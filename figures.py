@@ -9,6 +9,15 @@ import math
 from scipy import stats
 
 
+def bar4MovementDayNight(dfBar, ax, width = 4):
+    ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto')
+
+    ax.set_yticks([width/4, width*3/4])
+    ax.set_yticklabels(['Movement', 'Day or Night'])
+
+    ax.set_xticks([])
+    ax.set_xticklabels([])
+
 def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic):
 
     ax1 = axis
@@ -52,31 +61,32 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax2.grid(False)
 
     #setting x ticks
-    xTicks = dfxTicks['xTicks'].tolist()
-    xTickLabels = dfxTicks['xTickLabels'].tolist()
+    justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+
+    xTicks = justXticks['xTicks'].tolist()
+    xTickLabels = justXticks['xTickLabels'].tolist()
 
     ax1.set_xticks(xTicks)
     ax1.set_xticklabels(xTickLabels)
 
-
     #graph title
     ax1.set_title(title)
 
-    #AV Lines
-    zNightTrans = dfxTicks.query('ZeitTransition == \'Night\'')['xTicks'].tolist()
-    zDayTrans = dfxTicks.query('ZeitTransition == \'Day\'')['xTicks'].tolist()
-
-    for i in zDayTrans:
-        ax1.axvline(x=i, color='yellow', linestyle='--')
-
-    for i in zNightTrans:
-        ax1.axvline(x=i, color='blue', linestyle='--')
+    # #AV Lines
+    # zNightTrans = dfxTicks.query('ZeitTransition == \'Night\'')['xTicks'].tolist()
+    # zDayTrans = dfxTicks.query('ZeitTransition == \'Day\'')['xTicks'].tolist()
+    #
+    # for i in zDayTrans:
+    #     ax1.axvline(x=i, color='yellow', linestyle='--')
+    #
+    # for i in zNightTrans:
+    #     ax1.axvline(x=i, color='blue', linestyle='--')
 
 #
 #
 ## Metrics
 
-def interpulseIntervalFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True):
+def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True):
     df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex['InterpulseInterval'] < 30)]
     ax = axis
 
@@ -95,10 +105,18 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, show_title = True, sh
 
     ax.margins(x=0)
 
-    ax.set_ylim(0, 3)
+    ax.set_ylim(0, 5)
 
     if show_xLabels:
-        ax.set_xticklabels(x, rotation='vertical')
+
+        justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+
+        xTicks = justXticks['xTicks'].tolist()
+        xTickLabels = justXticks['xTickLabels'].tolist()
+
+        ax.set_xticks(xTicks)
+        ax.set_xticklabels(xTickLabels)
+
     else:
         ax.get_xaxis().set_visible(False)
 
@@ -184,7 +202,7 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
     ax.fill_between(x = x, y1 = ya, y2 = yb, color = fillColor, alpha = fillShade)
 
 
-def sensativityCCFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_Legend = True):
+def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True):
 
     ax = axis
 
@@ -236,7 +254,13 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, show_title = True, show_xL
     ax.margins(x=0)
 
     if show_xLabels:
-        ax.set_xticklabels(x, rotation='vertical')
+        justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+
+        xTicks = justXticks['xTicks'].tolist()
+        xTickLabels = justXticks['xTickLabels'].tolist()
+
+        ax.set_xticks(xTicks)
+        ax.set_xticklabels(xTickLabels)
     else:
         ax.get_xaxis().set_visible(False)
 
@@ -248,7 +272,7 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, show_title = True, show_xL
 # In[39]:
 
 
-def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3):
+def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3):
 
     ax = axis
 
@@ -296,7 +320,15 @@ def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_x
     ax.margins(x=0)
 
     if show_xLabels:
-        ax.set_xticklabels(x, rotation='vertical')
+
+        justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+
+        xTicks = justXticks['xTicks'].tolist()
+        xTickLabels = justXticks['xTickLabels'].tolist()
+
+        ax.set_xticks(xTicks)
+        ax.set_xticklabels(xTickLabels)
+
     else:
         ax.get_xaxis().set_visible(False)
 

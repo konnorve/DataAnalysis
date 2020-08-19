@@ -162,7 +162,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'CenterChangedAfterS2',
                      'CenterChangedAfterS3',
                      'distanceMoved',
-                     'isHourMark']
+                     'isHourMark',
+                     'isLightChange']
 
     addedDataFrame = []
 
@@ -190,6 +191,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         ccS3 = None
         dm = np.nan
         hourMark = False
+        lightChange = 'None'
 
         if zt.hour >= 12: dn = 'Night'
         elif zt.hour == 11 and zt.minute > 54: dn = 'Night'
@@ -206,6 +208,14 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             if lastHour != currHour:
                 hourMark = True
 
+            lastDN = addedDataRow[addedDataCols.index('DayOrNight')]
+            if lastDN != dn:
+                if lastDN == 'Day':
+                    lightChange = 'toNight'
+                else:
+                    lightChange = 'toDay'
+
+
 
         if not math.isnan(a1) and not math.isnan(a2):
             ccS1 = centerChanged(a1, a2, 10)
@@ -213,7 +223,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             ccS3 = centerChanged(a1, a2, 30)
 
         # should match added data columns
-        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, ccS1, ccS2, ccS3, dm, hourMark]
+        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, ccS1, ccS2, ccS3, dm, hourMark, lightChange]
 
         addedDataFrame.append(addedDataRow)
 
@@ -236,25 +246,24 @@ def getXtickDF(complexDF):
 
     hour_marks = complexDF[complexDF.isHourMark == True]
 
-    xtickDFheader = ['xTicks', 'xTickLabels', 'ZeitTransition']
+    xtickDFheader = ['xTicks', 'xTickLabels', 'TickType']
 
     globalFrames = hour_marks['global frame'].tolist()
     zeithours = hour_marks['ZeitgeberHour'].tolist()
 
-    zeitTransition = []
-    for i in range(len(zeithours)):
-        zt = None
-        if zeithours[i] == 12:
-            zt = 'Night'
-        if zeithours[i] == 0:
-            zt = 'Day'
-        zeitTransition.append(zt)
+    tickType = ['hour']*len(zeithours)
 
-    xticklabels = []
-    for i in range(len(zeithours)):
-        xticklabels.append(str(zeithours[i]) + ":00")
+    xticklabels = ['{}:00'.format(i) for i in zeithours]
 
-    xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, zeitTransition)), columns=xtickDFheader)
+    light_changes = complexDF[(complexDF.isLightChange == 'toNight') | (complexDF.isLightChange == 'toDay')]
+
+    globalFrames.extend(light_changes['global frame'].tolist())
+    zeithours.extend(light_changes['ZeitgeberHour'].tolist())
+    tickType.extend(light_changes.isLightChange.tolist())
+
+    xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickType)), columns=xtickDFheader)
+
+    print(xtickDF)
 
     return xtickDF
 
@@ -283,11 +292,9 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
 
     actigramArr = np.zeros((lastFrame+framesPerExtension, 360))
 
-    counter = 0
-    for frame, angle in zip(pulseFrames, pulseAngles):
-        if DEBUG:
-            print('counter: {}, frame: {}, angle: {}'.format(counter, frame, angle))
-            counter += 1
+    for i, (frame, angle) in enumerate(zip(pulseFrames, pulseAngles)):
+        if DEBUG and i%1000==0:
+            print('i: {}, frame: {}, angle: {}'.format(i, frame, angle))
 
         for extension in range(framesPerExtension):
             for offset in range(-INTERVAL, INTERVAL+1):
@@ -295,9 +302,47 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
 
     return actigramArr
 
+def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
+
+    pulseFrames = complexDF['global frame'].tolist()
+    pulseMoving = complexDF['bounded angle'].tolist()
+    pulseDayNight = complexDF['DayOrNight'].tolist()
+
+    lastFrame = pulseFrames[-1]
+
+    barArr = np.zeros((lastFrame, width, 3), dtype='int')
+
+    barArr[:,:] = [255,255,255]
+
+    numPulses = len(pulseFrames)
+
+    for i in range(numPulses-1):
+
+        currPulseFrame = pulseFrames[i]
+        nextPulseFrame = pulseFrames[i + 1]
+        isMoving = math.isnan(pulseMoving[i])
+        isNight = pulseDayNight[i] == 'Night'
+
+        if DEBUG and i%1000==0:
+            print('counter: {}, frame: {}, nextframe: {}, isMoving: {}, is night?: {}'.format(i, currPulseFrame, nextPulseFrame, isMoving, isNight))
+
+        if isMoving:
+            barArr[currPulseFrame:nextPulseFrame, 0:int(width/2)] = movementColor
+        if isNight:
+            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = nightColor
+        else:
+            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = dayColor
+
+    return barArr
+
+
+
 def createCompressedActigram(actigramCSV, compression_factor):
     return actigramCSV[::compression_factor]
 
-def createCompressedXtickDFF(xtickDF, compression_factor):
+def createCompressedXtickDF(xtickDF, compression_factor):
     xtickDF['xTicks'] = xtickDF['xTicks']/compression_factor
     return xtickDF
+
+def createCompressedMovementDayNightBar(barArr, compression_factor):
+    return barArr[::compression_factor]
