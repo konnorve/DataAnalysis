@@ -33,7 +33,7 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen,
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -55,7 +55,7 @@ def plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barA
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [5, 1]
@@ -80,7 +80,7 @@ def plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barA
 def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -102,7 +102,7 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfig
 def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -127,7 +127,7 @@ def plotActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPositions360
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -149,7 +149,7 @@ def plotSeismicActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPosit
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -170,7 +170,7 @@ def plotBinaryActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPositi
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -192,7 +192,7 @@ def plotActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, rhopa
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [7, 1]
@@ -217,7 +217,7 @@ def plotSeismicActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [7, 1]
@@ -242,7 +242,7 @@ def plotBinaryActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks,
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [7, 1]
@@ -267,7 +267,7 @@ def plotBar(outdir, jelly_title, barArr, yfigurelen, xfigurelen):
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -292,7 +292,7 @@ def plotSensativity(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfigur
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -314,7 +314,7 @@ def plotCentersChanged(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfi
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [1]
@@ -335,7 +335,7 @@ def plotSensativityWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfi
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [4, 1]
@@ -360,7 +360,7 @@ def plotCentersChangedWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
     heights = [4, 1]
@@ -389,7 +389,7 @@ def ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, barArr
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
     heights = [7, 1, 2]
@@ -415,10 +415,10 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, df
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
-    heights = [7, 1, 2, 2]
+    heights = [20, 1, 5, 5]
     widths = [10, 1]
     gs = fig.add_gridspec(ncols=2, nrows=4, height_ratios = heights, width_ratios = widths)
 
@@ -432,7 +432,7 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, df
     figures.actigramFigure(dfActigram, dfxTicks, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
     figures.bar4MovementDayNight(barArr,  fig_ax2)
     figures.interpulseIntervalFigure(jelly_title, fig_ax3, dfComplex, dfxTicks, show_title=False, show_xLabels=False)
-    figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, dfxTicks, show_title=False, show_xLabels=False, show_Legend=True)
+    figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, dfxTicks, show_title=False, show_xLabels=False, show_Legend=False)
     figures.initiatiorsHistogramFigure(jelly_title, fig_ax5, dfComplex, vertical=True, show_title=False, show_degreeLabels=False)
 
     #save fig
@@ -446,10 +446,10 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr
 
     updateparameters()
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
-    heights = [7, 1, 2, 2]
+    heights = [20, 1, 5, 5]
     widths = [10, 1, 1]
     gs = fig.add_gridspec(ncols=3, nrows=4, height_ratios = heights, width_ratios = widths)
 
@@ -464,7 +464,7 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr
     figures.actigramFigure(dfActigram, dfxTicks, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
     figures.bar4MovementDayNight(barArr,  fig_ax2)
     figures.interpulseIntervalFigure(jelly_title, fig_ax3, dfComplex, dfxTicks, show_title=False, show_xLabels=False)
-    figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, dfxTicks, show_title=False, show_xLabels=False, show_Legend=True)
+    figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, dfxTicks, show_title=False, show_xLabels=False, show_Legend=False)
 
     figures.initiatiorsHistogramQueryFigure('Day', fig_ax5, dfComplex, 'DayOrNight == \'Day\'', show_title=True, show_degreeLabels=False)
     figures.initiatiorsHistogramQueryFigure('Night', fig_ax6, dfComplex, 'DayOrNight == \'Night\'', show_title=True, show_degreeLabels=False)
@@ -478,7 +478,7 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr
 
 def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
 
-    fig = plt.figure(figsize=(xfigurelen, yfigurelen))
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
     heights = [1, 1]
@@ -509,7 +509,7 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, 
 
 ##############################################################
 
-def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfxTicksCompressed, dfComplex, RHOPOS, RHOLAB):
+def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB):
 
     #standard graph sizes
     stdYlen = 15/3
@@ -517,7 +517,7 @@ def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfxTicksCompressed, 
 
     # without bar
 
-    plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, 3, stdXlen)
+    plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, 7, stdXlen)
 
     plotCenterHistogramVertical(outdir, jelly_title, dfComplex, 36, 10)
 
@@ -527,30 +527,30 @@ def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfxTicksCompressed, 
 
     plotBinaryActigram(outdir, jelly_title, dfActigram, dfxTicks, RHOPOS, RHOLAB, 7, stdXlen)
 
-    plotSensativity(outdir, jelly_title, dfComplex, dfxTicks, 3, stdXlen)
+    plotSensativity(outdir, jelly_title, dfComplex, dfxTicks, 7, stdXlen)
 
-    plotCentersChanged(outdir, jelly_title, dfComplex, dfxTicks, 3, stdXlen)
+    plotCentersChanged(outdir, jelly_title, dfComplex, dfxTicks, 7, stdXlen)
 
     # with bar
 
-    plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 3, stdXlen)
+    plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 7, stdXlen)
 
     plotSeismicActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, RHOPOS, RHOLAB, stdYlen, stdXlen)
 
     plotBinaryActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, RHOPOS, RHOLAB, 7, stdXlen)
 
-    plotSensativityWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 3, stdXlen)
+    plotSensativityWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 7, stdXlen)
 
-    plotCentersChangedWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 3, stdXlen)
+    plotCentersChangedWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 7, stdXlen)
 
     # combined
 
     ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 7, stdXlen)
 
-    Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 10, stdXlen)
+    Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 20, stdXlen)
 
-    Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 10, stdXlen)
+    Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 20, stdXlen)
 
     centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, 20, 36)
 
-    plotBar(outdir, jelly_title, barArr, 5, stdXlen)
+    plotBar(outdir, jelly_title, barArr, 2, stdXlen)

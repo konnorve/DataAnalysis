@@ -7,23 +7,30 @@ import pandas as pd
 import matplotlib.cm as cm
 import math
 from scipy import stats
+import DataFrameCreationMethods as cdf
 
 
 def bar4MovementDayNight(dfBar, ax, width = 4):
+
+    dfBar = cdf.createCompressedMovementDayNightBar(dfBar, 10)
+
     ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto')
 
     ax.set_yticks([width/4, width*3/4])
     ax.set_yticklabels(['Movement', 'Day or Night'])
 
-    ax.set_xticks([])
-    ax.set_xticklabels([])
+    ax.get_xaxis().set_visible(False)
 
 def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic):
+
+    dfActigramComp = cdf.createCompressedActigram(dfActigram, 10)
+    dfxTicksComp = dfxTicks.copy()
+    dfxTicksComp['xTicks'] = dfxTicksComp['xTicks'] / 10
 
     ax1 = axis
 
     #imshow function
-    ax1.imshow(dfActigram.T, origin='lower', aspect='auto', cmap=colormap, interpolation='bilinear')
+    ax1.imshow(dfActigramComp.T, origin='lower', aspect='auto', cmap=colormap, interpolation='bilinear')
 
     #setting y ticks, both axis
     rp360 = rhopaliaPositions360
@@ -35,9 +42,6 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
 
         ax1.set_yticks(degreeTicks)
         ax1.set_yticklabels(degreeLabels)
-
-        # grids
-        ax1.grid(which='major', color='w', linestyle=':', linewidth=1)
 
     else:
         ax1.set_yticks(rp360)
@@ -52,22 +56,31 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax2.set_yticklabels(degreeLabels)
 
         # axis labels, both y's and x
-        ax1.set_xlabel('Time, Zeitgeber (Hours)')
+        ax1.set_xlabel('Zeitgeber Time (Hours)')
         ax1.set_ylabel('Rhopalia Number and Position')
         ax2.set_ylabel('Degrees')
 
-        # grids
-        ax1.grid(which='major', color='w', linestyle=':', linewidth=1)
         ax2.grid(False)
 
+    # grids
+    if colormap == cm.binary:
+        ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
+    elif colormap == cm.seismic:
+        ax1.grid(which='major', color='w', linestyle=':', linewidth=1)
+    else:
+        ax1.grid(which='major', color='#7f7f7f', linestyle=':', linewidth=1)
+
     #setting x ticks
-    justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+    justXticks = dfxTicksComp[dfxTicksComp.TickType == 'hour']
 
     xTicks = justXticks['xTicks'].tolist()
     xTickLabels = justXticks['xTickLabels'].tolist()
 
     ax1.set_xticks(xTicks)
     ax1.set_xticklabels(xTickLabels)
+
+    ax1.set_xlabel(xlabel=r'Zeitgeber Time')
+    ax1.set_ylabel(ylabel='Degree on Jellyfish')
 
     #graph title
     ax1.set_title(title)
@@ -87,25 +100,29 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
 ## Metrics
 
 def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True):
-    df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex['InterpulseInterval'] < 30)]
+    df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex.InterpulseInterval < 30)]
     ax = axis
 
-    x = df['ZeitgeberTime']
+    x = df['global frame']
 
     y = df['InterpulseInterval']
 
-    ax.plot(x, y, c = 'k', lw = 2, label= 'average');
+    ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'IPI')
+
+    ym = y.rolling(window=250).mean()
+
+    ax.plot(x, ym, c = 'b', lw = 2, label= 'average')
 
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='Interpulse Time (s)')
+    ax.set_ylabel(ylabel='IPI (s)')
 
     ax.grid(axis = 'y', alpha=0.5, linestyle='--')
 
-    # ax.semilogy()
+    ax.semilogy()
 
     ax.margins(x=0)
 
-    ax.set_ylim(0, 5)
+    ax.set_ylim(0, 3.5)
 
     if show_xLabels:
 
@@ -228,9 +245,7 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
     x = ysensativity(df, 'CenterChangedAfterS1')['min time'].tolist()
 
-    x = [str(i) for i in x]
-
-    x = [i[:i.find('.')] for i in x]
+    x = list(range(len(x)))
 
 
     yA1S1 = ysensativity(df, 'CenterChangedAfterS1')['count'].rolling(window=windowSize).mean()
@@ -248,13 +263,19 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
     ax.axis(ymin = 0, ymax = 1)
 
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% of pulses where center changed')
+    ax.set_ylabel(ylabel='% pulses IC')
 
     ax.grid(axis = 'y', alpha=0.5, linestyle='--')
     ax.margins(x=0)
 
     if show_xLabels:
+        lastx = x[-1]
+
+        compressionFactor = dfxTicks[dfxTicks.TickType == 'LastFrame'].iloc[0, 0] / lastx
+
         justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+
+        justXticks['xTicks'] = justXticks['xTicks'] / compressionFactor
 
         xTicks = justXticks['xTicks'].tolist()
         xTickLabels = justXticks['xTickLabels'].tolist()
@@ -272,7 +293,7 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 # In[39]:
 
 
-def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3):
+def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3, bounds = (0.1,0.6)):
 
     ax = axis
 
@@ -301,27 +322,28 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
 
     dfFigure = ysensativity(df, switcher.get(sensativity))
 
-    x = dfFigure['min time'].tolist()
-
-    x = [str(i) for i in x]
-
-    x = [i[:i.find('.')] for i in x]
+    x = list(range(len(dfFigure)))
 
     dfY = dfFigure['count']
 
     plotBinAverageWithErrorBars(dfY, x, ax, 20)
 
-    ax.axis(ymin = 0, ymax = 1)
+    ax.axis(ymin = bounds[0], ymax = bounds[1])
 
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% of pulses where center changed')
+    ax.set_ylabel(ylabel='% pulses IC')
 
     ax.grid(axis = 'y', alpha=0.5, linestyle='--')
     ax.margins(x=0)
 
     if show_xLabels:
+        lastx = x[-1]
+
+        compressionFactor = dfxTicks[dfxTicks.TickType == 'LastFrame'].iloc[0, 0] / lastx
 
         justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+
+        justXticks['xTicks'] = justXticks['xTicks'] / compressionFactor
 
         xTicks = justXticks['xTicks'].tolist()
         xTickLabels = justXticks['xTickLabels'].tolist()

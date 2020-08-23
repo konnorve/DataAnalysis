@@ -241,9 +241,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     return complexDF
 
 
-
 def getXtickDF(complexDF):
-
     hour_marks = complexDF[complexDF.isHourMark == True]
 
     xtickDFheader = ['xTicks', 'xTickLabels', 'TickType']
@@ -251,19 +249,25 @@ def getXtickDF(complexDF):
     globalFrames = hour_marks['global frame'].tolist()
     zeithours = hour_marks['ZeitgeberHour'].tolist()
 
-    tickType = ['hour']*len(zeithours)
+    tickType = ['hour'] * len(zeithours)
 
     xticklabels = ['{}:00'.format(i) for i in zeithours]
 
     light_changes = complexDF[(complexDF.isLightChange == 'toNight') | (complexDF.isLightChange == 'toDay')]
 
     globalFrames.extend(light_changes['global frame'].tolist())
-    zeithours.extend(light_changes['ZeitgeberHour'].tolist())
+    xticklabels.extend(light_changes['ZeitgeberHour'].tolist())
     tickType.extend(light_changes.isLightChange.tolist())
 
-    xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickType)), columns=xtickDFheader)
+    globalFrames.append(complexDF.iloc[0]['global frame'])
+    xticklabels.append(complexDF.iloc[0]['ZeitgeberHour'])
+    tickType.append('FirstFrame')
 
-    print(xtickDF)
+    globalFrames.append(complexDF.iloc[-1]['global frame'])
+    xticklabels.append(complexDF.iloc[-1]['ZeitgeberHour'])
+    tickType.append('LastFrame')
+
+    xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickType)), columns=xtickDFheader)
 
     return xtickDF
 
@@ -339,10 +343,6 @@ def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0],
 
 def createCompressedActigram(actigramCSV, compression_factor):
     return actigramCSV[::compression_factor]
-
-def createCompressedXtickDF(xtickDF, compression_factor):
-    xtickDF['xTicks'] = xtickDF['xTicks']/compression_factor
-    return xtickDF
 
 def createCompressedMovementDayNightBar(barArr, compression_factor):
     return barArr[::compression_factor]
