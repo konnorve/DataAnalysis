@@ -292,7 +292,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     pulseFrames = df['global frame'].tolist()
     pulseAngles = df['bounded angle'].tolist()
 
-    lastFrame = pulseFrames[-1]
+    lastFrame = max(pulseFrames)
 
     actigramArr = np.zeros((lastFrame+framesPerExtension, 360))
 
@@ -312,7 +312,7 @@ def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0],
     pulseMoving = complexDF['bounded angle'].tolist()
     pulseDayNight = complexDF['DayOrNight'].tolist()
 
-    lastFrame = pulseFrames[-1]
+    lastFrame = max(pulseFrames)
 
     barArr = np.zeros((lastFrame, width, 3), dtype='int')
 
@@ -346,3 +346,16 @@ def createCompressedActigram(actigramCSV, compression_factor):
 
 def createCompressedMovementDayNightBar(barArr, compression_factor):
     return barArr[::compression_factor]
+
+
+def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120):
+
+    td = secondDFstarttime - firstDFstarttime
+
+    frameOffset = (td.days*24*3600 + td.seconds)*framerate
+
+    secondDFCopy = secondDF.copy()
+
+    secondDFCopy['global frame'] = secondDFCopy['global frame'] + frameOffset
+
+    return pd.concat([firstDF, secondDFCopy])

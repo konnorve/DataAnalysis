@@ -184,7 +184,7 @@ def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertic
     initiatiorsHistogramFigure(jelly_title, ax, dfQuery, vertical, show_title, show_degreeLabels)
 
 
-def ysensativity (dataframe, metric):
+def ysensativity(dataframe, metric):
     #subsets dataframe into the only things I need
     dfSubset = dataframe[['binCount', metric,'ZeitgeberTime']]
 
@@ -254,6 +254,10 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
     yA1S3 = ysensativity(df, 'CenterChangedAfterS3')['count'].rolling(window=windowSize).mean()
 
+    print(len(x))
+    print(len(yA1S1))
+    print(len(yA1S2))
+    print(len(yA1S3))
 
     ax.plot(x, yA1S1, c = 'b', lw = 2, label= 'level of change 1 center after, s = 1');
     ax.plot(x, yA1S2, c = 'g', lw = 2, label= 'level of change 1 center after, s = 2');
@@ -284,7 +288,6 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
         ax.set_xticklabels(xTickLabels)
     else:
         ax.get_xaxis().set_visible(False)
-
     if show_Legend: ax.legend()
 
     if show_title: ax.set_title(jelly_title + ' Jellyfish Centers Changed Sensativity Testing')
@@ -293,7 +296,7 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 # In[39]:
 
 
-def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3, bounds = (0.1,0.6)):
+def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3, bounds = (0,0.6)):
 
     ax = axis
 

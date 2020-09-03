@@ -418,7 +418,7 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, df
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
-    heights = [20, 1, 5, 5]
+    heights = [15, 1, 5, 5]
     widths = [10, 1]
     gs = fig.add_gridspec(ncols=2, nrows=4, height_ratios = heights, width_ratios = widths)
 
@@ -449,7 +449,7 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
-    heights = [20, 1, 5, 5]
+    heights = [15, 1, 5, 5]
     widths = [10, 1, 1]
     gs = fig.add_gridspec(ncols=3, nrows=4, height_ratios = heights, width_ratios = widths)
 
@@ -527,7 +527,7 @@ def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, R
 
     plotBinaryActigram(outdir, jelly_title, dfActigram, dfxTicks, RHOPOS, RHOLAB, 7, stdXlen)
 
-    plotSensativity(outdir, jelly_title, dfComplex, dfxTicks, 7, stdXlen)
+    # plotSensativity(outdir, jelly_title, dfComplex, dfxTicks, 7, stdXlen)
 
     plotCentersChanged(outdir, jelly_title, dfComplex, dfxTicks, 7, stdXlen)
 
@@ -539,7 +539,7 @@ def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, R
 
     plotBinaryActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, RHOPOS, RHOLAB, 7, stdXlen)
 
-    plotSensativityWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 7, stdXlen)
+    # plotSensativityWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 7, stdXlen)
 
     plotCentersChangedWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 7, stdXlen)
 
@@ -547,9 +547,9 @@ def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, R
 
     ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 7, stdXlen)
 
-    Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 20, stdXlen)
+    Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 17, stdXlen)
 
-    Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 20, stdXlen)
+    Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, 17, stdXlen)
 
     centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, 20, 36)
 
