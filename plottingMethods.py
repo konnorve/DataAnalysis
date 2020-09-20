@@ -510,6 +510,20 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, 
 ##############################################################
 
 def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB):
+    """
+
+    :param jelly_title:
+    :param outdir:
+    :param dfActigram:
+    :param barArr:
+    :param dfxTicks:
+    :param dfComplex:
+    :param RHOPOS:
+    :param RHOLAB:
+    :return:
+    """
+
+
 
     #standard graph sizes
     stdYlen = 15/3

@@ -185,6 +185,14 @@ def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertic
 
 
 def ysensativity(dataframe, metric):
+    """
+    DO NOT WORRY ABOUT THIS ONE
+
+    :param dataframe:
+    :param metric:
+    :return:
+    """
+
     #subsets dataframe into the only things I need
     dfSubset = dataframe[['binCount', metric,'ZeitgeberTime']]
 
@@ -220,6 +228,19 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
 
 
 def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True):
+    """
+    DO NOT WORRY ABOUT THIS ONE
+
+    :param jelly_title:
+    :param axis:
+    :param dfComplex:
+    :param dfxTicks:
+    :param show_title:
+    :param show_xLabels:
+    :param show_Legend:
+    :return:
+    """
+
 
     ax = axis
 
@@ -243,16 +264,16 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
 
 
-    x = ysensativity(df, 'CenterChangedAfterS1')['min time'].tolist()
+    x = ysensativity(df, 'CenterChangedAfterS10')['min time'].tolist()
 
     x = list(range(len(x)))
 
 
-    yA1S1 = ysensativity(df, 'CenterChangedAfterS1')['count'].rolling(window=windowSize).mean()
+    yA1S1 = ysensativity(df, 'CenterChangedAfterS10')['count'].rolling(window=windowSize).mean()
 
-    yA1S2 = ysensativity(df, 'CenterChangedAfterS2')['count'].rolling(window=windowSize).mean()
+    yA1S2 = ysensativity(df, 'CenterChangedAfterS20')['count'].rolling(window=windowSize).mean()
 
-    yA1S3 = ysensativity(df, 'CenterChangedAfterS3')['count'].rolling(window=windowSize).mean()
+    yA1S3 = ysensativity(df, 'CenterChangedAfterS30')['count'].rolling(window=windowSize).mean()
 
     print(len(x))
     print(len(yA1S1))
@@ -317,9 +338,9 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
     df['binCount'] = binCount
 
     switcher = {
-        1 : 'CenterChangedAfterS1',
-        2 : 'CenterChangedAfterS2',
-        3 : 'CenterChangedAfterS3',
+        1 : 'CenterChangedAfterS10',
+        2 : 'CenterChangedAfterS20',
+        3 : 'CenterChangedAfterS30',
     }
 
 

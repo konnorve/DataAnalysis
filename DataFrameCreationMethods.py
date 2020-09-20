@@ -158,9 +158,9 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'ZeitgeberDay',
                      'DayOrNight',
                      'InterpulseInterval',
-                     'CenterChangedAfterS1',
-                     'CenterChangedAfterS2',
-                     'CenterChangedAfterS3',
+                     'CenterChangedAfterS10',
+                     'CenterChangedAfterS20',
+                     'CenterChangedAfterS30',
                      'distanceMoved',
                      'isHourMark',
                      'isLightChange']
