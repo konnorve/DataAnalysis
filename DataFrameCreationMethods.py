@@ -71,9 +71,21 @@ def centerChanged(a1, a2, sensativity):
         return True
 
 
-
 def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
+    """
+    Creates a complex data frame as a CSV and takes in angle and orientation data during a specified time frame.
 
+    # INPUTS (processingScript.py)
+    angleDataPath = path to angle data from files
+    orientationDF = ##########not sure what this is?
+    FRAMERATE = frames per second
+    STARTDATETIME = specifies start date time
+    DAYLIGHTSAVINGS = specifies if during daylight savings or not
+
+    # OUTPUTS
+    List all the output columns here and describe each one? It's a lot but idk
+    where else it would go (or if it's needed)
+    """
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
 
     simpleDFs = []
@@ -242,6 +254,14 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
 
 def getXtickDF(complexDF):
+    """
+    Creates X ticks? are these the lines on the ~actigram~ ? 
+
+    # INPUT
+    Complex Data Frame
+    # OUTPUT
+    X tick data frame (???)
+    """
     hour_marks = complexDF[complexDF.isHourMark == True]
 
     xtickDFheader = ['xTicks', 'xTickLabels', 'TickType']
@@ -271,15 +291,28 @@ def getXtickDF(complexDF):
 
     return xtickDF
 
+    # Reads in complex data as a CSV and takes angle and frame data.
+    # Creates a CSV with angle + margin set to 1 with all other points set to 0.
+    #
+    # INPUT: Complex Dataframe.
+    # OUTPUT: CSV has no header.
 
-# Reads in complex data as a CSV and takes angle and frame data.
-# Creates a CSV with angle + margin set to 1 with all other points set to 0.
-#
-# INPUT: Complex Dataframe.
-# OUTPUT: CSV has no header.
+    # INTERVAL is number of points either side of center to set to 1
 
-# INTERVAL is number of points either side of center to set to 1
 def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
+    """
+    Reads in complex data as a CSV and takes angle and frame data.
+    Creates a CSV with angle + margin set to 1 with all other points set to 0.
+
+    # INPUTS
+    Complex Dataframe
+    FRAMERATE: frames per second
+    INTERVAL: number of points either side of center to set to 1
+    pulseExtension: ##### idk :(
+
+    # OUTPUT
+    actigram array???
+    """
     framesPerExtension = int(FRAMERATE*pulseExtension)
 
     print(complexDF['bounded angle'].unique())
@@ -307,7 +340,12 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     return actigramArr
 
 def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
-
+"""
+Creates a movement bar indicating movement during the daytime or nightime
+Movement Color: Red
+Day Color: Yellow
+Night Color: Navy Blue
+"""
     pulseFrames = complexDF['global frame'].tolist()
     pulseMoving = complexDF['bounded angle'].tolist()
     pulseDayNight = complexDF['DayOrNight'].tolist()
