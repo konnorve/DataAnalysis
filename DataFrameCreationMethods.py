@@ -60,12 +60,13 @@ def distanceBetween(a1, a2):
 
 def centerChanged(a1, a2, sensativity):
     """
-        Determines if the center has changed between two center values
-        Distance between the two centers is calculated using distance()
+        Determines if the center has changed between two center values where each center value is an angle.
+        Distance between the two centers is calculated using distance().
         If the distance between the two is less than or equal to the
         sensativity interval this indicates the center has not changed and
         thus false is returned.
-        Sensativity is
+
+        Sensativity is the integer value determining whether the center changed or not.
     """
     d = distanceBetween(a1, a2)
 
@@ -91,7 +92,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     where else it would go (or if it's needed)
     """
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
-
+# what's happening in these simpleDFs
     simpleDFs = []
 
     for i, dfPath in enumerate(dfPaths):
@@ -114,7 +115,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     simpleConcatDF = pd.concat(simpleDFs)
 
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
-
+# creates column in simple simpleConcatDF with properly oriented angles of jellyfish
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
@@ -128,7 +129,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             boundAngles.append(None)
         else:
             boundAngles.append(angleLimits[int(ang)%360])
-
+# creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
     simpleConcatDF['bounded angle'] = boundAngles
 
     if DEBUG: print(simpleConcatDF.head())
@@ -146,7 +147,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     angles3After.append(np.nan)
     angles3After.append(np.nan)
-
+# adds columns of angles1, angles2, and angles3 after. Angles after what?
     simpleConcatDF['angles1After'] = angles1After
     simpleConcatDF['angles2After'] = angles2After
     simpleConcatDF['angles3After'] = angles3After
@@ -163,7 +164,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
-
+# added additional columns to ComplexDF
     addedDataCols = ['TimeDelta',
                      'AbsoluteMinute',
                      'DateTime',
@@ -259,7 +260,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
 def getXtickDF(complexDF):
     """
-    Creates X ticks? are these the lines on the ~actigram~ ?
+    Extracts the tick marks, for us in figure plotting.
 
     # INPUT
     Complex Data Frame
@@ -295,14 +296,6 @@ def getXtickDF(complexDF):
 
     return xtickDF
 
-    # Reads in complex data as a CSV and takes angle and frame data.
-    # Creates a CSV with angle + margin set to 1 with all other points set to 0.
-    #
-    # INPUT: Complex Dataframe.
-    # OUTPUT: CSV has no header.
-
-    # INTERVAL is number of points either side of center to set to 1
-
 def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     """
     Reads in complex data as a CSV and takes angle and frame data.
@@ -315,7 +308,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     pulseExtension: ##### idk :(
 
     # OUTPUT
-    actigram array???
+    Actigram array...finish this by asking Konnor 
     """
     framesPerExtension = int(FRAMERATE*pulseExtension)
 
