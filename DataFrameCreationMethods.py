@@ -15,8 +15,7 @@ from datetime import datetime, timedelta
 
 import math
 
-
-
+# testing again
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
@@ -25,7 +24,11 @@ CHIME = True
 
 ########################################################################################################################
 
+"""Definitions:
+center = a site of initiations
+centroid = center of the jellyfish
 
+"""
 def calculateDistance(c1, c2):
     dist = math.sqrt((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2)
     return dist
@@ -62,6 +65,7 @@ def centerChanged(a1, a2, sensativity):
         If the distance between the two is less than or equal to the
         sensativity interval this indicates the center has not changed and
         thus false is returned.
+        Sensativity is
     """
     d = distanceBetween(a1, a2)
 
@@ -255,7 +259,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
 def getXtickDF(complexDF):
     """
-    Creates X ticks? are these the lines on the ~actigram~ ? 
+    Creates X ticks? are these the lines on the ~actigram~ ?
 
     # INPUT
     Complex Data Frame
