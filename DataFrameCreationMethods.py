@@ -15,8 +15,7 @@ from datetime import datetime, timedelta
 
 import math
 
-
-
+# testing again
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
@@ -25,7 +24,11 @@ CHIME = True
 
 ########################################################################################################################
 
+"""Definitions:
+center = a site of initiations
+centroid = center of the jellyfish
 
+"""
 def calculateDistance(c1, c2):
     dist = math.sqrt((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2)
     return dist
@@ -57,11 +60,13 @@ def distanceBetween(a1, a2):
 
 def centerChanged(a1, a2, sensativity):
     """
-        Determines if the center has changed between two center values
-        Distance between the two centers is calculated using distance()
+        Determines if the center has changed between two center values where each center value is an angle.
+        Distance between the two centers is calculated using distance().
         If the distance between the two is less than or equal to the
         sensativity interval this indicates the center has not changed and
         thus false is returned.
+
+        Sensativity is the integer value determining whether the center changed or not.
     """
     d = distanceBetween(a1, a2)
 
@@ -86,10 +91,11 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     List all the output columns here and describe each one? It's a lot but idk
     where else it would go (or if it's needed)
     """
+    # sorting angleDataPath, angleDataPath -> dfPaths
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
-
+# what's happening in these simpleDFs
     simpleDFs = []
-
+   # enumerate(): assigns an index to each item in an iterable object
     for i, dfPath in enumerate(dfPaths):
 
         tempSimpleData = pd.read_csv(str(dfPath), header=0)
@@ -102,30 +108,32 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
         chunkName = pathStem[:pathStem.rindex('_')]
 
-        tempSimpleData['chunk name'] = chunkName
-        tempSimpleData['movement segment'] = movementSegment
+        tempSimpleData['chunk name'] = chunkName #chunk name (F)
+        tempSimpleData['movement segment'] = movementSegment  #movement segment (G)
 
         simpleDFs.append(tempSimpleData)
 
     simpleConcatDF = pd.concat(simpleDFs)
 
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
-
+# creates column in simple simpleConcatDF with properly oriented angles of jellyfish
+    # orientation factor (H)
+    # orientation angle (I)
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
 
-    angleLimits = list(range(360))
+    angleLimits = list(range(360)) #angles can only go up to 360 degrees
 
-    boundAngles = []
+    boundAngles = [] #create empty list
 
     for ang in orientedAngleList:
-        if math.isnan(ang):
+        if math.isnan(ang): # check if this is a valid parameter, don't append if not a number
             boundAngles.append(None)
         else:
             boundAngles.append(angleLimits[int(ang)%360])
-
-    simpleConcatDF['bounded angle'] = boundAngles
+# creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
+    simpleConcatDF['bounded angle'] = boundAngles #(J)
 
     if DEBUG: print(simpleConcatDF.head())
 
@@ -142,10 +150,10 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     angles3After.append(np.nan)
     angles3After.append(np.nan)
-
-    simpleConcatDF['angles1After'] = angles1After
-    simpleConcatDF['angles2After'] = angles2After
-    simpleConcatDF['angles3After'] = angles3After
+# adds columns of angles1, angles2, and angles3 after. Angles after what?
+    simpleConcatDF['angles1After'] = angles1After #(K)
+    simpleConcatDF['angles2After'] = angles2After #(L)
+    simpleConcatDF['angles3After'] = angles3After #(M)
 
     if DEBUG: print(simpleConcatDF.head())
 
@@ -159,29 +167,29 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
-
-    addedDataCols = ['TimeDelta',
-                     'AbsoluteMinute',
-                     'DateTime',
-                     'ZeitgeberTime',
-                     'ZeitgeberSec',
-                     'ZeitgeberMin',
-                     'ZeitgeberHour',
-                     'ZeitgeberDay',
-                     'DayOrNight',
-                     'InterpulseInterval',
-                     'CenterChangedAfterS10',
-                     'CenterChangedAfterS20',
-                     'CenterChangedAfterS30',
-                     'distanceMoved',
-                     'isHourMark',
-                     'isLightChange']
+# added additional columns to ComplexDF
+    addedDataCols = ['TimeDelta', #(N)
+                     'AbsoluteMinute', #(O)
+                     'DateTime', #(P)
+                     'ZeitgeberTime', #(Q)
+                     'ZeitgeberSec', #(R)
+                     'ZeitgeberMin', #(S)
+                     'ZeitgeberHour', #(T)
+                     'ZeitgeberDay', #(U)
+                     'DayOrNight', #(V)
+                     'InterpulseInterval', #(W)
+                     'CenterChangedAfterS10', #(X)
+                     'CenterChangedAfterS20', #(Y)
+                     'CenterChangedAfterS30', #(Z)
+                     'distanceMoved', #(AA)
+                     'isHourMark', #(AB)
+                     'isLightChange'] #(AC)
 
     addedDataFrame = []
+    # timedelta(days, seconds, microseconds, milliseconds, minutes, hours, weeks)
+    timedelta2Zeitgeber = timedelta(0, 0, 0, 0, 5, 7) #Zeitbeger time offset by 5 min and 7 hours?
 
-    timedelta2Zeitgeber = timedelta(0, 0, 0, 0, 5, 7)
-
-    if DAYLIGHTSAVINGS: timedelta2Zeitgeber = timedelta(0, 0, 0, 0, 5, 8)
+    if DAYLIGHTSAVINGS: timedelta2Zeitgeber = timedelta(0, 0, 0, 0, 5, 8) #offset an hour more bc Daylight Savings
 
     numPulses = len(simpleConcatArr)
 
@@ -255,7 +263,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
 def getXtickDF(complexDF):
     """
-    Creates X ticks? are these the lines on the ~actigram~ ? 
+    Extracts the tick marks, for us in figure plotting.
 
     # INPUT
     Complex Data Frame
@@ -291,14 +299,6 @@ def getXtickDF(complexDF):
 
     return xtickDF
 
-    # Reads in complex data as a CSV and takes angle and frame data.
-    # Creates a CSV with angle + margin set to 1 with all other points set to 0.
-    #
-    # INPUT: Complex Dataframe.
-    # OUTPUT: CSV has no header.
-
-    # INTERVAL is number of points either side of center to set to 1
-
 def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     """
     Reads in complex data as a CSV and takes angle and frame data.
@@ -311,7 +311,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     pulseExtension: ##### idk :(
 
     # OUTPUT
-    actigram array???
+    Actigram array...finish this by asking Konnor
     """
     framesPerExtension = int(FRAMERATE*pulseExtension)
 
