@@ -1,4 +1,6 @@
 
+
+# import statement
 import os
 
 from pathlib import Path
@@ -117,8 +119,10 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
 # creates column in simple simpleConcatDF with properly oriented angles of jellyfish
+
     # orientation factor (H)
     # orientation angle (I)
+
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
@@ -133,7 +137,9 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         else:
             boundAngles.append(angleLimits[int(ang)%360])
 # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
+
     simpleConcatDF['bounded angle'] = boundAngles #(J)
+
 
     if DEBUG: print(simpleConcatDF.head())
 
@@ -151,9 +157,11 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     angles3After.append(np.nan)
 # adds columns of angles1, angles2, and angles3 after. Angles after what?
+
     simpleConcatDF['angles1After'] = angles1After #(K)
     simpleConcatDF['angles2After'] = angles2After #(L)
     simpleConcatDF['angles3After'] = angles3After #(M)
+
 
     if DEBUG: print(simpleConcatDF.head())
 
@@ -311,6 +319,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     pulseExtension: ##### idk :(
 
     # OUTPUT
+
     Actigram array...finish this by asking Konnor
     """
     framesPerExtension = int(FRAMERATE*pulseExtension)

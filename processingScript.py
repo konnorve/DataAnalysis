@@ -1,5 +1,8 @@
 # test
 
+#update imports
+# imports
+
 import DataFrameCreationMethods as cdf
 from pathlib import Path
 import numpy as np
@@ -10,7 +13,7 @@ import matplotlib.cm as cm
 
 #datetime(year,month,day,strthr,strtmin) + timedelta(0, sec 0, 0, 0, min 0, hour 0),
 
-
+# Main input variables needed for DataFrame and Figures Creation
 trainingTitle = '20200707_Pink_218pm_cam2_1'
 angleDataPath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_9/testdata4dataprocessingscript/20200707_Pink_218pm_cam2_1/AngleData')
 complexDFoutpath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_9/testdata4dataprocessingscript/20200707_Pink_218pm_cam2_1/ComplexDF/20200707_Pink_218pm_cam2_1_MichaelOrientation.csv')
