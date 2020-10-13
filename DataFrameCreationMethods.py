@@ -1,6 +1,5 @@
 
 
-# import statement
 import os
 
 from pathlib import Path
@@ -17,7 +16,6 @@ from datetime import datetime, timedelta
 
 import math
 
-# testing again
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
@@ -68,7 +66,7 @@ def centerChanged(a1, a2, sensativity):
         sensativity interval this indicates the center has not changed and
         thus false is returned.
 
-        Sensativity is the integer value determining whether the center changed or not.
+        Sensativity is the integer value determining whether the center will or not.
     """
     d = distanceBetween(a1, a2)
 
@@ -83,15 +81,14 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     Creates a complex data frame as a CSV and takes in angle and orientation data during a specified time frame.
 
     # INPUTS (processingScript.py)
-    angleDataPath = path to angle data from files
-    orientationDF = ##########not sure what this is?
+    angleDataPath = path to angle data from files -needs to be clarified ***AJ***
+    orientationDF = needs to be clarified ***AJ***
     FRAMERATE = frames per second
     STARTDATETIME = specifies start date time
     DAYLIGHTSAVINGS = specifies if during daylight savings or not
 
     # OUTPUTS
-    List all the output columns here and describe each one? It's a lot but idk
-    where else it would go (or if it's needed)
+    DF with information on frame, centroid, angle (raw and bounded), time, movement (center changed boolean and distance)
     """
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
 # what's happening in these simpleDFs
@@ -117,7 +114,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     simpleConcatDF = pd.concat(simpleDFs)
 
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
-# creates column in simple simpleConcatDF with properly oriented angles of jellyfish
+
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
@@ -131,7 +128,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             boundAngles.append(None)
         else:
             boundAngles.append(angleLimits[int(ang)%360])
-# creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
+
     simpleConcatDF['bounded angle'] = boundAngles
 
     if DEBUG: print(simpleConcatDF.head())
@@ -267,7 +264,8 @@ def getXtickDF(complexDF):
     # INPUT
     Complex Data Frame
     # OUTPUT
-    X tick data frame (???)
+    creates a DF with hour marked data extracted from complexDF
+        includes information on when light changed occur
     """
     hour_marks = complexDF[complexDF.isHourMark == True]
 
@@ -310,7 +308,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     pulseExtension: ##### idk :(
 
     # OUTPUT
-    Actigram array...finish this by asking Konnor 
+    Actigram array...finish this by asking Konnor
     """
     framesPerExtension = int(FRAMERATE*pulseExtension)
 
@@ -379,14 +377,19 @@ Night Color: Navy Blue
 
 
 def createCompressedActigram(actigramCSV, compression_factor):
+    """ask Konnor about compressionFactor ***AJ***
+    """
     return actigramCSV[::compression_factor]
 
 def createCompressedMovementDayNightBar(barArr, compression_factor):
+    """ask Konnor about compression_factor ***AJ***
+    """
     return barArr[::compression_factor]
 
 
 def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120):
-
+    """concatenates two dataframes together taking into consideration the offset in frames
+    """
     td = secondDFstarttime - firstDFstarttime
 
     frameOffset = (td.days*24*3600 + td.seconds)*framerate
