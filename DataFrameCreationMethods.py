@@ -381,12 +381,13 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     return actigramArr
 
 def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
-"""
-Creates a movement bar indicating movement during the daytime or nightime
-Movement Color: Red
-Day Color: Yellow
-Night Color: Navy Blue
-"""
+
+    """
+    Creates a movement bar indicating movement during the daytime or nightime
+    Movement Color: Red
+    Day Color: Yellow
+    Night Color: Navy Blue
+    """
     pulseFrames = complexDF['global frame'].tolist()
     pulseMoving = complexDF['bounded angle'].tolist()
     pulseDayNight = complexDF['DayOrNight'].tolist()
