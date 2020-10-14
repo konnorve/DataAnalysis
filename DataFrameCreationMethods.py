@@ -17,7 +17,6 @@ from datetime import datetime, timedelta
 
 import math
 
-# testing again
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
@@ -32,6 +31,10 @@ centroid = center of the jellyfish
 
 """
 def calculateDistance(c1, c2):
+    """Distance Formula
+    Calculates how far the jellyfish has moved by
+    finding the distance between two centroids.
+    """
     dist = math.sqrt((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2)
     return dist
 
@@ -59,7 +62,7 @@ def distanceBetween(a1, a2):
     else:
         return "ERROR, fix this function :("
 
-
+# im so sorry but i swear it's spelled 'sensitivity'?,, idk lmao im tired -deb
 def centerChanged(a1, a2, sensativity):
     """
         Determines if the center has changed between two center values where each center value is an angle.
@@ -84,14 +87,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # INPUTS (processingScript.py)
     angleDataPath = path to angle data from files
-    orientationDF = ##########not sure what this is?
+    orientationDF = takes in data from an orientation DF
     FRAMERATE = frames per second
     STARTDATETIME = specifies start date time
     DAYLIGHTSAVINGS = specifies if during daylight savings or not
 
     # OUTPUTS
-    List all the output columns here and describe each one? It's a lot but idk
-    where else it would go (or if it's needed)
+    Data frame with information on frame, centroid, angle, time, movement
     """
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
 # what's happening in these simpleDFs
@@ -137,7 +139,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     if DEBUG: print(simpleConcatDF.head())
 
     angles = list(simpleConcatDF['bounded angle'])
-
+    
     angles1After = angles[1:]
     angles1After.append(np.nan)
 
@@ -149,13 +151,24 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     angles3After.append(np.nan)
     angles3After.append(np.nan)
+    # angles#After.append(np.nan) used in order to ensure all the columns are the same length 
+    
 # adds columns of angles1, angles2, and angles3 after. Angles after what?
+
+# angles1 after is the first angle after an angle the angle column
+# angles2 after is the second angle after an angle in the angle column
+# angles3 after is the third angle after an angle in the angle column
+
+# The purpose of creating 3 different angle columns is to easily inspect how much the 
+# jellyfish is (rotating?) within a short time frame -deb
+
     simpleConcatDF['angles1After'] = angles1After
     simpleConcatDF['angles2After'] = angles2After
     simpleConcatDF['angles3After'] = angles3After
 
     if DEBUG: print(simpleConcatDF.head())
 
+# convert simpleConcatDF from DataFrame array to NumPy array
     simpleConcatArr = simpleConcatDF.to_numpy()
     header = list(simpleConcatDF.columns.values)
 
@@ -166,7 +179,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
-# added additional columns to ComplexDF
+    
+# added additional columns to ComplexDF specifying time, center changes, and movement
     addedDataCols = ['TimeDelta',
                      'AbsoluteMinute',
                      'DateTime',
@@ -186,14 +200,37 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     addedDataFrame = []
 
+    # timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=5, hours=7)
+    # Zeitgeber time is offset by 7 hours and 5 minutes (ahead or behind?) check if this is actually true though
+    # This is determined by when the lights turn on at 7:05 am (pls fact check idk) -deb
+    
     timedelta2Zeitgeber = timedelta(0, 0, 0, 0, 5, 7)
 
+    # if daylight savings, Zeitgeber time is offset by 8 hours and 5 minutes
     if DAYLIGHTSAVINGS: timedelta2Zeitgeber = timedelta(0, 0, 0, 0, 5, 8)
-
+    
+    # Length of the NumPy array is the number of pulses by the jellyfish (i think? is it just how long the columns are) -deb
     numPulses = len(simpleConcatArr)
 
     if DEBUG: print(numPulses)
-
+        
+    # td = time elapsed in seconds, normalized by the frame rate (??)- deb     
+    # absM = absolute movement
+    # dt = delta time, takes into account when the recording started
+    # zt = delta zeit time, takes into account when the recording started
+    # ipi = i have no idea :(
+    # dn = day or night ?
+    # centroid = (X,Y)
+    # a1 = angle 1
+    # a2 = angle 2
+    # ccS1, ccS2m, ccS3 = determines if center has changed, True or False
+    # dm = delta movement? distance between 2 centroids 
+    # hourMark = determines if there is an XTick or not
+    # lightChange = determines the switch between day and night
+    
+    # -deb
+    
+    # initializing 
     for i in range(numPulses):
         if i % 1000 == 0: print(i)
         td = timedelta(0, simpleConcatArr[i][0]/FRAMERATE)
@@ -211,7 +248,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         dm = np.nan
         hourMark = False
         lightChange = 'None'
-
+        
+     # determine if it is day or night in zeitgeber hours
         if zt.hour >= 12: dn = 'Night'
         elif zt.hour == 11 and zt.minute > 54: dn = 'Night'
 
@@ -221,12 +259,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             dm = calculateDistance(centroid, centroidAfter)
 
         # get last zeithour and see if it's changed
+        # if it is true, it gets a mark on the Xtick DF (i think?) -deb
         if i > 0:
             lastHour = addedDataRow[addedDataCols.index('ZeitgeberHour')]
             currHour = zt.hour
             if lastHour != currHour:
                 hourMark = True
-
+        # determines if the light is on by seeing if it is day or night 
             lastDN = addedDataRow[addedDataCols.index('DayOrNight')]
             if lastDN != dn:
                 if lastDN == 'Day':
@@ -234,8 +273,10 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                 else:
                     lightChange = 'toDay'
 
-
-
+       # centerChanged(angle1, angle2, sensitivity)
+       # if distance between the two angles is less than the sensitivity then
+       # center can be treated as unchanged.
+       # sensitivity decreases when time increases (?) -deb
         if not math.isnan(a1) and not math.isnan(a2):
             ccS1 = centerChanged(a1, a2, 10)
             ccS2 = centerChanged(a1, a2, 20)
@@ -246,6 +287,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
         addedDataFrame.append(addedDataRow)
 
+    # not really sure what's going on here between np and pd, but a DF is returned -deb
     addedDataArr = np.array(addedDataFrame)
 
     complexDFArr = np.concatenate((simpleConcatArr, addedDataArr), axis=1)
@@ -262,12 +304,12 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
 def getXtickDF(complexDF):
     """
-    Extracts the tick marks, for us in figure plotting.
+    Extracts the tick marks, for use in figure plotting.
 
     # INPUT
     Complex Data Frame
     # OUTPUT
-    X tick data frame (???)
+    X tick Data Frame
     """
     hour_marks = complexDF[complexDF.isHourMark == True]
 
