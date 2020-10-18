@@ -493,9 +493,14 @@ def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0],
 
 
 def createCompressedActigram(actigramCSV, compression_factor):
+    # takes slice of actigram array. 
+    # slice contains one row of every n $compression_factors
+    # if there were 50 rows, and compression_factor == 10, it would return rows 0,10,20,30,40,50. 
     return actigramCSV[::compression_factor]
 
 def createCompressedMovementDayNightBar(barArr, compression_factor):
+    # takes slice of bar array
+    # see documentation for Compressed Actigram
     return barArr[::compression_factor]
 
 
