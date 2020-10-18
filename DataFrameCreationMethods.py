@@ -403,37 +403,48 @@ def getXtickDF(complexDF):
 def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     """
     Reads in complex data as a CSV and takes angle and frame data.
-    Creates a CSV with angle + margin set to 1 with all other points set to 0.
+    Creates a Numpy Arr m by n, m = number of frames in recording and n = number of degrees
+    Pulses are set to 1, all other space is set to 0 (this makes the actigram image)
+    Pulses are represented by a block of black (1) pixels
+    Pulse angle and frame number are identified. 
+    Block is built by INTERVAL pixels on either side of pulse
+    Block is extended by pulseExtension (seconds) 
 
     # INPUTS
     Complex Dataframe
     FRAMERATE: frames per second
     INTERVAL: number of points either side of center to set to 1
-    pulseExtension: ##### idk :(
+    pulseExtension: seconds to represent the pulse by. pulseExtension * frames gives a framecount which is used to extend the "tick mark" that represents each pulse. 
 
     # OUTPUT
-    Actigram array...finish this by asking Konnor 
+    Actigram array which is used in plotting the actigram using imshow. 
+    
+    Pulseas are 1's and non-pulse pixels are 0. 
     """
     framesPerExtension = int(FRAMERATE*pulseExtension)
 
     print(complexDF['bounded angle'].unique())
 
-
+    # gets a dataframe of bounded angles that are not null
     df = complexDF[complexDF['bounded angle'].notnull()]
-
+    
+    # converts the bounded angles into ints
     df = df.astype({'bounded angle': 'int64'})
-
+    
+    # changes the frame and angles to python lists
     pulseFrames = df['global frame'].tolist()
     pulseAngles = df['bounded angle'].tolist()
 
     lastFrame = max(pulseFrames)
-
+    
+    # creates the image array of zeros. m x n (m == all frames of recording, n == degrees on the jellyfish)
     actigramArr = np.zeros((lastFrame+framesPerExtension, 360))
 
+    # enumerates through pulses. gets the frame and angle from each pulse coming from the complex dataframe and changes the necessary pixels from 0 to 1. 
     for i, (frame, angle) in enumerate(zip(pulseFrames, pulseAngles)):
         if DEBUG and i%1000==0:
             print('i: {}, frame: {}, angle: {}'.format(i, frame, angle))
-
+        
         for extension in range(framesPerExtension):
             for offset in range(-INTERVAL, INTERVAL+1):
                 actigramArr[frame+extension][(angle + offset)%360] = 1
