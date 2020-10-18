@@ -88,65 +88,86 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # INPUTS (processingScript.py)
     angleDataPath = path to angle data from files
     orientationDF = takes in data from an orientation DF
-    FRAMERATE = frames per second
+    FRAMERATE = frames per second of recording
     STARTDATETIME = specifies start date time
     DAYLIGHTSAVINGS = specifies if during daylight savings or not
 
     # OUTPUTS
     Data frame with information on frame, centroid, angle, time, movement
+    
+    
+    we may want to use this output section to describe all the different categories involved. 
     """
+    # pulls paths of all the AngleData csvs present for that recording
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
-# what's happening in these simpleDFs
+    
+    # simple DFs aka raw angle data are put together into a list and concatenated 
     simpleDFs = []
 
     for i, dfPath in enumerate(dfPaths):
-
+        # reads in a dataframe
         tempSimpleData = pd.read_csv(str(dfPath), header=0)
-
+        
+        # reads in the name of the angle data
         pathStem = dfPath.stem
 
         if DEBUG: print('pathStem: {}'.format(pathStem))
-
+        
+        # determines the movement segment of the data
         movementSegment = int(pathStem[pathStem.rindex('_')+1:])
 
+        # determines the name of the Chunk
         chunkName = pathStem[:pathStem.rindex('_')]
 
+        #assigns columns equal to the chunk name and movement segment to the dataframe
         tempSimpleData['chunk name'] = chunkName
         tempSimpleData['movement segment'] = movementSegment
 
+        # adds the angle data + its chunk name and movement segment to a list of similar dataframes to be concatenated
         simpleDFs.append(tempSimpleData)
 
+    # concats all the dataframes into one pandas df
     simpleConcatDF = pd.concat(simpleDFs)
-
+    
+    # adds the orientation data from the orientationDF to the simpleConcatDF
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
-# creates column in simple simpleConcatDF with properly oriented angles of jellyfish
+    
+    # creates column in simple simpleConcatDF with properly oriented angles of jellyfish by adding angle and orientation factor from orientation segments
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
+    # turns the column of angle data into a python list
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
 
+    # defines the limits of an angle from [zero to 360 degrees)
     angleLimits = list(range(360))
 
+    # turns the orientated angles into integer angle measurements within angleLimits
     boundAngles = []
-
     for ang in orientedAngleList:
         if math.isnan(ang):
             boundAngles.append(None)
         else:
             boundAngles.append(angleLimits[int(ang)%360])
-# creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
+            
+    # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
+    # bounded angle is most important for data analysis. It maps each pulse on the normal jelly axis. 
     simpleConcatDF['bounded angle'] = boundAngles
 
     if DEBUG: print(simpleConcatDF.head())
-
+    
+    #turns bounded angles back into a python list
     angles = list(simpleConcatDF['bounded angle'])
     
+    # creates list of angles 1 after current angle. Useful for short pattern recognition. Shifts list by 1 entry. 
     angles1After = angles[1:]
     angles1After.append(np.nan)
 
+    # creates list of angles 2 after current angle. Useful for short pattern recognition. Shifts list by 2 entries. 
     angles2After = angles[2:]
     angles2After.append(np.nan)
     angles2After.append(np.nan)
 
+    # creates list of angles 3 after current angle. Useful for short pattern recognition. Shifts list by 3 entries. 
     angles3After = angles[3:]
     angles3After.append(np.nan)
     angles3After.append(np.nan)
