@@ -100,7 +100,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     simpleDFs = []
 
     for i, dfPath in enumerate(dfPaths):
-
+        
+        # use pandas to read csv 
         tempSimpleData = pd.read_csv(str(dfPath), header=0)
 
         pathStem = dfPath.stem
@@ -119,11 +120,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     simpleConcatDF = pd.concat(simpleDFs)
 
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
+    
 # creates column in simple simpleConcatDF with properly oriented angles of jellyfish
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
 
+    # angle range from 0 to 360 degrees
     angleLimits = list(range(360))
 
     boundAngles = []
@@ -133,6 +136,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             boundAngles.append(None)
         else:
             boundAngles.append(angleLimits[int(ang)%360])
+            
 # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
     simpleConcatDF['bounded angle'] = boundAngles
 
@@ -140,6 +144,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     angles = list(simpleConcatDF['bounded angle'])
     
+# angles1 after is the first angle after an angle the angle column
+# angles2 after is the second angle after an angle in the angle column
+# angles3 after is the third angle after an angle in the angle column
+
+# The purpose of creating 3 different angle columns is to easily inspect how much the 
+# jellyfish is (rotating?) within a short time frame -deb
+
     angles1After = angles[1:]
     angles1After.append(np.nan)
 
@@ -151,17 +162,9 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     angles3After.append(np.nan)
     angles3After.append(np.nan)
-    # angles#After.append(np.nan) used in order to ensure all the columns are the same length 
-    
-# adds columns of angles1, angles2, and angles3 after. Angles after what?
+    # angles#After.append(np.nan) used in order to ensure all the columns are the same length
 
-# angles1 after is the first angle after an angle the angle column
-# angles2 after is the second angle after an angle in the angle column
-# angles3 after is the third angle after an angle in the angle column
-
-# The purpose of creating 3 different angle columns is to easily inspect how much the 
-# jellyfish is (rotating?) within a short time frame -deb
-
+# adds columns of angles1, angles2, and angles3 after
     simpleConcatDF['angles1After'] = angles1After
     simpleConcatDF['angles2After'] = angles2After
     simpleConcatDF['angles3After'] = angles3After
@@ -181,6 +184,23 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     centroidYindex = header.index('centroid y')
     
 # added additional columns to ComplexDF specifying time, center changes, and movement
+# TimeDelta = time elapsed in seconds, normalized by the frame rate (??)- deb     
+# AbsoluteMinute = converts the delta time into minutes 
+# DateTime = takes into account when the recording started and adds changes in time
+# ZeitgeberTime = Zeitgeber Time associated with DateTime
+# ZeitgeberSec = Zeitgeber Second associated with DateTime
+# ZeitgeberMin = Zeitgeber Minute associated with DateTime
+# ZeitgeberHour = Zeitgeber Hour associated with DateTime
+# ZeitgeberDay = Zeitgeber Day associated with DateTime
+# DayOrNight = determines if it is Day or Night
+# InterpulseInterval = the time between pulses in seconds
+# CenterChangedAfterS10 = determines if center has changed after sensitivity = 10
+# CenterChangedAfterS20 = determines if center has changed after sensitivity = 20
+# CenterChangedAfterS30 = determines if center has changed after sensitivity = 30
+# distanceMoved = distance between 2 centroids between pulses 
+# isHourMark = determines if there is an XTick or not
+# isLightChange = determines the switch between day and night
+
     addedDataCols = ['TimeDelta',
                      'AbsoluteMinute',
                      'DateTime',
@@ -200,6 +220,9 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     addedDataFrame = []
 
+ # Zeitgeber time (ZT): A standardized 24-hour notation of the phase in an entrained circadian cycle in which ZT 0 indicates 
+ # the beginning of day, or the light phase, and ZT 12 is the beginning of night, or the dark phase.   
+    
     # timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=5, hours=7)
     # Zeitgeber time is offset by 7 hours and 5 minutes (ahead or behind?) check if this is actually true though
     # This is determined by when the lights turn on at 7:05 am (pls fact check idk) -deb
@@ -213,22 +236,24 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     numPulses = len(simpleConcatArr)
 
     if DEBUG: print(numPulses)
-        
-    # td = time elapsed in seconds, normalized by the frame rate (??)- deb     
-    # absM = absolute movement
-    # dt = delta time, takes into account when the recording started
-    # zt = delta zeit time, takes into account when the recording started
-    # ipi = i have no idea :(
-    # dn = day or night ?
-    # centroid = (X,Y)
+
+    # () corresponds to the column the variable is associated with 
+    
+    # td = (TimeDelta) 
+    # absM = (AbsoluteMinute)
+    # dt = (DateTime) 
+    # zt = (ZeitgeberTime) 
+    # ipi = (Interpulse Interval) 
+    # dn = (Day or Night) 
+    # centroid = X,Y coordinates of the jellyfish centroid
     # a1 = angle 1
     # a2 = angle 2
-    # ccS1, ccS2m, ccS3 = determines if center has changed, True or False
-    # dm = delta movement? distance between 2 centroids 
-    # hourMark = determines if there is an XTick or not
-    # lightChange = determines the switch between day and night
-    
-    # -deb
+    # ccS1 = (CenterChangedAfterS1) 
+    # ccS2 = (CenterChangedAfterS20) 
+    # ccS3 = (CenterChangedAfterS30) 
+    # dm = (distancedMoved) 
+    # hourMark = (isHourMark) 
+    # lightChange = (isLightChange)
     
     # initializing 
     for i in range(numPulses):
@@ -253,6 +278,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         if zt.hour >= 12: dn = 'Night'
         elif zt.hour == 11 and zt.minute > 54: dn = 'Night'
 
+        # calculates the interpulse interval and the distance moved between pulses
         if i < numPulses-1:
             centroidAfter = (simpleConcatArr[i+1][centroidXindex], simpleConcatArr[i+1][centroidYindex])
             ipi = (simpleConcatArr[i+1][0] - simpleConcatArr[i][0])/FRAMERATE
@@ -287,7 +313,6 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
         addedDataFrame.append(addedDataRow)
 
-    # not really sure what's going on here between np and pd, but a DF is returned -deb
     addedDataArr = np.array(addedDataFrame)
 
     complexDFArr = np.concatenate((simpleConcatArr, addedDataArr), axis=1)
@@ -305,39 +330,47 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 def getXtickDF(complexDF):
     """
     Extracts the tick marks, for use in figure plotting.
-
     # INPUT
     Complex Data Frame
     # OUTPUT
     X tick Data Frame
     """
+    # create a series of hour marks from 'True' Hour marks in complexDF
     hour_marks = complexDF[complexDF.isHourMark == True]
 
     xtickDFheader = ['xTicks', 'xTickLabels', 'TickType']
-
+    
+    # find where the global frames and zeithours associated with each hour mark in the complex DF
+    # convert series to list
     globalFrames = hour_marks['global frame'].tolist()
     zeithours = hour_marks['ZeitgeberHour'].tolist()
 
+    # not sure what this is? 
     tickType = ['hour'] * len(zeithours)
 
+    # x tick label zeithours, ex: 12:00 
     xticklabels = ['{}:00'.format(i) for i in zeithours]
 
+    # create an array of the instances where there are light changes, from Day to Night and Night to Day
     light_changes = complexDF[(complexDF.isLightChange == 'toNight') | (complexDF.isLightChange == 'toDay')]
 
     globalFrames.extend(light_changes['global frame'].tolist())
     xticklabels.extend(light_changes['ZeitgeberHour'].tolist())
     tickType.extend(light_changes.isLightChange.tolist())
 
+    # Add the first column of the ComplexDF of global frame and Zeitgeber hour as the first frame
     globalFrames.append(complexDF.iloc[0]['global frame'])
     xticklabels.append(complexDF.iloc[0]['ZeitgeberHour'])
     tickType.append('FirstFrame')
 
+    # Add the last column of the ComplexDF of global frame and Zeitgeber hour as the last frame
     globalFrames.append(complexDF.iloc[-1]['global frame'])
     xticklabels.append(complexDF.iloc[-1]['ZeitgeberHour'])
     tickType.append('LastFrame')
 
+    # create a DF of xticks including info on global frames, zeithours, and ticktype(?)
     xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickType)), columns=xtickDFheader)
-
+    
     return xtickDF
 
 def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
@@ -349,16 +382,16 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     Complex Dataframe
     FRAMERATE: frames per second
     INTERVAL: number of points either side of center to set to 1
-    pulseExtension: ##### idk :(
+    pulseExtension: the number of frames used to visualize ticks
 
     # OUTPUT
-    Actigram array...finish this by asking Konnor 
+    Actigram array
     """
+    # length of Xtick? 
     framesPerExtension = int(FRAMERATE*pulseExtension)
 
     print(complexDF['bounded angle'].unique())
-
-
+    
     df = complexDF[complexDF['bounded angle'].notnull()]
 
     df = df.astype({'bounded angle': 'int64'})
@@ -375,6 +408,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
             print('i: {}, frame: {}, angle: {}'.format(i, frame, angle))
 
         for extension in range(framesPerExtension):
+            # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5) 
             for offset in range(-INTERVAL, INTERVAL+1):
                 actigramArr[frame+extension][(angle + offset)%360] = 1
 
