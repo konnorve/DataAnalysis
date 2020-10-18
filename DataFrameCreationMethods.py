@@ -39,10 +39,16 @@ def calculateDistance(c1, c2):
     return dist
 
 def distanceBetween(a1, a2):
-    """ Finds the distance between two centers values in number of segements
-    if 5 degree data is used there will be 72 segemnets and each segment will
-    be 5 degrees. Therefore a distance of 3 segments will be 15 degrees.
+    """ 
+    Returns the shortest difference in degrees betwene two positive, bounded angles. 
+    
+    # Don't think the following applies anymore: -KVE
+    # Finds the distance between two centers values in number of segements
+    # if 5 degree data is used there will be 72 segemnets and each segment will
+    # be 5 degrees. Therefore a distance of 3 segments will be 15 degrees.
     """
+    
+    
     if(a1 == a2):
         return 0
     elif(a1<a2):
@@ -52,7 +58,11 @@ def distanceBetween(a1, a2):
         l = a2
         m = a1
     h = l + 360
-
+    
+    # h == high angle (greater than 360 degrees)
+    # m == medium angle (between low and 360)
+    # l == low angle (between 0 and medium)
+    
     d1 = h - m
     d2 = m - l
     d = min([d1,d2])
@@ -174,14 +184,14 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     # angles#After.append(np.nan) used in order to ensure all the columns are the same length 
     
-# adds columns of angles1, angles2, and angles3 after. Angles after what?
+    # adds columns of angles1, angles2, and angles3 after. Angles after what?
 
-# angles1 after is the first angle after an angle the angle column
-# angles2 after is the second angle after an angle in the angle column
-# angles3 after is the third angle after an angle in the angle column
+    # angles1 after is the first angle after an angle the angle column
+    # angles2 after is the second angle after an angle in the angle column
+    # angles3 after is the third angle after an angle in the angle column
 
-# The purpose of creating 3 different angle columns is to easily inspect how much the 
-# jellyfish is (rotating?) within a short time frame -deb
+    # The purpose of creating 3 different angle columns is to easily inspect how much the 
+    # jellyfish is (rotating?) within a short time frame -deb
 
     simpleConcatDF['angles1After'] = angles1After
     simpleConcatDF['angles2After'] = angles2After
@@ -189,19 +199,20 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     if DEBUG: print(simpleConcatDF.head())
 
-# convert simpleConcatDF from DataFrame array to NumPy array
+    # convert simpleConcatDF from DataFrame array to NumPy array
     simpleConcatArr = simpleConcatDF.to_numpy()
     header = list(simpleConcatDF.columns.values)
 
     if DEBUG: print("header: {}".format(header))
-
+    
+    # finds the index of important columns because numpy does not have String indexing, everything must be indexed to specific numeric indicides in the array
     angleArrIndex = header.index('bounded angle')
     angles1AfterIndex = header.index('angles1After')
-
+    
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
     
-# added additional columns to ComplexDF specifying time, center changes, and movement
+    # added additional columns to ComplexDF specifying time, center changes, and movement
     addedDataCols = ['TimeDelta',
                      'AbsoluteMinute',
                      'DateTime',
@@ -251,7 +262,28 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     
     # -deb
     
-    # initializing 
+    # Konnor's comments on Deborah's notes:
+    # td = time delta, a time delta object that represents the time elapsed from the start of the recording. HH:MM:SS.sss format? 
+    #       time delta is calculated using frame of pulse, divided by framerate to get raw seconds, which is then used by timedelta to calculate the rest. 
+    # absM = absolute minute. Takes the minute of each pulse. Useful for binning purposes. 
+    # dt = date time, datetime object of the exact date and time a pulse takes place. 
+    # zt = zeitgeber time. Datetime object. Shift of dt by the time the lights turn on which is ~7am normally and ~8am during daylight savings time
+    # ipi = interpulse interval
+    # dn = day/night. Specifies 'day' if pulse occured during circadium day (zt time is < 12) and 'night' if pulse occurs during circadium night (zt time is >12, < 24)
+    # centroid = (X,Y) position of the jellyfish in pixels, in the tank. 
+    # a1 = angle 1 -- angle of the current pulse
+    # a2 = angle 2 -- angle of the pulse 1 after the current pulse
+    # ccS1, ccS2m, ccS3 = determines if center has changed, True or False. 
+    #       True if angle of the pulse after is outside the sensativity distance. 
+    #       False if the angle of the pulse after is inside the sensativity distance
+    #       Sensativities are 10, 20, and 30 degrees. 
+    #       False at S==10 degrees means the next pulse lies within 10 degrees to either side of the current pulse.
+    ### ^^^ we should change these to AngleChanged and give actual sensativity (therefore: acS10, acS20, acS30... etc.) Centers is depricated.  
+    # dm = distance moved. distance between 2 centroids in pixels
+    # hourMark = determines if there is a change in hour to determine if that frame location should be used as an XTick or not.
+    # lightChange = determines the switch between day and night. Useful in marking Day/Night changes on bar graph and xtickDf
+    
+    # initializing various components to create fully complex dataframe
     for i in range(numPulses):
         if i % 1000 == 0: print(i)
         td = timedelta(0, simpleConcatArr[i][0]/FRAMERATE)
