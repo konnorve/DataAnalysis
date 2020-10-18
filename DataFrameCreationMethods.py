@@ -291,7 +291,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         dt = STARTDATETIME + td
         zt = dt - timedelta2Zeitgeber
         ipi = np.nan
-        dn = 'Day'
+        dn = 'Day'  # initalized as Day. All night pulses are then changed to night. 
         centroid = (simpleConcatArr[i][centroidXindex], simpleConcatArr[i][centroidYindex])
         a1 = float(simpleConcatArr[i][angleArrIndex])
         a2 = float(simpleConcatArr[i][angles1AfterIndex])
@@ -302,34 +302,36 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         hourMark = False
         lightChange = 'None'
         
-     # determine if it is day or night in zeitgeber hours
+        # determine if it is day or night in zeitgeber hours
         if zt.hour >= 12: dn = 'Night'
         elif zt.hour == 11 and zt.minute > 54: dn = 'Night'
 
+        # finds distance moved if there is a centroid position in the pulse after. 
         if i < numPulses-1:
             centroidAfter = (simpleConcatArr[i+1][centroidXindex], simpleConcatArr[i+1][centroidYindex])
             ipi = (simpleConcatArr[i+1][0] - simpleConcatArr[i][0])/FRAMERATE
             dm = calculateDistance(centroid, centroidAfter)
-
-        # get last zeithour and see if it's changed
-        # if it is true, it gets a mark on the Xtick DF (i think?) -deb
+        
+        # just checks that the previous pulse exists for comparison
         if i > 0:
+            # get last zeithour and see if it's changed
             lastHour = addedDataRow[addedDataCols.index('ZeitgeberHour')]
             currHour = zt.hour
+            # if the last hour is not the current hour, than there is an hour mark. that pulse represents the xtick should be a xtick
             if lastHour != currHour:
                 hourMark = True
-        # determines if the light is on by seeing if it is day or night 
+            # specifies a light to dark transition for the xtick df 
             lastDN = addedDataRow[addedDataCols.index('DayOrNight')]
             if lastDN != dn:
                 if lastDN == 'Day':
                     lightChange = 'toNight'
                 else:
                     lightChange = 'toDay'
-
+        
        # centerChanged(angle1, angle2, sensitivity)
        # if distance between the two angles is less than the sensitivity then
        # center can be treated as unchanged.
-       # sensitivity decreases when time increases (?) -deb
+       # various sensitivites are offered depending on sensativity of experiment and of videoProcessing program. 
         if not math.isnan(a1) and not math.isnan(a2):
             ccS1 = centerChanged(a1, a2, 10)
             ccS2 = centerChanged(a1, a2, 20)
@@ -341,17 +343,22 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         addedDataFrame.append(addedDataRow)
 
     # not really sure what's going on here between np and pd, but a DF is returned -deb
+    # turns the python list of lists data that was created in the for loop into a numpy array
     addedDataArr = np.array(addedDataFrame)
 
+    # concatenates the simplified numpy dataarr from before and the added dataframe array created from the for loop. 
     complexDFArr = np.concatenate((simpleConcatArr, addedDataArr), axis=1)
 
+    # extends the header to include the added rows
     header.extend(addedDataCols)
     if DEBUG: print(header)
 
+    # pieces together the entire complex datframe, complete with all data and the header
     complexDF = pd.DataFrame(complexDFArr, columns = header)
 
     if DEBUG: print(complexDF.head())
-
+    
+    #returns a pandas dataframe
     return complexDF
 
 
