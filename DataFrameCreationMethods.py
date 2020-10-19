@@ -27,8 +27,12 @@ CHIME = True
 """Definitions:
 center = a site of initiations
 centroid = center of the jellyfish
-
 """
+
+###############################
+##### Utility Functions #######
+###############################
+
 def calculateDistance(c1, c2):
     dist = math.sqrt((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2)
     return dist
@@ -75,6 +79,12 @@ def centerChanged(a1, a2, sensativity):
     else:
         return True
 
+#########################################################
+#########################################################
+############      DataFrame Creation         ############
+#########################################################
+#########################################################
+
 
 def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
     """
@@ -89,11 +99,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # OUTPUTS
     DF with information on frame, centroid, angle (raw and bounded), time, movement (center changed boolean and distance)
-    """
-    dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
-# what's happening in these simpleDFs
-    simpleDFs = []
 
+    """
+    # initiate angle data dataframe from directory
+    dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
+    # empty DataFrame created
+    simpleDFs = []
+    # segment angleData in to chunks based on naming conventions? ***clarify AJ***
     for i, dfPath in enumerate(dfPaths):
 
         tempSimpleData = pd.read_csv(str(dfPath), header=0)
@@ -105,16 +117,16 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         movementSegment = int(pathStem[pathStem.rindex('_')+1:])
 
         chunkName = pathStem[:pathStem.rindex('_')]
-
+         # create columns 'chunk name' and 'movement segments'
         tempSimpleData['chunk name'] = chunkName
         tempSimpleData['movement segment'] = movementSegment
-
+        # chunk name and movement segment added to empty DataFrame
         simpleDFs.append(tempSimpleData)
-
+    # concatentates all tempSimpleData created in for loop into larger DataFrame representing all of angleData
     simpleConcatDF = pd.concat(simpleDFs)
-
+    # joins simpleConcat with orientationDF by movement segment
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
-
+    # properly orients angles
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
@@ -122,7 +134,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angleLimits = list(range(360))
 
     boundAngles = []
-
+    # bounded angle is valid integer value angle that and the site on initiation
     for ang in orientedAngleList:
         if math.isnan(ang):
             boundAngles.append(None)
@@ -130,11 +142,15 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             boundAngles.append(angleLimits[int(ang)%360])
 
     simpleConcatDF['bounded angle'] = boundAngles
-
+    # ^^^^^^^MOST IMPORTANT COLUMN^^^^^^^
+    # indicates the properly oriented angle at which contraction occured
     if DEBUG: print(simpleConcatDF.head())
 
     angles = list(simpleConcatDF['bounded angle'])
 
+    ###################################
+    ###### Additional Angle Data ######      ***AJ***
+    ###################################
     angles1After = angles[1:]
     angles1After.append(np.nan)
 
@@ -146,7 +162,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     angles3After.append(np.nan)
     angles3After.append(np.nan)
-# adds columns of angles1, angles2, and angles3 after. Angles after what?
+
     simpleConcatDF['angles1After'] = angles1After
     simpleConcatDF['angles2After'] = angles2After
     simpleConcatDF['angles3After'] = angles3After
@@ -163,7 +179,11 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
-# added additional columns to ComplexDF
+
+    #############################
+    ######## Time Data #########
+    #############################
+
     addedDataCols = ['TimeDelta',
                      'AbsoluteMinute',
                      'DateTime',
@@ -180,7 +200,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'distanceMoved',
                      'isHourMark',
                      'isLightChange']
-
+    # initiate a new empty DataFrame for time data
     addedDataFrame = []
 
     timedelta2Zeitgeber = timedelta(0, 0, 0, 0, 5, 7)
@@ -190,7 +210,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     numPulses = len(simpleConcatArr)
 
     if DEBUG: print(numPulses)
-
+    # Determine the time at which pulses were recorded
     for i in range(numPulses):
         if i % 1000 == 0: print(i)
         td = timedelta(0, simpleConcatArr[i][0]/FRAMERATE)
@@ -256,16 +276,21 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     return complexDF
 
+###################################
+###################################
+########## Figure Data ############
+###################################
+###################################
 
 def getXtickDF(complexDF):
     """
-    Extracts the tick marks, for us in figure plotting.
+    Extracts the tick marks, for use in figure plotting.
 
     # INPUT
     Complex Data Frame
     # OUTPUT
     creates a DF with hour marked data extracted from complexDF
-        includes information on when light changed occur
+    includes information on when light changed occur
     """
     hour_marks = complexDF[complexDF.isHourMark == True]
 
@@ -378,11 +403,13 @@ Night Color: Navy Blue
 
 def createCompressedActigram(actigramCSV, compression_factor):
     """ask Konnor about compressionFactor ***AJ***
+    resizes actimgram?
     """
     return actigramCSV[::compression_factor]
 
 def createCompressedMovementDayNightBar(barArr, compression_factor):
     """ask Konnor about compression_factor ***AJ***
+    resizes movementbar?
     """
     return barArr[::compression_factor]
 
