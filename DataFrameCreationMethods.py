@@ -1,4 +1,7 @@
-
+# This begins with just the standard host of imports;
+# not all modules imported are used here, and in Pycharm the unused show up gray, as warnings
+# like the cries of the spirit you never really intended to summon
+# when you first started playing with that dusty old ouija board    -x
 
 # import statement
 import os
@@ -17,11 +20,13 @@ from datetime import datetime, timedelta
 
 import math
 
+# In case it's not immediately clear, only numpy, pandas, datetime: timedelta, and math are used in this file. -x
+
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
-DEBUG = True
-CHIME = True
+DEBUG = True  # While true, program compiles w/ extra info to help with debugging; set to False when deployed -x
+CHIME = True  # Probably makes a noise like this: *ding!* when compilation is done. -x
 
 ########################################################################################################################
 
@@ -34,8 +39,8 @@ def calculateDistance(c1, c2):
     """Distance Formula
     Calculates how far the jellyfish has moved by
     finding the distance between two centroids.
-    """
-    dist = math.sqrt((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2)
+    """     # Creates and populates variable "dist" with the calculated distance between args c2 and c1;  -x.
+    dist = math.sqrt((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2)  # Where are c1 and c2 given their values?
     return dist
 
 def distanceBetween(a1, a2):
