@@ -139,10 +139,12 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # concats all the dataframes into one pandas df
     simpleConcatDF = pd.concat(simpleDFs)
+
+    print(simpleConcatDF['chunk name'].iloc[0])
     
     # adds the orientation data from the orientationDF to the simpleConcatDF
-    simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', on='movement segment')
-    
+    simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', left_on=['movement segment', 'chunk name'], right_on=['movement segment', 'chunk name'])
+
 
     # creates column in simple simpleConcatDF with properly oriented angles of jellyfish by adding angle and orientation factor from orientation segments
 
@@ -496,10 +498,11 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     pulseFrames = df['global frame'].tolist()
     pulseAngles = df['bounded angle'].tolist()
 
+    startFrame = min(pulseFrames)
     lastFrame = max(pulseFrames)
     
     # creates the image array of zeros. m x n (m == all frames of recording, n == degrees on the jellyfish)
-    actigramArr = np.zeros((lastFrame+framesPerExtension, 360))
+    actigramArr = np.zeros((lastFrame+framesPerExtension-startFrame, 360))
 
     # enumerates through pulses. gets the frame and angle from each pulse coming from the complex dataframe and changes the necessary pixels from 0 to 1. 
     for i, (frame, angle) in enumerate(zip(pulseFrames, pulseAngles)):
@@ -509,7 +512,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
         for extension in range(framesPerExtension):
             # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5) 
             for offset in range(-INTERVAL, INTERVAL+1):
-                actigramArr[frame+extension][(angle + offset)%360] = 1
+                actigramArr[frame-startFrame+extension][(angle + offset)%360] = 1
 
     return actigramArr
 
@@ -525,9 +528,10 @@ def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0],
     pulseMoving = complexDF['bounded angle'].tolist()
     pulseDayNight = complexDF['DayOrNight'].tolist()
 
+    startFrame = min(pulseFrames)
     lastFrame = max(pulseFrames)
 
-    barArr = np.zeros((lastFrame, width, 3), dtype='int')
+    barArr = np.zeros((lastFrame-startFrame, width, 3), dtype='int')
 
     barArr[:,:] = [255,255,255]
 
@@ -535,8 +539,8 @@ def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0],
 
     for i in range(numPulses-1):
 
-        currPulseFrame = pulseFrames[i]
-        nextPulseFrame = pulseFrames[i + 1]
+        currPulseFrame = pulseFrames[i] - startFrame
+        nextPulseFrame = pulseFrames[i + 1] - startFrame
         isMoving = math.isnan(pulseMoving[i])
         isNight = pulseDayNight[i] == 'Night'
 

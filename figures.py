@@ -9,6 +9,8 @@ import math
 from scipy import stats
 import DataFrameCreationMethods as cdf
 
+def readCSV2pandasDF(CSVpath):
+    return pd.read_csv(str(CSVpath), index_col=0)
 
 def bar4MovementDayNight(dfBar, ax, width = 4):
 
