@@ -67,7 +67,7 @@ def distanceBetween(a1, a2):
     else:
         return "ERROR, fix this function :("
 
-# im so sorry but i swear it's spelled 'sensitivity'?,, idk lmao im tired -deb
+# im so sorry but i swear it's spelled 'sensitivity'?,, idk lmao im tired -deb  deborah thank you for catching that i was afraid to say anything- x
 def centerChanged(a1, a2, sensativity):
     """
         Determines if the center has changed between two center values where each center value is an angle.
@@ -77,7 +77,9 @@ def centerChanged(a1, a2, sensativity):
         thus false is returned.
 
         Sensativity is the integer value determining whether the center changed or not.
-    """
+    """  # For reference & to catch all dependencies, 'Sensativity's value is assigned in figures.py,
+    # and it's used again in plottingMethods.py. -x
+    
     d = distanceBetween(a1, a2)
 
     if d <= sensativity:
@@ -100,13 +102,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # OUTPUTS
     Data frame with information on frame, centroid, angle, time, movement
     """
-    dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
+    dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']  # new dataframe dfPaths using sorted contents of angleDataPath
 # what's happening in these simpleDFs
     simpleDFs = []
+# Having a hard time understanding this block; it seems to be using pathlib which I'm unfamiliar with, even though that import is grayed out. -x
+    for i, dfPath in enumerate(dfPaths):  # Enumerate adds numbers to the objects(?) in dfPaths
 
-    for i, dfPath in enumerate(dfPaths):
-
-        tempSimpleData = pd.read_csv(str(dfPath), header=0)
+        tempSimpleData = pd.read_csv(str(dfPath), header=0)  #  new temporary df full of string versions of each dfPath, designating the first row as headers
 
         pathStem = dfPath.stem
 
