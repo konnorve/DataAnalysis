@@ -114,7 +114,6 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # OUTPUTS
     DF with information on frame, centroid, angle (raw and bounded), time, movement (center changed boolean and distance)
 
-    """
     # initiate angle data dataframe from directory
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
     """
