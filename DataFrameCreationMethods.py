@@ -408,7 +408,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     return complexDF
 
 
-def getXtickDF(complexDF):
+def getXtickDF_hour(complexDF):
     """
     Extracts the tick marks, for use in figure plotting.
     # INPUT
@@ -417,41 +417,177 @@ def getXtickDF(complexDF):
     X tick Data Frame
     """
     # create a series of hour marks from 'True' Hour marks in complexDF
+
+    #minute_marks = complexDF[complexDF.isMinuteMark == True]
     hour_marks = complexDF[complexDF.isHourMark == True]
 
     xtickDFheader = ['xTicks', 'xTickLabels', 'TickType']
     
     # find where the global frames and zeithours associated with each hour mark in the complex DF
     # convert series to list
+
+    firstFrame = complexDF.iloc[0]['global frame']
+
     globalFrames = hour_marks['global frame'].tolist()
     zeithours = hour_marks['ZeitgeberHour'].tolist()
+    xticklabels = ['{}'.format(i) for i in zeithours]
+    tickTypeA = ['hour_absolute'] * len(zeithours)
+    absHour_xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickTypeA)), columns=xtickDFheader)
 
-    # not sure what this is? 
-    tickType = ['hour'] * len(zeithours)
+    relativeFrames = [globalFrame - firstFrame for globalFrame in globalFrames]
+    tickTypeR = ['hour_relative'] * len(zeithours)
+    relHour_xtickDF = pd.DataFrame(list(zip(relativeFrames, xticklabels, tickTypeR)), columns=xtickDFheader)
 
-    # x tick label zeithours, ex: 12:00 
-    xticklabels = ['{}:00'.format(i) for i in zeithours]
-
-    # create an array of the instances where there are light changes, from Day to Night and Night to Day
     light_changes = complexDF[(complexDF.isLightChange == 'toNight') | (complexDF.isLightChange == 'toDay')]
+    absLCFrames = light_changes['global frame'].tolist()
+    relLCFrames = [globalFrame - firstFrame for globalFrame in absLCFrames]
+    xticklabelsLC = light_changes['ZeitgeberHour'].tolist()
+    tickTypeLC = light_changes.isLightChange.tolist()
+    lightX_xtickDF = pd.DataFrame(list(zip(relLCFrames, xticklabelsLC, tickTypeLC)), columns=xtickDFheader)
 
-    globalFrames.extend(light_changes['global frame'].tolist())
-    xticklabels.extend(light_changes['ZeitgeberHour'].tolist())
-    tickType.extend(light_changes.isLightChange.tolist())
+    startFrame_xtickDF = pd.DataFrame(
+        [[complexDF.iloc[0]['global frame'], complexDF.iloc[0]['ZeitgeberHour'], 'FirstFrame']], columns=xtickDFheader)
+    lastFrame_xtickDF = pd.DataFrame(
+        [[complexDF.iloc[-1]['global frame'], complexDF.iloc[-1]['ZeitgeberHour'], 'LastFrame']], columns=xtickDFheader)
 
-    # Add the first column of the ComplexDF of global frame and Zeitgeber hour as the first frame
-    globalFrames.append(complexDF.iloc[0]['global frame'])
-    xticklabels.append(complexDF.iloc[0]['ZeitgeberHour'])
-    tickType.append('FirstFrame')
+    # Tick Types:
+    # hour_absolute
+    # hour_relative
+    # toNight
+    # toDay
+    # FirstFrame
+    # LastFrame
 
-    # Add the last column of the ComplexDF of global frame and Zeitgeber hour as the last frame
-    globalFrames.append(complexDF.iloc[-1]['global frame'])
-    xticklabels.append(complexDF.iloc[-1]['ZeitgeberHour'])
-    tickType.append('LastFrame')
+    xtickDFs = [absHour_xtickDF,
+                relHour_xtickDF,
+                lightX_xtickDF,
+                startFrame_xtickDF,
+                lastFrame_xtickDF]
 
-    # create a DF of xticks including info on global frames, zeithours, and ticktype(?)
-    xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickType)), columns=xtickDFheader)
-    
+    xtickDF = pd.concat(xtickDFs)
+
+    return xtickDF
+
+
+def getXtickDF_minute(complexDF):
+    """
+    Extracts the tick marks, for use in figure plotting.
+    # INPUT
+    Complex Data Frame
+    # OUTPUT
+    X tick Data Frame
+    """
+    # create a series of hour marks from 'True' Hour marks in complexDF
+
+    # minute_marks = complexDF[complexDF.isMinuteMark == True]
+    minute_marks = complexDF[complexDF.isMinuteMark == True]
+
+    xtickDFheader = ['xTicks', 'xTickLabels', 'TickType']
+
+    # find where the global frames and zeithours associated with each hour mark in the complex DF
+    # convert series to list
+
+    firstFrame = complexDF.iloc[0]['global frame']
+
+    globalFrames = minute_marks['global frame'].tolist()
+    zeithours = minute_marks['ZeitgeberMin'].tolist()
+    xticklabels = ['{}'.format(i) for i in zeithours]
+    tickTypeA = ['hour_absolute'] * len(zeithours)
+    absHour_xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickTypeA)), columns=xtickDFheader)
+
+    relativeFrames = [globalFrame - firstFrame for globalFrame in globalFrames]
+    tickTypeR = ['hour_relative'] * len(zeithours)
+    relHour_xtickDF = pd.DataFrame(list(zip(relativeFrames, xticklabels, tickTypeR)), columns=xtickDFheader)
+
+    light_changes = complexDF[(complexDF.isLightChange == 'toNight') | (complexDF.isLightChange == 'toDay')]
+    absLCFrames = light_changes['global frame'].tolist()
+    relLCFrames = [globalFrame - firstFrame for globalFrame in absLCFrames]
+    xticklabelsLC = light_changes['ZeitgeberHour'].tolist()
+    tickTypeLC = light_changes.isLightChange.tolist()
+    lightX_xtickDF = pd.DataFrame(list(zip(relLCFrames, xticklabelsLC, tickTypeLC)), columns=xtickDFheader)
+
+    startFrame_xtickDF = pd.DataFrame(
+        [[complexDF.iloc[0]['global frame'], complexDF.iloc[0]['ZeitgeberHour'], 'FirstFrame']], columns=xtickDFheader)
+    lastFrame_xtickDF = pd.DataFrame(
+        [[complexDF.iloc[-1]['global frame'], complexDF.iloc[-1]['ZeitgeberHour'], 'LastFrame']], columns=xtickDFheader)
+
+    # Tick Types:
+    # hour_absolute
+    # hour_relative
+    # toNight
+    # toDay
+    # FirstFrame
+    # LastFrame
+
+    xtickDFs = [absHour_xtickDF,
+                relHour_xtickDF,
+                lightX_xtickDF,
+                startFrame_xtickDF,
+                lastFrame_xtickDF]
+
+    xtickDF = pd.concat(xtickDFs)
+
+    return xtickDF
+
+
+def getXtickDF_10minute(complexDF):
+    """
+    Extracts the tick marks, for use in figure plotting.
+    # INPUT
+    Complex Data Frame
+    # OUTPUT
+    X tick Data Frame
+    """
+    # create a series of hour marks from 'True' Hour marks in complexDF
+
+    # minute_marks = complexDF[complexDF.isMinuteMark == True]
+    minute10_marks = complexDF[complexDF.is10MinuteMark == True]
+
+    xtickDFheader = ['xTicks', 'xTickLabels', 'TickType']
+
+    # find where the global frames and zeithours associated with each hour mark in the complex DF
+    # convert series to list
+
+    firstFrame = complexDF.iloc[0]['global frame']
+
+    globalFrames = minute10_marks['global frame'].tolist()
+    zeithours = minute10_marks['ZeitgeberMin'].tolist()
+    xticklabels = ['{}'.format(i) for i in zeithours]
+    tickTypeA = ['hour_absolute'] * len(zeithours)
+    absHour_xtickDF = pd.DataFrame(list(zip(globalFrames, xticklabels, tickTypeA)), columns=xtickDFheader)
+
+    relativeFrames = [globalFrame - firstFrame for globalFrame in globalFrames]
+    tickTypeR = ['hour_relative'] * len(zeithours)
+    relHour_xtickDF = pd.DataFrame(list(zip(relativeFrames, xticklabels, tickTypeR)), columns=xtickDFheader)
+
+    light_changes = complexDF[(complexDF.isLightChange == 'toNight') | (complexDF.isLightChange == 'toDay')]
+    absLCFrames = light_changes['global frame'].tolist()
+    relLCFrames = [globalFrame - firstFrame for globalFrame in absLCFrames]
+    xticklabelsLC = light_changes['ZeitgeberHour'].tolist()
+    tickTypeLC = light_changes.isLightChange.tolist()
+    lightX_xtickDF = pd.DataFrame(list(zip(relLCFrames, xticklabelsLC, tickTypeLC)), columns=xtickDFheader)
+
+    startFrame_xtickDF = pd.DataFrame(
+        [[complexDF.iloc[0]['global frame'], complexDF.iloc[0]['ZeitgeberHour'], 'FirstFrame']], columns=xtickDFheader)
+    lastFrame_xtickDF = pd.DataFrame(
+        [[complexDF.iloc[-1]['global frame'], complexDF.iloc[-1]['ZeitgeberHour'], 'LastFrame']], columns=xtickDFheader)
+
+    # Tick Types:
+    # hour_absolute
+    # hour_relative
+    # toNight
+    # toDay
+    # FirstFrame
+    # LastFrame
+
+    xtickDFs = [absHour_xtickDF,
+                relHour_xtickDF,
+                lightX_xtickDF,
+                startFrame_xtickDF,
+                lastFrame_xtickDF]
+
+    xtickDF = pd.concat(xtickDFs)
+
     return xtickDF
 
 def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):

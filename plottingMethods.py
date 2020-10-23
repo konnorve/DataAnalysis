@@ -245,7 +245,7 @@ def plotBinaryActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks,
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
-    heights = [7, 1]
+    heights = [14, 1]
     gs = fig.add_gridspec(ncols=1, nrows=2, height_ratios=heights)
 
     # subplot
@@ -392,7 +392,7 @@ def ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, barArr
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
-    heights = [7, 1, 2]
+    heights = [14, 1, 3]
     gs = fig.add_gridspec(ncols=1, nrows=3, height_ratios = heights)
 
     #subplot
@@ -418,7 +418,7 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, df
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
-    heights = [15, 1, 5, 5]
+    heights = [15, 1, 3, 3]
     widths = [10, 1]
     gs = fig.add_gridspec(ncols=2, nrows=4, height_ratios = heights, width_ratios = widths)
 

@@ -20,20 +20,20 @@ def makeOutDir(outputDir, folderName):
     return outdir
 
 # Main input variables needed for DataFrame and Figures Creation
-trainingTitle = ''
-angleDataPath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/TaylorS/TaylorS_AngleData')
 
+angleDataPath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/NinaSimone_AngleData')
 figureOutDir = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/Figures/')
 starttime = datetime(2000,1,1,0,0)
+orientationData = pd.read_csv(Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/NinaSimoneBehavioralTesting_OrientationFactors_completed_v2.csv'))
+complexDFiofile= Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/ComplexDF/NinaSimoneComplexDF.csv')
 
-orientationData = pd.read_csv(Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/TaylorS/TaylorSBehavioralTesting_OrientationFactors_completed.csv'))
+complexDF = cdf.createComplexDF(angleDataPath, orientationData, 120, starttime, True)
 
+complexDF = complexDF.loc[complexDF['chunk name']!='202001002_NinaSimone_335pm_Long_baseline']
 
+complexDF.to_csv(str(complexDFiofile))
 
-####
-complexDFinfile= Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/ComplexDF/NinaSimoneComplexDF.csv')
-complexDF = pd.read_csv(Path(complexDFinfile))
-####
+# complexDF = pd.read_csv(complexDFiofile)
 
 uniqueChunks = complexDF['chunk name'].unique()
 

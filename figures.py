@@ -9,8 +9,8 @@ import math
 from scipy import stats
 import DataFrameCreationMethods as cdf
 
-def readCSV2pandasDF(CSVpath):
-    return pd.read_csv(str(CSVpath), index_col=0)
+# def readCSV2pandasDF(CSVpath):
+#     return pd.read_csv(str(CSVpath), index_col=0)
 
 def bar4MovementDayNight(dfBar, ax, width = 4):
 
@@ -19,7 +19,7 @@ def bar4MovementDayNight(dfBar, ax, width = 4):
     ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto')
 
     ax.set_yticks([width/4, width*3/4])
-    ax.set_yticklabels(['Movement', 'Day or Night'])
+    ax.set_yticklabels(['Movement', 'Light or Dark'])
 
     ax.get_xaxis().set_visible(False)
 
@@ -73,7 +73,7 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax1.grid(which='major', color='#7f7f7f', linestyle=':', linewidth=1)
 
     #setting x ticks
-    justXticks = dfxTicksComp[dfxTicksComp.TickType == 'hour']
+    justXticks = dfxTicksComp[dfxTicksComp.TickType == 'hour_relative']
 
     xTicks = justXticks['xTicks'].tolist()
     xTickLabels = justXticks['xTickLabels'].tolist()
@@ -101,7 +101,7 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
 #
 ## Metrics
 
-def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True):
+def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_average = True):
     df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex.InterpulseInterval < 30)]
     ax = axis
 
@@ -111,24 +111,25 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
 
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'IPI')
 
-    ym = y.rolling(window=250).mean()
+    if show_average:
+        ym = y.rolling(window=250).mean()
 
-    ax.plot(x, ym, c = 'b', lw = 2, label= 'average')
+        ax.plot(x, ym, c = 'b', lw = 2, label= 'average')
 
-    ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='IPI (s)')
+        ax.set_xlabel(xlabel=r'Zeitgeber Time')
+        ax.set_ylabel(ylabel='IPI (s)')
 
-    ax.grid(axis = 'y', alpha=0.5, linestyle='--')
+    ax.grid(which = 'both', axis = 'y', alpha=0.5, linestyle='--')
 
     ax.semilogy()
 
     ax.margins(x=0)
 
-    ax.set_ylim(0, 3.5)
+    ax.set_ylim(0.5, 3)
 
     if show_xLabels:
 
-        justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+        justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
 
         xTicks = justXticks['xTicks'].tolist()
         xTickLabels = justXticks['xTickLabels'].tolist()
@@ -298,9 +299,9 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
     if show_xLabels:
         lastx = x[-1]
 
-        compressionFactor = dfxTicks[dfxTicks.TickType == 'LastFrame'].iloc[0, 0] / lastx
+        compressionFactor = dfxTicks[dfxTicks.TickType == 'hour_absolute'].iloc[0, 0] / lastx
 
-        justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+        justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
 
         justXticks['xTicks'] = justXticks['xTicks'] / compressionFactor
 
@@ -319,15 +320,24 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 # In[39]:
 
 
-def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3, bounds = (0,0.6)):
+def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3, bounds = (0,0.8), figType = 'Long'):
 
     ax = axis
 
     df = dfComplex[dfComplex.AbsoluteMinute.notnull()]
 
-    #BINSIZE is number of minutes to use in each bin
-    BINSIZE = 5
 
+
+    #BINSIZE is number of minutes to use in each bin
+    if figType == 'Long':
+        BINSIZE = 5
+        WINDOWSIZE = 20
+    elif figType == 'Medium':
+        BINSIZE = 1
+        WINDOWSIZE = 5
+    elif figType == 'Short':
+        BINSIZE = 1
+        WINDOWSIZE = 1
 
     #establishes column to groupby and use bins
     df['binCount'] = df['AbsoluteMinute']/BINSIZE
@@ -345,14 +355,13 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
         3 : 'CenterChangedAfterS30',
     }
 
-
     dfFigure = ysensativity(df, switcher.get(sensativity))
 
     x = list(range(len(dfFigure)))
 
     dfY = dfFigure['count']
 
-    plotBinAverageWithErrorBars(dfY, x, ax, 20)
+    plotBinAverageWithErrorBars(dfY, x, ax, WINDOWSIZE)
 
     ax.axis(ymin = bounds[0], ymax = bounds[1])
 
@@ -365,9 +374,12 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
     if show_xLabels:
         lastx = x[-1]
 
-        compressionFactor = dfxTicks[dfxTicks.TickType == 'LastFrame'].iloc[0, 0] / lastx
+        lastFrame = dfComplex.iloc[-1]['global frame']
+        #lastFrame = dfxTicks[dfxTicks.TickType == 'LastFrame'].iloc[0, 0]
 
-        justXticks = dfxTicks[dfxTicks.TickType == 'hour']
+        compressionFactor = lastFrame / lastx
+
+        justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
 
         justXticks['xTicks'] = justXticks['xTicks'] / compressionFactor
 
@@ -382,5 +394,5 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
 
     if show_Legend: ax.legend()
 
-    if show_title: ax.set_title(jelly_title + ' Jellyfish Centers Changed Transition Metric (tests if center changed from one pulse to next)')
+    if show_title: ax.set_title(jelly_title + ' Interpulse Change')
 
