@@ -13,48 +13,44 @@ import matplotlib.cm as cm
 
 #datetime(year,month,day,strthr,strtmin) + timedelta(0, sec 0, 0, 0, min 0, hour 0),
 
+def makeOutDir(outputDir, folderName):
+    outdir = outputDir / folderName
+    if not outdir.exists():
+        outdir.mkdir()
+    return outdir
+
 # Main input variables needed for DataFrame and Figures Creation
-trainingTitle = '20200707_Pink_218pm_cam2_1'
-angleDataPath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_9/testdata4dataprocessingscript/20200707_Pink_218pm_cam2_1/AngleData')
-complexDFoutpath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_9/testdata4dataprocessingscript/20200707_Pink_218pm_cam2_1/ComplexDF/20200707_Pink_218pm_cam2_1_MichaelOrientation.csv')
-figureOutDir = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_9/testdata4dataprocessingscript/20200707_Pink_218pm_cam2_1/figures')
-starttime = datetime(2020,7,7,14,18)
-data = pd.DataFrame([[0, 27],
-                      [1, -111],
-                      [2, -115],
-                      [3, -92],
-                      [4, -53],
-                      [5, -75],
-                      [6, -54],
-                      [7, -118],
-                      [8, -21],
-                      [9, -50],
-                      [10, -89],
-                      [11, -88],
-                      [12, -65],
-                      [13, -44],
-                      [14, 30]], columns = ['movement segment', 'orientation factor'])
 
-complexDF = cdf.createComplexDF(
-            angleDataPath,
-            data,
-            120,
-            starttime,
-            DAYLIGHTSAVINGS=True
-            )
+angleDataPath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/NinaSimone_AngleData')
+figureOutDir = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/Figures/')
+starttime = datetime(2000,1,1,0,0)
+orientationData = pd.read_csv(Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/NinaSimoneBehavioralTesting_OrientationFactors_completed_v2.csv'))
+complexDFiofile= Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_10/Short_Behavioral_Recordings/Home/NinaSimone/ComplexDF/NinaSimoneComplexDF.csv')
 
-complexDF.to_csv(str(complexDFoutpath), index = False)
+complexDF = cdf.createComplexDF(angleDataPath, orientationData, 120, starttime, True)
 
-xticks_P2 = cdf.getXtickDF(complexDF)
+complexDF = complexDF.loc[complexDF['chunk name']!='202001002_NinaSimone_335pm_Long_baseline']
 
-print(xticks_P2)
+complexDF.to_csv(str(complexDFiofile))
 
-actigramArr_P2 = cdf.createActigramArr(complexDF, 120, pulseExtension=1)
+# complexDF = pd.read_csv(complexDFiofile)
 
-print(actigramArr_P2[:15])
+uniqueChunks = complexDF['chunk name'].unique()
 
-barArr_P2 = cdf.createDayNightMovementBar(complexDF)
+# complexDF_B1 = complexDF_B1.loc[(complexDF_B1['ZeitgeberDay']==7) & (complexDF_B1['ZeitgeberHour']==(5 or 6))]
 
-print(barArr_P2[:15])
+for chunkName in uniqueChunks:
+    complexDFslice = complexDF.loc[complexDF['chunk name']==chunkName]
 
-pm.main(trainingTitle, figureOutDir, actigramArr_P2, barArr_P2, xticks_P2, complexDF, [], [])
+    print(complexDFslice['chunk name'].unique())
+
+    chunkFiguresOutDir = makeOutDir(figureOutDir, chunkName)
+
+    xticks_P2 = cdf.getXtickDF(complexDFslice)
+
+    actigramArr_P2 = cdf.createActigramArr(complexDFslice, 120, pulseExtension=1)
+
+    barArr_P2 = cdf.createDayNightMovementBar(complexDFslice)
+
+    pm.main(chunkName, chunkFiguresOutDir, actigramArr_P2, barArr_P2, xticks_P2, complexDFslice, [], [], stdXlen=15)
+
