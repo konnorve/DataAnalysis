@@ -1,6 +1,5 @@
 
 
-# import statement
 import os
 
 from pathlib import Path
@@ -28,8 +27,12 @@ CHIME = True
 """Definitions:
 center = a site of initiations
 centroid = center of the jellyfish
-
 """
+
+###############################
+##### Utility Functions #######
+###############################
+
 def calculateDistance(c1, c2):
     """Distance Formula
     Calculates how far the jellyfish has moved by
@@ -81,7 +84,7 @@ def centerChanged(a1, a2, sensativity):
         sensativity interval this indicates the center has not changed and
         thus false is returned.
 
-        Sensativity is the integer value determining whether the center changed or not.
+        Sensativity is the integer value determining whether the center will or not.
     """
     d = distanceBetween(a1, a2)
 
@@ -89,6 +92,12 @@ def centerChanged(a1, a2, sensativity):
         return False
     else:
         return True
+
+#########################################################
+#########################################################
+############      DataFrame Creation         ############
+#########################################################
+#########################################################
 
 
 def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
@@ -103,17 +112,16 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     DAYLIGHTSAVINGS = specifies if during daylight savings or not
 
     # OUTPUTS
-    Data frame with information on frame, centroid, angle, time, movement
-    
-    
-    we may want to use this output section to describe all the different categories involved. 
-    """
-    # pulls paths of all the AngleData csvs present for that recording
-    dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
-    
-    # simple DFs aka raw angle data are put together into a list and concatenated 
-    simpleDFs = []
+    DF with information on frame, centroid, angle (raw and bounded), time, movement (center changed boolean and distance)
 
+    """
+    # initiate angle data dataframe from directory
+    dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
+    """
+    # simple DFs aka raw angle data are put together into a list and concatenated 
+
+    simpleDFs = []
+    # segment angleData in to chunks based on naming conventions? ***clarify AJ***
     for i, dfPath in enumerate(dfPaths):
 
         # use pandas to read csv 
@@ -145,7 +153,6 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     
 
     # creates column in simple simpleConcatDF with properly oriented angles of jellyfish by adding angle and orientation factor from orientation segments
-
     simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
 
     # turns the column of angle data into a python list
@@ -157,23 +164,31 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # turns the orientated angles into integer angle measurements within angleLimits
     boundAngles = []
+
+    # bounded angle is valid integer value angle that and the site on initiation
     for ang in orientedAngleList:
         if math.isnan(ang):
             boundAngles.append(None)
         else:
             boundAngles.append(angleLimits[int(ang)%360])
-            
     # kve:
     # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
     # bounded angle is most important for data analysis. It maps each pulse on the normal jelly axis. 
 
     # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
     simpleConcatDF['bounded angle'] = boundAngles
-
+    # ^^^^^^^MOST IMPORTANT COLUMN^^^^^^^
+    
+    # indicates the properly oriented angle at which contraction occured
     if DEBUG: print(simpleConcatDF.head())
     
     #turns bounded angles back into a python list
     angles = list(simpleConcatDF['bounded angle'])
+
+
+    ###################################
+    ###### Additional Angle Data ######      
+    ###################################
     
     # creates list of angles 1 after current angle. Useful for short pattern recognition. Shifts list by 1 entry. 
     # angles1 after is the first angle after an angle the angle column
@@ -182,7 +197,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # The purpose of creating 3 different angle columns is to easily inspect how much the 
     # jellyfish is (rotating?) within a short time frame -deb -- not really, we just want to see what the next position of initiation is and if the site has changed from previous. -kve
-    
+
     angles1After = angles[1:]
     angles1After.append(np.nan)
 
@@ -196,20 +211,6 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     angles3After.append(np.nan)
     angles3After.append(np.nan)
     angles3After.append(np.nan)
-
-    # angles#After.append(np.nan) used in order to ensure all the columns are the same length 
-    
-    # adds columns of angles1, angles2, and angles3 after. Angles after what?
-
-    # angles1 after is the first angle after an angle the angle column
-    # angles2 after is the second angle after an angle in the angle column
-    # angles3 after is the third angle after an angle in the angle column
-
-    # The purpose of creating 3 different angle columns is to easily inspect how much the 
-    # jellyfish is (rotating?) within a short time frame -deb
-
-    # angles#After.append(np.nan) used in order to ensure all the columns are the same length
-
 
     # adds columns of angles1, angles2, and angles3 after
     simpleConcatDF['angles1After'] = angles1After
@@ -230,6 +231,11 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
+
+    #############################
+    ######## Time Data #########
+    #############################
+
     
 
     # added additional columns to ComplexDF specifying time, center changes, and movement
@@ -252,6 +258,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # isHourMark = determines if there is an XTick or not
     # isLightChange = determines the switch between day and night
 
+
     addedDataCols = ['TimeDelta',
                      'AbsoluteMinute',
                      'DateTime',
@@ -268,7 +275,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'distanceMoved',
                      'isHourMark',
                      'isLightChange']
-
+    # initiate a new empty DataFrame for time data
     addedDataFrame = []
 
     # Zeitgeber time (ZT): A standardized 24-hour notation of the phase in an entrained circadian cycle in which ZT 0 indicates 
@@ -405,15 +412,22 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     #returns a pandas dataframe
     return complexDF
 
+###################################
+###################################
+########## Figure Data ############
+###################################
+###################################
 
 def getXtickDF(complexDF):
     """
-    Extracts the tick marks, for use in figure plotting.
-    # INPUT
-    Complex Data Frame
-    # OUTPUT
-    X tick Data Frame
+#     Extracts the tick marks, for use in figure plotting.
+#     INPUT
+#     Complex Data Frame
+#     OUTPUT
+#     creates a DF with hour marked data extracted from complexDF
+#     includes information on when light changed occur
     """
+    
     # create a series of hour marks from 'True' Hour marks in complexDF
     hour_marks = complexDF[complexDF.isHourMark == True]
 
@@ -454,33 +468,27 @@ def getXtickDF(complexDF):
 
 def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     """
-    Reads in complex data as a CSV and takes angle and frame data.
-    Creates a Numpy Arr m by n, m = number of frames in recording and n = number of degrees
-    Pulses are set to 1, all other space is set to 0 (this makes the actigram image)
-    Pulses are represented by a block of black (1) pixels
-    Pulse angle and frame number are identified. 
-    Block is built by INTERVAL pixels on either side of pulse
-    Block is extended by pulseExtension (seconds) 
+#     Reads in complex data as a CSV and takes angle and frame data.
+#     Creates a Numpy Arr m by n, m = number of frames in recording and n = number of degrees
+#     Pulses are set to 1, all other space is set to 0 (this makes the actigram image)
+#     Pulses are represented by a block of black (1) pixels
+#     Pulse angle and frame number are identified. 
+#     Block is built by INTERVAL pixels on either side of pulse
+#     Block is extended by pulseExtension (seconds) 
 
     # INPUTS
-    Complex Dataframe
-    FRAMERATE: frames per second
-    INTERVAL: number of points either side of center to set to 1
+#     Complex Dataframe
+#     FRAMERATE: frames per second
+#     INTERVAL: number of points either side of center to set to 1
 
-    pulseExtension: seconds to represent the pulse by. pulseExtension * frames gives a framecount which is used to extend the "tick mark" that represents each pulse. 
-
-    # OUTPUT
-    Actigram array which is used in plotting the actigram using imshow. 
-    
-    Pulseas are 1's and non-pulse pixels are 0. 
-
-    pulseExtension: the number of frames used to visualize ticks
+#     pulseExtension: seconds to represent the pulse by. pulseExtension * frames gives a framecount which is used to extend the "tick mark" that represents each pulse. 
 
     # OUTPUT
-    Actigram array
-    
+#     Actigram array which is used in plotting the actigram using imshow. 
+#     Pulseas are 1's and non-pulse pixels are 0. 
+#     pulseExtension: the number of frames used to visualize ticks
+
     """
-    # length of Xtick? 
     framesPerExtension = int(FRAMERATE*pulseExtension)
 
     print(complexDF['bounded angle'].unique())
@@ -516,10 +524,10 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
 def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
 
     """
-    Creates a movement bar indicating movement during the daytime or nightime
-    Movement Color: Red
-    Day Color: Yellow
-    Night Color: Navy Blue
+#     Creates a movement bar indicating movement during the daytime or nightime
+#     Movement Color: Red
+#     Day Color: Yellow
+#     Night Color: Navy Blue
     """
     pulseFrames = complexDF['global frame'].tolist()
     pulseMoving = complexDF['bounded angle'].tolist()
@@ -567,7 +575,9 @@ def createCompressedMovementDayNightBar(barArr, compression_factor):
 
 
 def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120):
-
+    """
+#   concatenates two dataframes together taking into consideration the offset in frames
+    """
     td = secondDFstarttime - firstDFstarttime
 
     frameOffset = (td.days*24*3600 + td.seconds)*framerate
