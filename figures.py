@@ -15,11 +15,12 @@ import DataFrameCreationMethods as cdf
 ####### Key things to know #######
 # Axis refers to the axes object, not the x or y axis. Every figure must be added in
 # similarly, all of the titles, x/y ticks, and visibility methods are from the axes class, not pyplt.
+# a lot of these need to be worked on and organized. That is likely to be a future project for you guys.
 
 
 def bar4MovementDayNight(dfBar, ax, width = 4):
     """
-    Creates daynight movement bar to go along with actigram and other behavioral figures.
+    Creates DayNight movement bar to go along with actigram and other behavioral figures.
 
     :param dfBar: Bar dataframe, created in DataFrameCreationMethods. Image array specifying what is
     :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
@@ -277,7 +278,7 @@ def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertic
     initiatiorsHistogramFigure(jelly_title, ax, dfQuery, vertical, show_title, show_degreeLabels)
 
 
-def ysensativity(dataframe, metric):
+def ysensitivity(dataframe, metric):
     """
     DO NOT WORRY ABOUT THIS ONE. Represents grouping metrics. I need to comment a bit more on it and maybe rework it.
 
@@ -330,11 +331,11 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
     ax.fill_between(x = x, y1 = ya, y2 = yb, color = fillColor, alpha = fillShade)
 
 
-def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True):
+def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True):
     """
     Plots the different sensativities of the center changed figure. S10, S20, S30 are all plotted together.
     Does not seem to be working rn?
-    TODO: fix sensativityCCFigure.
+    TODO: fix sensitivityCCFigure.
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
@@ -369,16 +370,16 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
 
 
-    x = ysensativity(df, 'CenterChangedAfterS10')['min time'].tolist()
+    x = ysensitivity(df, 'CenterChangedAfterS10')['min time'].tolist()
 
     x = list(range(len(x)))
 
 
-    yA1S1 = ysensativity(df, 'CenterChangedAfterS10')['count'].rolling(window=windowSize).mean()
+    yA1S1 = ysensitivity(df, 'CenterChangedAfterS10')['count'].rolling(window=windowSize).mean()
 
-    yA1S2 = ysensativity(df, 'CenterChangedAfterS20')['count'].rolling(window=windowSize).mean()
+    yA1S2 = ysensitivity(df, 'CenterChangedAfterS20')['count'].rolling(window=windowSize).mean()
 
-    yA1S3 = ysensativity(df, 'CenterChangedAfterS30')['count'].rolling(window=windowSize).mean()
+    yA1S3 = ysensitivity(df, 'CenterChangedAfterS30')['count'].rolling(window=windowSize).mean()
 
     print(len(x))
     print(len(yA1S1))
@@ -416,21 +417,51 @@ def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
         ax.get_xaxis().set_visible(False)
     if show_Legend: ax.legend()
 
-    if show_title: ax.set_title(jelly_title + ' Jellyfish Centers Changed Sensativity Testing')
+    if show_title: ax.set_title(jelly_title + ' Jellyfish Centers Changed sensitivity Testing')
 
 
 # In[39]:
 
 
-def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensativity = 3, bounds = (0,0.8), figType = 'Long'):
+def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
+    """
+    Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to 
+    another. This is done by aggregating the True/False "CentersChangedS__' columns. 
+    Very similar to the sensativities figure although it only
+
+    "centers" describes the angle of a pulse, specifically the bounded angle. If the bounded angle of the next pulse is
+    within the sensitivity distance.
+    
+    TODO: refactor the columns involved to say "AngleChangedS10"
+    TODO: change this so it is the inverse, and a measure of centralization, not decentralization
+
+
+    :param jelly_title: title of Jellyfish to be used in naming of figure
+    :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param dfComplex: Takes in the complex dataframe. Uses the global frame and all of the CenterChangedS** columns.
+    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
+    :param show_title:
+    :param show_xLabels:
+    :param show_Legend:
+    :param sensitivity: Specified sensitivity. Can be either 10, 20, or 30, corresponding to the 3 CentersChanged Columns
+    :param bounds: Y axis bounds of the figure. The amount of center's changed is bounded between 0 and 1 because it
+                    is tracking the percentage of centers that changed within a given bin. Therefore these bounds should
+                    be between 0 and 1.
+    :param figType: Specifies the length of ComplexDF. Desribes what sort of xtick system to use: house, 10mintues, or
+                    minutes. This may need to be added to every graph, or be automated for the length of the slice being
+                    used.
+                    3 options: 'Long', 'Medium', and 'Short'
+    :return:
+    """
+
 
     ax = axis
 
+    # filters the dataframe
     df = dfComplex[dfComplex.AbsoluteMinute.notnull()]
 
-
-
     #BINSIZE is number of minutes to use in each bin
+    #WINDOWSIZE is the number of bins to use in the rolling average and standard error analysis
     if figType == 'Long':
         BINSIZE = 5
         WINDOWSIZE = 20
@@ -441,38 +472,49 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
         BINSIZE = 1
         WINDOWSIZE = 1
 
+
     #establishes column to groupby and use bins
     df['binCount'] = df['AbsoluteMinute']/BINSIZE
     df['counter'] = 1
 
+    # counts the entries in the bins
     binCount = []
     for item in df['binCount']:
         binCount.append(int(item))
 
+    # creates a column that has bin counts
     df['binCount'] = binCount
 
     switcher = {
-        1 : 'CenterChangedAfterS10',
-        2 : 'CenterChangedAfterS20',
-        3 : 'CenterChangedAfterS30',
+        10 : 'CenterChangedAfterS10',
+        20 : 'CenterChangedAfterS20',
+        30 : 'CenterChangedAfterS30',
     }
 
-    dfFigure = ysensativity(df, switcher.get(sensativity))
+    # gets the figure dataframe by binning various items.
+    dfFigure = ysensitivity(df, switcher.get(sensitivity))
 
+    # finds a list of x values
     x = list(range(len(dfFigure)))
 
+    # gets just the counts from the figure provided.
     dfY = dfFigure['count']
 
+    # plots the data onto the axes object
     plotBinAverageWithErrorBars(dfY, x, ax, WINDOWSIZE)
 
+    # sets y bounds using input
     ax.axis(ymin = bounds[0], ymax = bounds[1])
 
+    # sets labels
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
     ax.set_ylabel(ylabel='% pulses IC')
 
+    # sets grid
     ax.grid(axis = 'y', alpha=0.5, linestyle='--')
     ax.margins(x=0)
 
+    # x ticks and labels
     if show_xLabels:
         lastx = x[-1]
 
