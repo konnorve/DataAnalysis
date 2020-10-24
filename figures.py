@@ -12,11 +12,27 @@ import DataFrameCreationMethods as cdf
 # def readCSV2pandasDF(CSVpath):
 #     return pd.read_csv(str(CSVpath), index_col=0)
 
+####### Key things to know #######
+# Axis refers to the axes object, not the x or y axis. Every figure must be added in
+# similarly, all of the titles, x/y ticks, and visibility methods are from the axes class, not pyplt.
+
+
 def bar4MovementDayNight(dfBar, ax, width = 4):
+    """
+    Creates daynight movement bar to go along with actigram and other behavioral figures.
+
+    :param dfBar: Bar dataframe, created in DataFrameCreationMethods. Image array specifying what is
+    :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param width: width of the bar. specified in the creation of the bar.
+    :return: axes object filled with bar image.
+    """
 
     dfBar = cdf.createCompressedMovementDayNightBar(dfBar, 10)
 
+    # imshow == Image show. Shows the np array as an image.
+    # np.transpose flips the array from verical to horizonal. It goes from being n frames long to n frames wide
     ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto')
+
 
     ax.set_yticks([width/4, width*3/4])
     ax.set_yticklabels(['Movement', 'Light or Dark'])
@@ -24,9 +40,25 @@ def bar4MovementDayNight(dfBar, ax, width = 4):
     ax.get_xaxis().set_visible(False)
 
 def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic):
+    """
 
+    :param dfActigram:  np actigram array. n frames long by 360 degrees wide. Must be transposed in order to be made into horizontal image.
+                        often these are huge images. Plots that utilize this figure take a while to compile.
+                        1's represent pulses, 0's represent non-pulse areas
+    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
+    :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param title: desired title of the plot.
+    :param rhopaliaPositions360: Python list of rhopalia positions
+    :param rhopaliaLabels: Python list of corresponding rhopalia labels
+    :param colormap: corresponding matplotlib colormap chosen to plot the data.
+    :return: axes object filled with actigram image.
+    """
+
+    # takes slice of actigram to compress the image to be manageable for our purposes. Otherwise image is thousands of megabytes.
+    # takes every 10th row of the actigram to create a sliced image.
     dfActigramComp = cdf.createCompressedActigram(dfActigram, 10)
     dfxTicksComp = dfxTicks.copy()
+    # compresses the xticks by a comprable amount
     dfxTicksComp['xTicks'] = dfxTicksComp['xTicks'] / 10
 
     ax1 = axis
@@ -38,12 +70,16 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
     rp360 = rhopaliaPositions360
     rl = rhopaliaLabels
 
+    # if rhopalia are added, then it changes the tick axes so that the rhopalia show up on the left and degress are on the right.
     if len(rhopaliaPositions360) == 0:
         degreeTicks = np.linspace(0, 360, 7)
         degreeLabels = [0, 60, 120, 180, 240, 300, 360]
 
         ax1.set_yticks(degreeTicks)
         ax1.set_yticklabels(degreeLabels)
+
+        ax1.set_xlabel(xlabel=r'Zeitgeber Time (Hours)')
+        ax1.set_ylabel(ylabel='Degrees')
 
     else:
         ax1.set_yticks(rp360)
@@ -58,13 +94,13 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax2.set_yticklabels(degreeLabels)
 
         # axis labels, both y's and x
-        ax1.set_xlabel('Zeitgeber Time (Hours)')
-        ax1.set_ylabel('Rhopalia Number and Position')
-        ax2.set_ylabel('Degrees')
+        ax1.set_xlabel(xlabel=r'Zeitgeber Time (Hours)')
+        ax1.set_ylabel(ylabel='Rhopalia Number and Position')
+        ax2.set_ylabel(ylabel='Degrees')
 
         ax2.grid(False)
 
-    # grids
+    # grids. Changes colors so that grids show regardless of colormap.
     if colormap == cm.binary:
         ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
     elif colormap == cm.seismic:
@@ -80,9 +116,6 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
 
     ax1.set_xticks(xTicks)
     ax1.set_xticklabels(xTickLabels)
-
-    ax1.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax1.set_ylabel(ylabel='Degree on Jellyfish')
 
     #graph title
     ax1.set_title(title)

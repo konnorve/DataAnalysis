@@ -659,6 +659,8 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
 
     return actigramArr
 
+
+# TODO: consider looping this into figures methods, and removing it from its own method. It compiles very quickly so it is not neceesary on its own.
 def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
 
     """
