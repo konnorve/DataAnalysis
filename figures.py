@@ -135,15 +135,34 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
 ## Metrics
 
 def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_average = True):
+    """
+
+    :param jelly_title: title of Jellyfish to be used in naming of figure
+    :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param dfComplex: Takes in the complex dataframe. Uses the global frame and 'InterpulseInterval'
+    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
+    :param show_title: True if title is desired, False otherwise. Default is True.
+    :param show_xLabels: True if x labels are desired, False otherwise. Default is True.
+    :param show_average: True if average line is desired, False otherwise. Default is True. Average line gets worse the shorter the video is.
+    :return: axes object filled with IPI figure.
+    """
+
+    # takes pulses where Interpulse interval is not null
     df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex.InterpulseInterval < 30)]
+
+    # renames axes object for convenience
     ax = axis
 
+    # global frame taken from complex dataframe
     x = df['global frame']
 
+    # interpulse interval taken from dataframe
     y = df['InterpulseInterval']
 
+    # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'IPI')
 
+    # averaging method
     if show_average:
         ym = y.rolling(window=250).mean()
 
@@ -152,16 +171,20 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
         ax.set_xlabel(xlabel=r'Zeitgeber Time')
         ax.set_ylabel(ylabel='IPI (s)')
 
+    # adds gridlines. Major and minor ticks. Only y axis. Alpha is the opacity of the lines.
     ax.grid(which = 'both', axis = 'y', alpha=0.5, linestyle='--')
 
+    #changes y axis to log scale
     ax.semilogy()
 
+    # zeros the margins
     ax.margins(x=0)
 
+    #fixed limits. Makes graphs compareable
     ax.set_ylim(0.5, 3)
 
+    # x tick method.
     if show_xLabels:
-
         justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
 
         xTicks = justXticks['xTicks'].tolist()
@@ -176,12 +199,30 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
     if show_title: ax.set_title(jelly_title + '- Interpulse Interval')
 
 def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show_title = True, show_degreeLabels = True):
+    """
+    Shows a normalized histogram of usage across the degrees of a jellyfish. Each entry represents the total pulses of
+    that particular degree on the jellyfish as a percent of total pulses.
 
+    :param jelly_title: title of Jellyfish to be used in naming of figure
+    :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param dfComplex: Takes in the complex dataframe. Only uses the 'bounded angle'
+    :param vertical:    if vertical is true, the plot is plotted vertically, with the degree locations on the y axis.
+                        if vertical is false, the plot is plotted horizontally, with the degree locations on the x axis.
+    :param show_title:  True if title is desired, False otherwise. Default is True.
+    :param show_degreeLabels:  True if labels (x or y ticks depending on orientation) are desired, False otherwise. Default is True.
+    :return: axes object filled with IPI figure.
+    """
+
+    # aggregates angle measurements from 'bounded angle' column
+    #
     dfGrouped = dfComplex.groupby(['bounded angle'])['bounded angle'].agg('count')
+
 
     degrees = dfGrouped.index.tolist()
     counts = dfGrouped.tolist()
     numPulses = sum(counts)
+
+    # normalizes the amount into precent of pulses
     percents = [i/numPulses for i in counts]
 
     if vertical:
@@ -209,11 +250,27 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
 
     if show_title: ax.set_title(jelly_title)
 
-def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertical = True, show_title = True, show_degreeLabels = True):
-    #questions are written as pandas query functions
-    #useful questions:
-        #'DayOrNight == \'Night\''
-        #'DayOrNight == \'Day\''
+
+def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertical=True, show_title=True, show_degreeLabels = True):
+    """
+    you can query the complex dataframe data to look at differences in subsets of data. Filtered Complex DF is an input
+    for the 'initiatiorsHistogramFigure' method.
+
+    useful questions:
+        'DayOrNight == \'Night\''   # queries all the night pulses
+        'DayOrNight == \'Day\''     # queries all the day pulses
+
+
+    :param jelly_title: title of Jellyfish to be used in naming of figure
+    :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param dfComplex: Takes in the complex dataframe. Only uses the 'bounded angle'
+    :param question: Query to filter the complex dataframe. questions are written as pandas query functions.
+    :param vertical:    if vertical is true, the plot is plotted vertically, with the degree locations on the y axis.
+                        if vertical is false, the plot is plotted horizontally, with the degree locations on the x axis.
+    :param show_title:  True if title is desired, False otherwise. Default is True.
+    :param show_degreeLabels:  True if labels (x or y ticks depending on orientation) are desired, False otherwise. Default is True.
+    :return: axes object filled with IPI figure.
+    """
 
     dfQuery = dfComplex.query(question)
 
@@ -222,7 +279,7 @@ def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertic
 
 def ysensativity(dataframe, metric):
     """
-    DO NOT WORRY ABOUT THIS ONE
+    DO NOT WORRY ABOUT THIS ONE. Represents grouping metrics. I need to comment a bit more on it and maybe rework it.
 
     :param dataframe:
     :param metric:
@@ -245,7 +302,17 @@ def ysensativity(dataframe, metric):
 
     return dfFigure
 
+
 def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
+    """
+    Given a dataframe to plot, this also plots error bars on either size with binning and error bars.
+
+    :param dfY:
+    :param x:
+    :param ax:
+    :param windowSize:
+    :return:
+    """
 
     fillColor = 'b'
     fillShade = 0.1
@@ -265,12 +332,14 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
 
 def sensativityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True):
     """
-    DO NOT WORRY ABOUT THIS ONE
+    Plots the different sensativities of the center changed figure. S10, S20, S30 are all plotted together.
+    Does not seem to be working rn?
+    TODO: fix sensativityCCFigure.
 
-    :param jelly_title:
-    :param axis:
-    :param dfComplex:
-    :param dfxTicks:
+    :param jelly_title: title of Jellyfish to be used in naming of figure
+    :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param dfComplex: Takes in the complex dataframe. Uses the global frame and all of the CenterChangedS** columns.
+    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
     :param show_title:
     :param show_xLabels:
     :param show_Legend:
