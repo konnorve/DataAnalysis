@@ -62,18 +62,18 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
     # compresses the xticks by a comprable amount
     dfxTicksComp['xTicks'] = dfxTicksComp['xTicks'] / 10
 
-    ax1 = axis
+    ax1 = axis  # renames axis to ax1; how come?  x
 
-    #imshow function
+    # imshow function - show the sliced actogram; .T flips rows and columns, bcuz it's a transposed array(?). x
     ax1.imshow(dfActigramComp.T, origin='lower', aspect='auto', cmap=colormap, interpolation='bilinear')
 
-    #setting y ticks, both axis
+    # if statement setting y ticks, both axis  x
     rp360 = rhopaliaPositions360
     rl = rhopaliaLabels
 
     # if rhopalia are added, then it changes the tick axes so that the rhopalia show up on the left and degress are on the right.
     if len(rhopaliaPositions360) == 0:
-        degreeTicks = np.linspace(0, 360, 7)
+        degreeTicks = np.linspace(0, 360, 7)  # degrees with 7 intervals  x
         degreeLabels = [0, 60, 120, 180, 240, 300, 360]
 
         ax1.set_yticks(degreeTicks)
@@ -84,11 +84,11 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
 
     else:
         ax1.set_yticks(rp360)
-        ax1.set_yticklabels(rl)
+        ax1.set_yticklabels(rl)  # creates and labels as many yticks as there are rhopalia   x
 
-        ax2 = ax1.twinx()
+        ax2 = ax1.twinx()  # ax2 has same number of ticks as ax1
 
-        degreeTicks = np.linspace(0, 1, 7)
+        degreeTicks = np.linspace(0, 1, 7)  # seven intervals between 0 and 1. why 1 and not 360?   x
         degreeLabels = [0,60,120,180,240,300,360]
 
         ax2.set_yticks(degreeTicks)
@@ -110,7 +110,7 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax1.grid(which='major', color='#7f7f7f', linestyle=':', linewidth=1)
 
     #setting x ticks
-    justXticks = dfxTicksComp[dfxTicksComp.TickType == 'hour_relative']
+    justXticks = dfxTicksComp[dfxTicksComp.TickType == 'hour_relative']  # I get what is says but not what it does 4: rest of function   x
 
     xTicks = justXticks['xTicks'].tolist()
     xTickLabels = justXticks['xTickLabels'].tolist()
@@ -148,28 +148,28 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
     :return: axes object filled with IPI figure.
     """
 
-    # takes pulses where Interpulse interval is not null
+    # takes pulses where Interpulse interval is not null [and is lower than thirty?  x]
     df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex.InterpulseInterval < 30)]
 
     # renames axes object for convenience
     ax = axis
 
-    # global frame taken from complex dataframe
+    # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     x = df['global frame']
 
     # interpulse interval taken from dataframe
     y = df['InterpulseInterval']
 
     # plotting method
-    ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'IPI')
+    ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'IPI')  # specifying color, linewidth, label text   x
 
     # averaging method
     if show_average:
-        ym = y.rolling(window=250).mean()
+        ym = y.rolling(window=250).mean()  # calculates rolling average in/of groups of 250   x
 
-        ax.plot(x, ym, c = 'b', lw = 2, label= 'average')
+        ax.plot(x, ym, c = 'b', lw = 2, label= 'average')  # adds to ax a plot of the global dataframe vs rolling avg  x
 
-        ax.set_xlabel(xlabel=r'Zeitgeber Time')
+        ax.set_xlabel(xlabel=r'Zeitgeber Time')  # sets x and y labels
         ax.set_ylabel(ylabel='IPI (s)')
 
     # adds gridlines. Major and minor ticks. Only y axis. Alpha is the opacity of the lines.
@@ -187,7 +187,7 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
     # x tick method.
     if show_xLabels:
         justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
-
+    # fills each xtick version with the contents of the named column   x
         xTicks = justXticks['xTicks'].tolist()
         xTickLabels = justXticks['xTickLabels'].tolist()
 
@@ -195,7 +195,7 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
         ax.set_xticklabels(xTickLabels)
 
     else:
-        ax.get_xaxis().set_visible(False)
+        ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
     if show_title: ax.set_title(jelly_title + '- Interpulse Interval')
 
@@ -206,7 +206,7 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
-    :param dfComplex: Takes in the complex dataframe. Only uses the 'bounded angle'
+    :param dfComplex: Takes in the complex dataframe. Only uses the 'bounded angle' column
     :param vertical:    if vertical is true, the plot is plotted vertically, with the degree locations on the y axis.
                         if vertical is false, the plot is plotted horizontally, with the degree locations on the x axis.
     :param show_title:  True if title is desired, False otherwise. Default is True.
@@ -215,17 +215,17 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
     """
 
     # aggregates angle measurements from 'bounded angle' column
-    #
     dfGrouped = dfComplex.groupby(['bounded angle'])['bounded angle'].agg('count')
 
-
-    degrees = dfGrouped.index.tolist()
-    counts = dfGrouped.tolist()
+    degrees = dfGrouped.index.tolist()  # sets 'degrees' as contents of dfGrouped, in list form
+    counts = dfGrouped.tolist()  # sets 'counts' as dfGrouped in index form.  possible vice versa but I dont think so  x
     numPulses = sum(counts)
 
-    # normalizes the amount into precent of pulses
+    # normalizes the amount into percent of pulses  [Konnor is a great speller, what are you talking about]
     percents = [i/numPulses for i in counts]
 
+    # interesting, this originally makes a horizontal/vertical bar plot;
+    # what's the math diff between this and using Hist()?   x [something to do with the normalization?]
     if vertical:
         ax.barh(degrees, percents)
 
@@ -260,7 +260,6 @@ def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertic
     useful questions:
         'DayOrNight == \'Night\''   # queries all the night pulses
         'DayOrNight == \'Day\''     # queries all the day pulses
-
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
