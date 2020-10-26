@@ -254,7 +254,7 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
 
 def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertical=True, show_title=True, show_degreeLabels = True):
     """
-    you can query the complex dataframe data to look at differences in subsets of data. Filtered Complex DF is an input
+    lets you query the complex dataframe data to look at differences in subsets of data. Filtered Complex DF is an input
     for the 'initiatiorsHistogramFigure' method.
 
     useful questions:
@@ -289,7 +289,7 @@ def ysensitivity(dataframe, metric):
     #subsets dataframe into the only things I need
     dfSubset = dataframe[['binCount', metric,'ZeitgeberTime']]
 
-    #gets a ataframe with the count of items in each bin
+    #gets a dataframe with the count of items in each bin
     dfBinCounts = dataframe.groupby(['binCount']).count()[['counter']]
 
     #groups the subset by metric and bin count while applying aggregations
@@ -302,10 +302,12 @@ def ysensitivity(dataframe, metric):
 
     return dfFigure
 
+# binCount comes from the AbsoluteMinute column once divided into bins of 5 mins -see def sensitivityCCFigure
 
 def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
     """
     Given a dataframe to plot, this also plots error bars on either size with binning and error bars.
+    Check the centersChangedFigure function to understand dfy, and check below for the other params if I haven't addressed it up here yet   x
 
     :param dfY:
     :param x:
@@ -332,7 +334,7 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
 
 def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True):
     """
-    Plots the different sensativities of the center changed figure. S10, S20, S30 are all plotted together.
+    Plots the different sensitivities of the center changed figure. S10, S20, S30 are all plotted together. [konnorspellsgrate]
     Does not seem to be working rn?
     TODO: fix sensitivityCCFigure.
 
@@ -340,7 +342,7 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param dfComplex: Takes in the complex dataframe. Uses the global frame and all of the CenterChangedS** columns.
     :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
-    :param show_title:
+    :param show_title: True if title is desired, False otherwise. Default is True.  x
     :param show_xLabels:
     :param show_Legend:
     :return:
