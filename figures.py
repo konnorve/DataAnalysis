@@ -18,6 +18,26 @@ import DataFrameCreationMethods as cdf
 # a lot of these need to be worked on and organized. That is likely to be a future project for you guys.
 
 
+###  Definitions, look at () for ex so i remember what is what for now -deb ###
+# bar4MovementDayNight- the skinny bar with the yellow/blue day/night, and the red ticks for movement // (plotBar)
+# actigramFigure- the blue graph with time vs degrees // (SeismicActigram)
+# interpulseIntervalFigure- the spikey grey one with the blue line going through the middle // (InterpulseInterval)
+# initiatiorsHistogramFigure- blue histogram // (CenterHistogramHorizonatal/Vertical)
+# initiatiorsHistogramQueryFigure- (centersHistogramDayANDNightPlot)
+# ysensitivity- IGNORE FOR NOW
+# plotBinAverageWithErrorBars- not used in plottingMethods? 
+# sensitivityCCFigure- commented out rn/not working :(
+# centersChangedFigure- 'highlight' blue line with black line down the middle // (CenterChanged)
+
+
+## matplotlib.axes (common attributes used)
+# imshow  // Display data as an image
+# set_xticks //	Set the xaxis' tick locations
+# set_xticklabels //	Set the xaxis' labels with list of string labels.
+# set_yticks	// Set the yaxis' tick locations.
+# set_yticklabels  // Set the yaxis' labels with list of string labels.
+
+
 def bar4MovementDayNight(dfBar, ax, width = 4):
     """
     Creates DayNight movement bar to go along with actigram and other behavioral figures.
@@ -27,22 +47,23 @@ def bar4MovementDayNight(dfBar, ax, width = 4):
     :param width: width of the bar. specified in the creation of the bar.
     :return: axes object filled with bar image.
     """
-
+    # takes slice of bar to compress the image to be manageable for our purposes
+    # takes every 10th row of the bar to create a sliced image
     dfBar = cdf.createCompressedMovementDayNightBar(dfBar, 10)
 
     # imshow == Image show. Shows the np array as an image.
-    # np.transpose flips the array from verical to horizonal. It goes from being n frames long to n frames wide
+    # np.transpose flips the array from vertical to horizontal. It goes from being n frames long to n frames wide
     ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto')
 
-
+    # labels the Day/Night section on the top half and the Movement section on the bottom half of the plotBar
     ax.set_yticks([width/4, width*3/4])
     ax.set_yticklabels(['Movement', 'Light or Dark'])
 
+    # x axis not visible 
     ax.get_xaxis().set_visible(False)
 
 def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic):
     """
-
     :param dfActigram:  np actigram array. n frames long by 360 degrees wide. Must be transposed in order to be made into horizontal image.
                         often these are huge images. Plots that utilize this figure take a while to compile.
                         1's represent pulses, 0's represent non-pulse areas
@@ -62,7 +83,8 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
     # compresses the xticks by a comprable amount
     dfxTicksComp['xTicks'] = dfxTicksComp['xTicks'] / 10
 
-    ax1 = axis  # renames axis to ax1; how come?  x
+    # renames axes object for convenience
+    ax1 = axis
 
     # imshow function - show the sliced actogram; .T flips rows and columns, bcuz it's a transposed array(?). x
     ax1.imshow(dfActigramComp.T, origin='lower', aspect='auto', cmap=colormap, interpolation='bilinear')
@@ -71,9 +93,12 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
     rp360 = rhopaliaPositions360
     rl = rhopaliaLabels
 
-    # if rhopalia are added, then it changes the tick axes so that the rhopalia show up on the left and degress are on the right.
+    # if no rhopalia are added, degrees on the left 
     if len(rhopaliaPositions360) == 0:
-        degreeTicks = np.linspace(0, 360, 7)  # degrees with 7 intervals  x
+
+        # use numpy, space from 0 to 360 degrees, every 60 degrees 
+        degreeTicks = np.linspace(0, 360, 7)
+        # label each tick starting from 0 to 360 degrees, every 60 degrees 
         degreeLabels = [0, 60, 120, 180, 240, 300, 360]
 
         ax1.set_yticks(degreeTicks)
@@ -82,13 +107,16 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax1.set_xlabel(xlabel=r'Zeitgeber Time (Hours)')
         ax1.set_ylabel(ylabel='Degrees')
 
+    # if rhopalia are added, then it changes the tick axes so that the rhopalia show up on the left and degrees are on the right.
     else:
         ax1.set_yticks(rp360)
         ax1.set_yticklabels(rl)  # creates and labels as many yticks as there are rhopalia   x
 
-        ax2 = ax1.twinx()  # ax2 has same number of ticks as ax1
+        # twinx(): create a twin axes sharing the x axis.
+        ax2 = ax1.twinx()
 
-        degreeTicks = np.linspace(0, 1, 7)  # seven intervals between 0 and 1. why 1 and not 360?   x
+        degreeTicks = np.linspace(0, 1, 7) # seven intervals between 0 and 1. why 1 and not 360?   x
+        # label each tick starting from 0 to 360 degrees, every 60 degrees 
         degreeLabels = [0,60,120,180,240,300,360]
 
         ax2.set_yticks(degreeTicks)
@@ -102,6 +130,9 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax2.grid(False)
 
     # grids. Changes colors so that grids show regardless of colormap.
+    # colormaps
+    # binary: black and white
+    # seismic: dark blues
     if colormap == cm.binary:
         ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
     elif colormap == cm.seismic:
@@ -155,15 +186,17 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
     ax = axis
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
+    # global frame taken from complex dataframe for x axis data
     x = df['global frame']
 
-    # interpulse interval taken from dataframe
+    # interpulse interval taken from dataframe for y axis data
     y = df['InterpulseInterval']
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'IPI')  # specifying color, linewidth, label text   x
 
     # averaging method
+    # shown as a blue line
     if show_average:
         ym = y.rolling(window=250).mean()  # calculates rolling average in/of groups of 250   x
 
@@ -226,6 +259,7 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
 
     # interesting, this originally makes a horizontal/vertical bar plot;
     # what's the math diff between this and using Hist()?   x [something to do with the normalization?]
+    # For CenterHistogramVertical
     if vertical:
         ax.barh(degrees, percents)
 
@@ -237,6 +271,8 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
             ax.set_ylabel(ylabel='Degree')
         else:
             ax.get_yaxis().set_visible(False)
+    
+    # For CenterHistogramHorizontal
     else:
         ax.bar(degrees, percents)
 
@@ -520,7 +556,7 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
 
     # x ticks and labels
     if show_xLabels:
-        lastx = x[-1]  # havent found anything about the [-1] thing; extracting the last item in the list?
+        lastx = x[-1]  # havent found anything about the [-1] thing; extracting the last item in the list?  x
 
         lastFrame = dfComplex.iloc[-1]['global frame']
         #lastFrame = dfxTicks[dfxTicks.TickType == 'LastFrame'].iloc[0, 0]
