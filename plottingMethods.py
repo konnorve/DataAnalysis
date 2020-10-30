@@ -25,10 +25,6 @@ def updateparameters():
 
 # # Single Plots
 
-# ### Metrics
-
-
-
 def plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfigurelen):
     """
     Input: complex dataframe for a jellyfish
