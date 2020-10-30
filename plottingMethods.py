@@ -30,9 +30,13 @@ def updateparameters():
 
 
 def plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfigurelen):
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing the interpulse-interval of a given jelly
+    """
 
     updateparameters()
-
+    # create empty figure
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
@@ -41,7 +45,7 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen,
 
     # subplot
     ax1 = fig.add_subplot(gs[0, 0])
-
+    # generate interpulse figure with inputted data from complexDF
     figures.interpulseIntervalFigure(jelly_title, ax1, dfComplex, dfxTicks)
 
     #save fig
@@ -52,9 +56,12 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen,
 
 
 def plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfigurelen, xfigurelen):
-
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing the interpulse-interval of a given jelly with day/night bar
+    """
     updateparameters()
-
+    # creates empty figure with inputted size
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
@@ -69,7 +76,7 @@ def plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barA
 
     figures.interpulseIntervalFigure(jelly_title, ax1, dfComplex, dfxTicks)
 
-    #save fig
+    #save fig to outpath directory
     outpath =  outdir / '{}_{}.png'.format(jelly_title, 'plotInterpulseIntervalWithBar')
     fig.savefig(str(outpath),bbox_inches='tight')
 
@@ -78,8 +85,12 @@ def plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barA
 
 
 def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
+    """
     updateparameters()
-
+    # generate empty figure
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
@@ -124,7 +135,10 @@ def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, yfigurelen, xf
 # ### Centers
 
 def plotActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, colormap):
-
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -146,7 +160,10 @@ def plotActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPositions360
 
 
 def plotSeismicActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
-
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing seismic actigram
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
