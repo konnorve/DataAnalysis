@@ -104,6 +104,7 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax1.set_yticks(degreeTicks)
         ax1.set_yticklabels(degreeLabels)
 
+        # axis labels, both y's and x
         ax1.set_xlabel(xlabel=r'Zeitgeber Time (Hours)')
         ax1.set_ylabel(ylabel='Degrees')
 
@@ -260,26 +261,34 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
     # interesting, this originally makes a horizontal/vertical bar plot;
     # what's the math diff between this and using Hist()?   x [something to do with the normalization?]
     # For CenterHistogramVertical
+    # The graph itself is vertical, but the bars are horizontal
     if vertical:
+        # create horizontal bar plot
         ax.barh(degrees, percents)
 
+         # x axis label: % of total counts
         ax.set_xlabel(xlabel=r'% of total counts')
 
         ax.margins(y=0)
 
+         # y axis label: Degree
         if show_degreeLabels:
             ax.set_ylabel(ylabel='Degree')
         else:
             ax.get_yaxis().set_visible(False)
     
     # For CenterHistogramHorizontal
+    # The graph itself is horizontal, but the bars are vertical
     else:
+        # create vertical bar plot
         ax.bar(degrees, percents)
 
+         # y axis label: % of total counts
         ax.set_ylabel(ylabel=r'% of total counts')
 
         ax.margins(x=0)
 
+         # x axis label: Degree
         if show_degreeLabels:
             ax.set_xlabel(xlabel='Degree')
         else:
@@ -308,6 +317,7 @@ def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertic
     :return: axes object filled with IPI figure.
     """
 
+    # queries the complex DF depending on the "question" input to filter based on what we want to see in the graph
     dfQuery = dfComplex.query(question)
 
     initiatiorsHistogramFigure(jelly_title, ax, dfQuery, vertical, show_title, show_degreeLabels)
@@ -363,6 +373,8 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
     ya = np.add(ym, yse)  # finds the respective values labeled below  x
     yb = np.subtract(ym, yse)
 
+    # plot metric? bar in a thicker black 
+    # plot error bars above and below the average in a thinner blue line
     ax.plot(x, ym, c = 'k', lw = 2, label= 'Metric');
     ax.plot(x, ya, c = 'b', lw = 0.5, label='Standard Error Above Average');
     ax.plot(x, yb, c = 'b', lw = 0.5, label='Standard Error Below Average');
@@ -386,9 +398,9 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
     :return:
     """
 
-
+    # renames axes object for convenience
     ax = axis
-
+    # pull AbsoluteMinute data from Complex DF
     df = dfComplex[dfComplex.AbsoluteMinute.notnull()]
 
     #BINSIZE is number of minutes to use in each bin
@@ -406,7 +418,6 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
         binCount.append(int(item))
 
     df['binCount'] = binCount
-
 
 
     x = ysensitivity(df, 'CenterChangedAfterS10')['min time'].tolist()
@@ -432,6 +443,7 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
     ax.axis(ymin = 0, ymax = 1)
 
+    # axis labels, both y's and x
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
     ax.set_ylabel(ylabel='% pulses IC')
 
@@ -451,6 +463,7 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
         xTicks = justXticks['xTicks'].tolist()
         xTickLabels = justXticks['xTickLabels'].tolist()
 
+        # axis labels, both y's and x
         ax.set_xticks(xTicks)
         ax.set_xticklabels(xTickLabels)
     else:
@@ -494,7 +507,7 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
     :return:
     """
 
-
+    # renames axes object for convenience
     ax = axis
 
     # filters the dataframe [to fill 'df' with every cell from AbsoluteMinute with any value present? i think?   x]
@@ -502,6 +515,7 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
 
     # BINSIZE is number of minutes to use in each bin
     # WINDOWSIZE is the number of bins to use in the rolling average and standard error analysis
+    # create 3 different sizes of figures: Long, Medium, and Short
     if figType == 'Long':
         BINSIZE = 5
         WINDOWSIZE = 20
@@ -546,7 +560,7 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
     # sets y bounds using input
     ax.axis(ymin = bounds[0], ymax = bounds[1])
 
-    # sets labels
+    # sets labels, x and y
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
     ax.set_ylabel(ylabel='% pulses IC')
 
@@ -570,6 +584,7 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
         xTicks = justXticks['xTicks'].tolist()
         xTickLabels = justXticks['xTickLabels'].tolist()
 
+        # set x ticks and x label
         ax.set_xticks(xTicks)
         ax.set_xticklabels(xTickLabels)
 
@@ -578,5 +593,6 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
 
     if show_Legend: ax.legend()
 
+    # create title
     if show_title: ax.set_title(jelly_title + ' Interpulse Change')
 
