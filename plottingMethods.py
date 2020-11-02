@@ -108,7 +108,10 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfig
 
 def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
     updateparameters()
-
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
+    """
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     # gridspec organization
@@ -180,7 +183,10 @@ def plotSeismicActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPosit
     plt.close()
 
 def plotBinaryActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
-
+    """
+    Input: complexDF
+    Output: Binary (Black and White) Actigram determining degree of jellyfish pulse with a tick
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -202,7 +208,12 @@ def plotBinaryActigram(outdir, jelly_title, dfActigram, dfxTicks, rhopaliaPositi
 
 
 def plotActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, colormap):
-
+    """
+    # Is this being used?? (difference between this and binaryactigramwithbar?)
+    Input: complexDF
+    Output: Binary (Black and White) Actigram determining jellyfish pulse with a tick
+    at its corresponding Zeitgeber time using the day/night plot bar
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -227,7 +238,11 @@ def plotActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, rhopa
 
 
 def plotSeismicActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+    """
+    Input: complexDF
+    Output: Actigram determining jellyfish pulse with a tick with additional intensity character for clustered pulses
 
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -252,7 +267,12 @@ def plotSeismicActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks
 
 
 def plotBinaryActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
-
+# deboarh
+    """
+    Input: complexDF
+    Output: Binary (Black and White) Actigram determining jellyfish pulse with a tick
+    at its corresponding Zeitgeber time using the day/night plot bar
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -277,7 +297,11 @@ def plotBinaryActigramWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks,
     plt.close()
 
 def plotBar(outdir, jelly_title, barArr, yfigurelen, xfigurelen):
-
+    """
+    Input: Complex Df
+    Ouput: Day/Night Movement Bar, specifies when jellyfish have moved uses a red tick
+    during the corresponding Zeitgeber time
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -324,7 +348,10 @@ def plotSensativity(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfigur
 
 
 def plotCentersChanged(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfigurelen):
-
+    """
+    Input: complex dataframe for a given jellyfish
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centersChangedFigure
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -345,7 +372,7 @@ def plotCentersChanged(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfi
     plt.close()
 
 def plotSensativityWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfigurelen, xfigurelen):
-
+# xavier
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -370,7 +397,11 @@ def plotSensativityWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfi
 
 
 def plotCentersChangedWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfigurelen, xfigurelen):
-
+    """
+    Input: complex dataframe for a given jellyfish
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centersChangedFigure
+    Added Day Night Bar
+    """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -399,7 +430,10 @@ def plotCentersChangedWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, 
 
 
 def ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
-
+"""
+Input: ComplexDF
+Ouput: Actigram figure with corresponding Interpulse Interval and Day/Night Bar
+"""
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -425,7 +459,7 @@ def ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, barArr
 
 
 def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
-
+# xavier
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -456,7 +490,7 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, df
 
 
 def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
-
+# xavier
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
@@ -490,7 +524,10 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr
 
 
 def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
-
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing distribution of centers by degree angle for one day and night period
+    """
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
     #gridspec organization
@@ -525,14 +562,14 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, 
 def main(jelly_title, outdir, dfActigram, barArr, dfxTicks, dfComplex, RHOPOS, RHOLAB, stdYlen = None, stdXlen = None):
     """
 
-    :param jelly_title:
-    :param outdir:
-    :param dfActigram:
-    :param barArr:
-    :param dfxTicks:
-    :param dfComplex:
-    :param RHOPOS:
-    :param RHOLAB:
+    :param jelly_title: name of jellyfish
+    :param outdir: output directory where png's will be saved
+    :param dfActigram:actigram created by figures.py
+    :param barArr:bar array created by DataFrameCreationMethods.py
+    :param dfxTicks: x ticks for image axis
+    :param dfComplex:complex DF
+    :param RHOPOS:rhopalia position
+    :param RHOLAB:rhopalia label
     :return:
     """
 
