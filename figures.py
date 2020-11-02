@@ -25,7 +25,7 @@ import DataFrameCreationMethods as cdf
 # initiatiorsHistogramFigure- blue histogram // (CenterHistogramHorizonatal/Vertical)
 # initiatiorsHistogramQueryFigure- (centersHistogramDayANDNightPlot)
 # ysensitivity- IGNORE FOR NOW
-# plotBinAverageWithErrorBars- not used in plottingMethods? 
+# plotBinAverageWithErrorBars- not used in plottingMethods?
 # sensitivityCCFigure- commented out rn/not working :(
 # centersChangedFigure- 'highlight' blue line with black line down the middle // (CenterChanged)
 
@@ -59,7 +59,7 @@ def bar4MovementDayNight(dfBar, ax, width = 4):
     ax.set_yticks([width/4, width*3/4])
     ax.set_yticklabels(['Movement', 'Light or Dark'])
 
-    # x axis not visible 
+    # x axis not visible
     ax.get_xaxis().set_visible(False)
 
 def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic):
@@ -93,12 +93,12 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
     rp360 = rhopaliaPositions360
     rl = rhopaliaLabels
 
-    # if no rhopalia are added, degrees on the left 
+    # if no rhopalia are added, degrees on the left
     if len(rhopaliaPositions360) == 0:
 
-        # use numpy, space from 0 to 360 degrees, every 60 degrees 
+        # use numpy, space from 0 to 360 degrees, every 60 degrees
         degreeTicks = np.linspace(0, 360, 7)
-        # label each tick starting from 0 to 360 degrees, every 60 degrees 
+        # label each tick starting from 0 to 360 degrees, every 60 degrees
         degreeLabels = [0, 60, 120, 180, 240, 300, 360]
 
         ax1.set_yticks(degreeTicks)
@@ -116,7 +116,7 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax2 = ax1.twinx()
 
         degreeTicks = np.linspace(0, 1, 7) # seven intervals between 0 and 1. why 1 and not 360?   x
-        # label each tick starting from 0 to 360 degrees, every 60 degrees 
+        # label each tick starting from 0 to 360 degrees, every 60 degrees
         degreeLabels = [0,60,120,180,240,300,360]
 
         ax2.set_yticks(degreeTicks)
@@ -271,7 +271,7 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = True, show
             ax.set_ylabel(ylabel='Degree')
         else:
             ax.get_yaxis().set_visible(False)
-    
+
     # For CenterHistogramHorizontal
     else:
         ax.bar(degrees, percents)
@@ -465,13 +465,13 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
 def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
     """
-    Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to 
-    another. This is done by aggregating the True/False "CentersChangedS__' columns. 
-    Very similar to the sensativities figure although it only ______
+    Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to
+    another. This is done by aggregating the True/False "CentersChangedS__' columns.
+
 
     "centers" describes the angle of a pulse, specifically the bounded angle. If the bounded angle of the next pulse is
-    within the sensitivity distance, ______
-    
+    within the sensitivity distance
+
     TODO: refactor the columns involved to say "AngleChangedS10"
     TODO: change this so it is the inverse, and a measure of centralization, not decentralization
     TODO: We're not in Kansas anymore!
@@ -579,4 +579,3 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
     if show_Legend: ax.legend()
 
     if show_title: ax.set_title(jelly_title + ' Interpulse Change')
-
