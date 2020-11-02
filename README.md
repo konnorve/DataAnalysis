@@ -16,7 +16,7 @@ In being able to track jellyfish pulse initiation we can study jellyfish behavio
 ## Usage
 
 ## Scripts
-# DataFrameCreationMethods.py
+### DataFrameCreationMethods.py
 `def calculateDistance(c1, c2)`
  Distance Formula, calculates how far the jellyfish has moved by finding the distance between two centroids.
  
@@ -30,10 +30,32 @@ If the distance between the two is less than or equal to the
 sensativity interval this indicates the center has not changed and
 thus false is returned.
 
-        Sensativity is the integer value determining whether the center will or not.
+Sensativity is the integer value determining whether the center will or not.
 
-# plottingMethods.py
-# figures.py
+`createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False)`
+
+`getXtickDF_hour(complexDF)`
+
+`getXtickDF_minute(complexDF)`
+
+`getXtickDF_10minute(complexDF)`
+
+`createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2)`
+
+`createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127])`
+
+`createCompressedActigram(actigramCSV, compression_factor)`
+
+`createCompressedMovementDayNightBar(barArr, compression_factor)`
+
+`dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120)`
+
+### plottingMethods.py
+`plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfigurelen)`
+`plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfigurelen, xfigurelen)`
+`plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen)`
+
+### figures.py
 
 ## How it works
 
