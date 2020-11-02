@@ -86,10 +86,10 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
     # renames axes object for convenience
     ax1 = axis
 
-    # imshow function - show the sliced actogram; .T flips rows and columns, bcuz it's a transposed array(?). x
+    # imshow function - show the sliced actogram; ('.T' flips rows and columns, because it's a transposed array?)
     ax1.imshow(dfActigramComp.T, origin='lower', aspect='auto', cmap=colormap, interpolation='bilinear')
 
-    # if statement setting y ticks, both axis  x
+    # if statement setting y ticks, both axes
     rp360 = rhopaliaPositions360
     rl = rhopaliaLabels
 

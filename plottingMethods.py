@@ -38,6 +38,7 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen,
     updateparameters()
     # create empty figure
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+    # "constrained_layout" automatically adjusts subplots to fit window size
 
     # gridspec organization
     heights = [1]
@@ -51,14 +52,14 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen,
     #save fig
     outpath =  outdir / '{}_{}.png'.format(jelly_title, 'InterpulseInterval')
     fig.savefig(str(outpath),bbox_inches='tight')
-
+    # "bbox_inches" removes extra whitespace from around the rendered figure.
     plt.close()
 
 
 def plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfigurelen, xfigurelen):
     """
     Input: complex dataframe for a jellyfish
-    Output: figure vizualizing the interpulse-interval of a given jelly with day/night bar
+    Output: figure visualizing the interpulse-interval of a given jelly with day/night bar
     """
     updateparameters()
     # creates empty figure with inputted size
@@ -122,7 +123,7 @@ def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, yfigurelen, xf
     # subplot
     ax = fig.add_subplot(gs[0, 0])
 
-
+    # adding the initiatorHist fig to the current plot?
     figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = False)
 
     # save fig
@@ -429,21 +430,24 @@ def ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, barArr
 
 
 def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+    """ input: complex dataframe for a jelly
+    Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and vertical
+    CenterHistogram with the day/night bar"""
 
     updateparameters()
-
+    # create empty figure with customized dimensions. "constrained_layout" automatically adjusts subplots to fit window
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
-    #gridspec organization
+    # gridspec organization: fig has two columns, four large figures and several smaller supplementary figs.
     heights = [15, 1, 3, 3]
     widths = [10, 1]
     gs = fig.add_gridspec(ncols=2, nrows=4, height_ratios = heights, width_ratios = widths)
 
-    #subplot
+    # subplots - created and assigned to a graph below
     fig_ax1 = fig.add_subplot(gs[0,0])
     fig_ax2 = fig.add_subplot(gs[1,0])
     fig_ax3 = fig.add_subplot(gs[2,0])
-    fig_ax4 = fig.add_subplot(gs[3, 0])
+    fig_ax4 = fig.add_subplot(gs[3,0])
     fig_ax5 = fig.add_subplot(gs[0,1])
 
     figures.actigramFigure(dfActigram, dfxTicks, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
@@ -451,8 +455,8 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, df
     figures.interpulseIntervalFigure(jelly_title, fig_ax3, dfComplex, dfxTicks, show_title=False, show_xLabels=False)
     figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, dfxTicks, show_title=False, show_xLabels=False, show_Legend=False)
     figures.initiatiorsHistogramFigure(jelly_title, fig_ax5, dfComplex, vertical=True, show_title=False, show_degreeLabels=False)
-
-    #save fig
+    # individual titles, legends and labels are turned off
+    # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_II_CC_AND_CHVert')
     fig.savefig(str(outpath),bbox_inches='tight')
 
@@ -460,21 +464,24 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, barArr, df
 
 
 def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, barArr, dfxTicks, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
-
+    """ input: complex dataframe for a jelly
+        Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and
+        pulse initiation day-night Histogram with the day/night bar"""
     updateparameters()
 
+    # create empty figure with customized dimensions. "constrained_layout" automatically adjusts subplots to fit window
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
-    #gridspec organization
+    # gridspec organization: 3 columns, 4 rows, with boxes of their respective size ratio
     heights = [15, 1, 5, 5]
     widths = [10, 1, 1]
     gs = fig.add_gridspec(ncols=3, nrows=4, height_ratios = heights, width_ratios = widths)
 
-    #subplot
+    # subplots  - created and assigned to a graph below
     fig_ax1 = fig.add_subplot(gs[0,0])
     fig_ax2 = fig.add_subplot(gs[1,0])
     fig_ax3 = fig.add_subplot(gs[2,0])
-    fig_ax4 = fig.add_subplot(gs[3, 0])
+    fig_ax4 = fig.add_subplot(gs[3,0])
     fig_ax5 = fig.add_subplot(gs[0,1])
     fig_ax6 = fig.add_subplot(gs[0,2])
 
