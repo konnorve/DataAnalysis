@@ -17,20 +17,11 @@ In being able to track jellyfish pulse initiation we can study jellyfish behavio
 
 ## Scripts
 ### DataFrameCreationMethods.py
-`def calculateDistance(c1, c2)`
- Distance Formula, calculates how far the jellyfish has moved by finding the distance between two centroids.
+`calculateDistance(c1, c2)`
  
- `distanceBetween(a1, a2)`
- Returns the shortest difference in degrees betwene two positive, bounded angles. 
+`distanceBetween(a1, a2)`
  
- `centerChanged(a1, a2, sensativity)`
-Determines if the center has changed between two center values where each center value is an angle.
-Distance between the two centers is calculated using distance().
-If the distance between the two is less than or equal to the
-sensativity interval this indicates the center has not changed and
-thus false is returned.
-
-Sensativity is the integer value determining whether the center will or not.
+`centerChanged(a1, a2, sensativity)`
 
 `createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False)`
 
