@@ -97,6 +97,51 @@ def createCompressedMovementDayNightBar(barArr, compression_factor):
     return barArr[::compression_factor]
 
 
+def applyXticks(complexDF, ax, figType):
+    # turn off ticks on first axis
+    ax.get_xaxis().set_visible(False)
+
+    # create a new axis to tick on
+    tickAx = ax.twiny()
+
+    # move that twin axis from top of plot to bottom of plot
+    tickAx.get_xaxis().set_ticks_position('bottom')
+
+    # see length of twin axis
+    print("xlimits of normal axes: {}".format(ax.get_xlim()))
+    print("xlimits of tick axes: {}".format(tickAx.get_xlim()))
+
+    # get first and last frames to adjust the data to fit the given x axis
+    firstFrame = complexDF.iloc[0]['global frame']
+    lastFrame = complexDF.iloc[-1]['global frame']
+    frameCount = lastFrame - firstFrame
+
+    if figType == 'Long':
+        # takes out just the pulses designated as tick marks
+        tick_pulses_slice = complexDF[complexDF.isHourMark == True]
+    elif figType == 'Medium':
+        tick_pulses_slice = complexDF[complexDF.is10MinuteMark == True]
+    elif figType == 'Short':
+        tick_pulses_slice = complexDF[complexDF.isMinuteMark == True]
+
+    # takes the frames from each of those tick marks
+    globalFrames = tick_pulses_slice['global frame'].tolist()
+
+    # gets the labels which are used for tick labels
+    zeithours = tick_pulses_slice['ZeitgeberHour'].tolist()
+
+    # creates the tick labels
+    xticklabels = ['{}'.format(i) for i in zeithours]
+
+    # adjusts the frame numbers to a float value between 0 and 1 where 0 is the first frame and 1 is the last frame
+    xtickMarks = [(globalFrame-firstFrame)/frameCount for globalFrame in globalFrames]
+
+
+    tickAx.set_xticks(xtickMarks)
+    tickAx.set_xticklabels(xticklabels)
+
+
+
 ###################################
 ###################################
 ############# Figure ##############
@@ -130,12 +175,12 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
     # x axis not visible
     ax.get_xaxis().set_visible(False)
 
-def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic):
+def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic, figType='Long'):
     """
     :param dfActigram:  np actigram array. n frames long by 360 degrees wide. Must be transposed in order to be made into horizontal image.
                         often these are huge images. Plots that utilize this figure take a while to compile.
                         1's represent pulses, 0's represent non-pulse areas
-    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
+    :param complexDF: complexDf
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param title: desired title of the plot.
     :param rhopaliaPositions360: Python list of rhopalia positions
@@ -147,9 +192,6 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
     # takes slice of actigram to compress the image to be manageable for our purposes. Otherwise image is thousands of megabytes.
     # takes every 10th row of the actigram to create a sliced image.
     dfActigramComp = createCompressedActigram(dfActigram, 10)
-    dfxTicksComp = dfxTicks.copy()
-    # compresses the xticks by a comprable amount
-    dfxTicksComp['xTicks'] = dfxTicksComp['xTicks'] / 10
 
     # renames axes object for convenience
     ax1 = axis
@@ -209,38 +251,18 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
         ax1.grid(which='major', color='#7f7f7f', linestyle=':', linewidth=1)
 
     #setting x ticks
-    justXticks = dfxTicksComp[dfxTicksComp.TickType == 'hour_relative']  # I get what is says but not what it does 4: rest of function   x
-
-    xTicks = justXticks['xTicks'].tolist()
-    xTickLabels = justXticks['xTickLabels'].tolist()
-
-    ax1.set_xticks(xTicks)
-    ax1.set_xticklabels(xTickLabels)
+    applyXticks(complexDF, ax1, figType)
 
     #graph title
     ax1.set_title(title)
 
-    # #AV Lines
-    # zNightTrans = dfxTicks.query('ZeitTransition == \'Night\'')['xTicks'].tolist()
-    # zDayTrans = dfxTicks.query('ZeitTransition == \'Day\'')['xTicks'].tolist()
-    #
-    # for i in zDayTrans:
-    #     ax1.axvline(x=i, color='yellow', linestyle='--')
-    #
-    # for i in zNightTrans:
-    #     ax1.axvline(x=i, color='blue', linestyle='--')
 
-#
-#
-## Metrics
-
-def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_average = True):
+def interpulseIntervalFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param dfComplex: Takes in the complex dataframe. Uses the global frame and 'InterpulseInterval'
-    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
     :param show_title: True if title is desired, False otherwise. Default is True.
     :param show_xLabels: True if x labels are desired, False otherwise. Default is True.
     :param show_average: True if average line is desired, False otherwise. Default is True. Average line gets worse the shorter the video is.
@@ -287,13 +309,8 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, dfxTicks, show_title 
 
     # x tick method.
     if show_xLabels:
-        justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
-    # fills each xtick version with the contents of the named column   x
-        xTicks = justXticks['xTicks'].tolist()
-        xTickLabels = justXticks['xTickLabels'].tolist()
-
-        ax.set_xticks(xTicks)
-        ax.set_xticklabels(xTickLabels)
+        # setting x ticks
+        applyXticks(dfComplex, ax, figType)
 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
@@ -438,7 +455,7 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
     ax.fill_between(x = x, y1 = ya, y2 = yb, color = fillColor, alpha = fillShade)
 
 
-def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True):
+def sensitivityCCFigure(jelly_title, axis, dfComplex, figType='Long', show_title = True, show_xLabels = True, show_Legend = True):
     """
     Plots the different sensitivities of the center changed figure. S10, S20, S30 are all plotted together. [konnorspellsgrate]
     Does not seem to be working rn?
@@ -447,7 +464,6 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param dfComplex: Takes in the complex dataframe. Uses the global frame and all of the CenterChangedS** columns.
-    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
     :param show_title: True if title is desired, False otherwise. Default is True. same for two below   x
     :param show_xLabels:
     :param show_Legend:
@@ -508,20 +524,9 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
     # x ticks and labels - nearly identical to this section in centersChangedFigure   x
     if show_xLabels:
-        lastx = x[-1]
+        # setting x ticks
+        applyXticks(dfComplex, ax, figType)
 
-        compressionFactor = dfxTicks[dfxTicks.TickType == 'hour_absolute'].iloc[0, 0] / lastx
-
-        justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
-
-        # todo: change to use loc
-        justXticks['xTicks'] = justXticks['xTicks'] / compressionFactor
-
-        xTicks = justXticks['xTicks'].tolist()
-        xTickLabels = justXticks['xTickLabels'].tolist()
-
-        ax.set_xticks(xTicks)
-        ax.set_xticklabels(xTickLabels)
     else:
         ax.get_xaxis().set_visible(False)
     if show_Legend: ax.legend()
@@ -532,7 +537,7 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 # In[39]:
 
 
-def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
+def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
     """
     Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to
     another. This is done by aggregating the True/False "CentersChangedS__' columns.
@@ -548,7 +553,6 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param dfComplex: Takes in the complex dataframe. Uses the global frame and all of the CenterChangedS** columns.
-    :param dfxTicks: Xtick dataframe, initialized in DataFrameCreationMethods
     :param show_title: presumably left blank because they're all just: "true or false, show this detail?"  x
     :param show_xLabels:
     :param show_Legend:
@@ -625,22 +629,8 @@ def centersChangedFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tr
 
     # x ticks and labels
     if show_xLabels:
-        lastx = x[-1]  # havent found anything about the [-1] thing; extracting the last item in the list?  x
-
-        lastFrame = dfComplex.iloc[-1]['global frame']
-        #lastFrame = dfxTicks[dfxTicks.TickType == 'LastFrame'].iloc[0, 0]
-
-        compressionFactor = lastFrame / lastx
-
-        justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
-
-        justXticks['xTicks'] = justXticks['xTicks'] / compressionFactor
-
-        xTicks = justXticks['xTicks'].tolist()
-        xTickLabels = justXticks['xTickLabels'].tolist()
-
-        ax.set_xticks(xTicks)
-        ax.set_xticklabels(xTickLabels)
+        # setting x ticks
+        applyXticks(dfComplex, ax, figType)
 
     else:
         ax.get_xaxis().set_visible(False)
