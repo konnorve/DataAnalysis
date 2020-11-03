@@ -113,10 +113,11 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # OUTPUTS
     DF with information on frame, centroid, angle (raw and bounded), time, movement (center changed boolean and distance)
+    """
 
     # initiate angle data dataframe from directory
     dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
-    """
+
     # simple DFs aka raw angle data are put together into a list and concatenated 
 
     simpleDFs = []
@@ -275,7 +276,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'CenterChangedAfterS30',
                      'distanceMoved',
                      'isHourMark',
-                     'isLightChange']
+                     'isLightChange',
+                     'by eye verification']
     # initiate a new empty DataFrame for time data
     addedDataFrame = []
 
@@ -391,7 +393,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             ccS3 = centerChanged(a1, a2, 30)
 
         # should match added data columns
-        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, ccS1, ccS2, ccS3, dm, hourMark, lightChange]
+        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, ccS1, ccS2, ccS3, dm, hourMark, lightChange, np.nan]
 
         addedDataFrame.append(addedDataRow)
         
@@ -421,12 +423,12 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
 def getXtickDF_hour(complexDF):
     """
-#     Extracts the tick marks, for use in figure plotting.
-#     INPUT
-#     Complex Data Frame
-#     OUTPUT
-#     creates a DF with hour marked data extracted from complexDF
-#     includes information on when light changed occur
+    Extracts the tick marks, for use in figure plotting.
+    INPUT
+    Complex Data Frame
+    OUTPUT
+    creates a DF with hour marked data extracted from complexDF
+    includes information on when light changed occur
     """
     
     # create a series of hour marks from 'True' Hour marks in complexDF
@@ -728,3 +730,5 @@ def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, frame
     secondDFCopy['global frame'] = secondDFCopy['global frame'] + frameOffset
 
     return pd.concat([firstDF, secondDFCopy])
+
+
