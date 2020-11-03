@@ -37,8 +37,73 @@ import DataFrameCreationMethods as cdf
 # set_yticks	// Set the yaxis' tick locations.
 # set_yticklabels  // Set the yaxis' labels with list of string labels.
 
+###################################
+###################################
+######## Accessory Methods ########
+###################################
+###################################
 
-def bar4MovementDayNight(dfBar, ax, width = 4):
+
+def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
+    """
+    Creates a movement bar indicating movement during the daytime or nightime
+    Movement Color: Red
+    Day Color: Yellow
+    Night Color: Navy Blue
+    """
+    pulseFrames = complexDF['global frame'].tolist()
+    pulseMoving = complexDF['bounded angle'].tolist()
+    pulseDayNight = complexDF['DayOrNight'].tolist()
+
+    startFrame = min(pulseFrames)
+    lastFrame = max(pulseFrames)
+
+    barArr = np.zeros((lastFrame-startFrame, width, 3), dtype='int')
+
+    barArr[:,:] = [255,255,255]
+
+    numPulses = len(pulseFrames)
+
+    for i in range(numPulses-1):
+
+        currPulseFrame = pulseFrames[i] - startFrame
+        nextPulseFrame = pulseFrames[i + 1] - startFrame
+        isMoving = math.isnan(pulseMoving[i])
+        isNight = pulseDayNight[i] == 'Night'
+
+        if i%1000==0 and False:
+            print('counter: {}, frame: {}, nextframe: {}, isMoving: {}, is night?: {}'.format(i, currPulseFrame, nextPulseFrame, isMoving, isNight))
+
+        if isMoving:
+            barArr[currPulseFrame:nextPulseFrame, 0:int(width/2)] = movementColor
+        if isNight:
+            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = nightColor
+        else:
+            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = dayColor
+
+    return barArr
+
+
+def createCompressedActigram(actigramCSV, compression_factor):
+    # takes slice of actigram array.
+    # slice contains one row of every n $compression_factors
+    # if there were 50 rows, and compression_factor == 10, it would return rows 0,10,20,30,40,50.
+    return actigramCSV[::compression_factor]
+
+
+def createCompressedMovementDayNightBar(barArr, compression_factor):
+    # takes slice of bar array
+    # see documentation for Compressed Actigram
+    return barArr[::compression_factor]
+
+
+###################################
+###################################
+############# Figure ##############
+###################################
+###################################
+
+def bar4MovementDayNight(complexDF, ax, width = 4):
     """
     Creates DayNight movement bar to go along with actigram and other behavioral figures.
 
@@ -49,7 +114,10 @@ def bar4MovementDayNight(dfBar, ax, width = 4):
     """
     # takes slice of bar to compress the image to be manageable for our purposes
     # takes every 10th row of the bar to create a sliced image
-    dfBar = cdf.createCompressedMovementDayNightBar(dfBar, 10)
+
+    dfBar = createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127])
+
+    dfBar = createCompressedMovementDayNightBar(dfBar, 10)
 
     # imshow == Image show. Shows the np array as an image.
     # np.transpose flips the array from vertical to horizontal. It goes from being n frames long to n frames wide
@@ -78,7 +146,7 @@ def actigramFigure(dfActigram, dfxTicks, axis, title, rhopaliaPositions360 = [],
 
     # takes slice of actigram to compress the image to be manageable for our purposes. Otherwise image is thousands of megabytes.
     # takes every 10th row of the actigram to create a sliced image.
-    dfActigramComp = cdf.createCompressedActigram(dfActigram, 10)
+    dfActigramComp = createCompressedActigram(dfActigram, 10)
     dfxTicksComp = dfxTicks.copy()
     # compresses the xticks by a comprable amount
     dfxTicksComp['xTicks'] = dfxTicksComp['xTicks'] / 10
@@ -446,6 +514,7 @@ def sensitivityCCFigure(jelly_title, axis, dfComplex, dfxTicks, show_title = Tru
 
         justXticks = dfxTicks[dfxTicks.TickType == 'hour_absolute']
 
+        # todo: change to use loc
         justXticks['xTicks'] = justXticks['xTicks'] / compressionFactor
 
         xTicks = justXticks['xTicks'].tolist()

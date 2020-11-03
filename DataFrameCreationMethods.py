@@ -662,61 +662,6 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     return actigramArr
 
 
-# TODO: consider looping this into figures methods, and removing it from its own method. It compiles very quickly so it is not neceesary on its own.
-def createDayNightMovementBar(complexDF, width = 4, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
-
-    """
-#     Creates a movement bar indicating movement during the daytime or nightime
-#     Movement Color: Red
-#     Day Color: Yellow
-#     Night Color: Navy Blue
-    """
-    pulseFrames = complexDF['global frame'].tolist()
-    pulseMoving = complexDF['bounded angle'].tolist()
-    pulseDayNight = complexDF['DayOrNight'].tolist()
-
-    startFrame = min(pulseFrames)
-    lastFrame = max(pulseFrames)
-
-    barArr = np.zeros((lastFrame-startFrame, width, 3), dtype='int')
-
-    barArr[:,:] = [255,255,255]
-
-    numPulses = len(pulseFrames)
-
-    for i in range(numPulses-1):
-
-        currPulseFrame = pulseFrames[i] - startFrame
-        nextPulseFrame = pulseFrames[i + 1] - startFrame
-        isMoving = math.isnan(pulseMoving[i])
-        isNight = pulseDayNight[i] == 'Night'
-
-        if DEBUG and i%1000==0:
-            print('counter: {}, frame: {}, nextframe: {}, isMoving: {}, is night?: {}'.format(i, currPulseFrame, nextPulseFrame, isMoving, isNight))
-
-        if isMoving:
-            barArr[currPulseFrame:nextPulseFrame, 0:int(width/2)] = movementColor
-        if isNight:
-            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = nightColor
-        else:
-            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = dayColor
-
-    return barArr
-
-
-
-def createCompressedActigram(actigramCSV, compression_factor):
-    # takes slice of actigram array. 
-    # slice contains one row of every n $compression_factors
-    # if there were 50 rows, and compression_factor == 10, it would return rows 0,10,20,30,40,50. 
-    return actigramCSV[::compression_factor]
-
-def createCompressedMovementDayNightBar(barArr, compression_factor):
-    # takes slice of bar array
-    # see documentation for Compressed Actigram
-    return barArr[::compression_factor]
-
-
 def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120):
     """
 #   concatenates two dataframes together taking into consideration the offset in frames
