@@ -67,7 +67,7 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, yfigurelen, xfigurele
     plt.close()
 
 
-def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
+def plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, yfigurelen, xfigurelen):
     """
     Input: complex dataframe for a jellyfish
     Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
@@ -83,7 +83,7 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfig
     # subplot
     ax = fig.add_subplot(gs[0, 0])
 
-    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex)
+    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterHistogramVertical')
@@ -93,7 +93,7 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfig
 
 
 
-def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
+def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, yfigurelen, xfigurelen):
     updateparameters()
     """
     Input: complex dataframe for a jellyfish
@@ -109,7 +109,7 @@ def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, yfigurelen, xf
     ax = fig.add_subplot(gs[0, 0])
 
     # adding the initiatorHist fig to the current plot?
-    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex, vertical = False)
+    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab, vertical = False)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterHistogramHorizontal')
