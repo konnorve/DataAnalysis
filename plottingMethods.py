@@ -356,7 +356,7 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, 
 
 ##############################################################
 
-def main(jelly_title, outdir, dfComplex, RHOPOS, RHOLAB, stdYlen = None, stdXlen = None, Framerate=120):
+def main(jelly_title, outdir, dfComplex, rhopos,rholab, stdYlen = None, stdXlen = None, Framerate=120):
     """
     :param jelly_title: name of jellyfish
     :param outdir: output directory where png's will be saved
@@ -376,21 +376,21 @@ def main(jelly_title, outdir, dfComplex, RHOPOS, RHOLAB, stdYlen = None, stdXlen
 
     plotInterpulseInterval(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
-    plotCenterHistogramVertical(outdir, jelly_title, dfComplex, 36, 10)
+    plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, 36, 10)
 
-    plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, 10, 36)
+    plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 10, 36)
 
-    plotActigram(outdir, jelly_title, dfActigram, dfComplex, RHOPOS, RHOLAB, stdYlen, stdXlen)
+    plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen, stdXlen)
 
     plotCentersChanged(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
     # combined
 
-    ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, dfComplex, RHOPOS, RHOLAB, stdYlen+2, stdXlen)
+    ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+2, stdXlen)
 
-    Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, RHOPOS, RHOLAB, stdYlen+8, stdXlen)
+    Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen)
 
-    Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, RHOPOS, RHOLAB, 17, stdXlen)
+    Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, 17, stdXlen)
 
     centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, 20, 36)
 
