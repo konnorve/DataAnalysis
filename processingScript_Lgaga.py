@@ -22,7 +22,7 @@ def makeOutDir(outputDir, folderName):
 
 # Main input variables needed for DataFrame and Figures Creation
 
-homePath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_11/Lgaga/')
+homePath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_11.nosync/Lgaga/')
 
 rec1path = homePath / '20200720_Lgaga_604pm_cam2_1'
 
@@ -52,7 +52,18 @@ rhopos = [
 
 rholab = list(range(1, len(rhopos)+1))
 
+
 complexDF1 = pd.read_csv(rec1ComplexDFOutpath)
 
-pm.main(rec1name, rec1FigureOutDir, complexDF1, rhopos, rholab)
+# pm.main(rec1name, rec1FigureOutDir, complexDF1, rhopos, rholab)
+
+
+
+pm.plotCenterHistogramHorizontal(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 5, 15)
+
+pm.plotCenterHistogramVertical(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 15, 5)
+
+pm.plotHistorgram4DayLightSlices(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 5, 15)
+
+pm.plotHistorgram4DayHourSlices(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 5, 15)
 

@@ -317,7 +317,7 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, show_title = True, sh
 
     if show_title: ax.set_title(jelly_title + '- Interpulse Interval')
 
-def initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab, vertical = True, show_title = True, show_degreeLabels = True):
+def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[], vertical = True, show_title = True, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = []):
     """
     Shows a normalized histogram of usage across the degrees of a jellyfish. Each entry represents the total pulses of
     that particular degree on the jellyfish as a percent of total pulses.
@@ -349,40 +349,90 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab, vertica
     # what's the math diff between this and using Hist()?   x [something to do with the normalization?]
     # For CenterHistogramVertical
     if vertical:
-        ax2 = ax1.twinx()
         ax1.barh(degrees, percents)
 
         ax1.set_xlabel(xlabel=r'% of total counts')
 
         ax1.margins(y=0)
 
+        if len(constraints) != 0:
+            ax1.set_xlim(left=constraints[0], right=constraints[1])
+
+        for rp in rhopos:
+            ax1.axhline(rp, alpha=0.5, color='gray', lw=1)
+            if rp < shadeAroundRhopaliaInterval:
+                ax1.axhspan(0, rp + shadeAroundRhopaliaInterval, alpha=0.25, color='gray', lw=0)
+                ax1.axhspan(360 - shadeAroundRhopaliaInterval + rp, 360, alpha=0.25, color='gray', lw=0)
+            elif rp + shadeAroundRhopaliaInterval > 360:
+                ax1.axhspan(rp - shadeAroundRhopaliaInterval, 360, alpha=0.25, color='gray', lw=0)
+                ax1.axhspan(0, shadeAroundRhopaliaInterval - 360 + rp, alpha=0.25, color='gray', lw=0)
+            else:
+                ax1.axhspan(rp - shadeAroundRhopaliaInterval, rp + shadeAroundRhopaliaInterval, alpha=0.25,
+                            color='gray', lw=0)
+
         if show_degreeLabels:
             ax1.set_ylabel(ylabel='Degree')
+
+            ax2 = ax1.twinx()
             ax2.set_yticks([i/360 for i in rp360])
             ax2.set_yticklabels(rl)
             ax2.set_ylabel(ylabel='Rhopalia Label')
-            ax2.grid(b=True,which='major', axis='y')
+        elif show_just_degree_labels:
+            ax1.set_ylabel(ylabel='Degree')
+        elif show_just_rhopalia_labels:
+            ax1.get_yaxis().set_visible(False)
+            ax2 = ax1.twinx()
+            ax2.set_yticks([i / 360 for i in rp360])
+            ax2.set_yticklabels(rl)
+            ax2.set_ylabel(ylabel='Rhopalia Label')
         else:
             ax1.get_yaxis().set_visible(False)
 
+
+
     # For CenterHistogramHorizontal
     else:
-        ax2 = ax1.twiny()
         ax1.bar(degrees, percents)
 
         ax1.set_ylabel(ylabel=r'% of total counts')
 
         ax1.margins(x=0)
 
+        if len(constraints) != 0:
+            ax1.set_ylim(bottom=constraints[0], top=constraints[1])
+
+        for rp in rhopos:
+            ax1.axvline(rp, alpha=0.5, color='gray', lw=1)
+            if rp < shadeAroundRhopaliaInterval:
+                ax1.axvspan(0, rp + shadeAroundRhopaliaInterval, alpha=0.25, color='gray', lw=0)
+                ax1.axvspan(360 - shadeAroundRhopaliaInterval + rp, 360, alpha=0.25, color='gray', lw=0)
+            elif rp + shadeAroundRhopaliaInterval > 360:
+                ax1.axvspan(rp - shadeAroundRhopaliaInterval, 360, alpha=0.25, color='gray', lw=0)
+                ax1.axvspan(0, shadeAroundRhopaliaInterval - 360 + rp, alpha=0.25, color='gray', lw=0)
+            else:
+                ax1.axvspan(rp - shadeAroundRhopaliaInterval, rp + shadeAroundRhopaliaInterval, alpha=0.25,
+                            color='gray', lw=0)
+
         if show_degreeLabels:
-            ax2.set_xticks(rp360)
+            ax1.set_xlabel(xlabel='Degree')
+
+            ax2 = ax1.twiny()
+            ax2.set_xticks([i/360 for i in rp360])
             ax2.set_xticklabels(rl)
             ax2.set_xlabel(xlabel='Rhopalia Label')
-            ax2.grid(b=True, which='major', axis='x')
+        elif show_just_degree_labels:
+            ax1.set_xlabel(xlabel='Degree')
+        elif show_just_rhopalia_labels:
+            ax1.get_xaxis().set_visible(False)
+            ax2 = ax1.twiny()
+            ax2.set_xticks([i / 360 for i in rp360])
+            ax2.set_xticklabels(rl)
+            ax2.set_xlabel(xlabel='Rhopalia Label')
         else:
             ax1.get_xaxis().set_visible(False)
 
     if show_title: ax1.set_title(jelly_title)
+
 
 
 def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertical=True, show_title=True, show_degreeLabels = True):

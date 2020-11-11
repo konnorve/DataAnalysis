@@ -93,7 +93,7 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, yf
 
 
 
-def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, yfigurelen, xfigurelen):
+def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
     updateparameters()
     """
     Input: complex dataframe for a jellyfish
@@ -109,7 +109,7 @@ def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 
     ax = fig.add_subplot(gs[0, 0])
 
     # adding the initiatorHist fig to the current plot?
-    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab, vertical = False)
+    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos, rholab, vertical = False)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterHistogramHorizontal')
@@ -119,6 +119,120 @@ def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 
 
 
 # ### Centers
+
+def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
+    updateparameters()
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
+    """
+
+    dfComplex["Day.Hour"] = dfComplex["ZeitgeberDay"].astype(str) + str('.') + dfComplex["ZeitgeberHour"].astype(str)
+
+    uniqueCombos = dfComplex["Day.Hour"].unique()
+
+    fig = plt.figure(figsize=(xfigurelen, len(uniqueCombos)*yfigurelen), constrained_layout=True)
+
+    # gridspec organization
+    heights = [1]*len(uniqueCombos)
+    widths = [xfigurelen, 2]
+    gs = fig.add_gridspec(ncols=2, nrows=len(uniqueCombos), height_ratios=heights, width_ratios=widths)
+
+    # subplot
+    for i, combo in enumerate(uniqueCombos):
+        print(combo)
+
+        ax1 = fig.add_subplot(gs[i, 0])
+        ax2 = fig.add_subplot(gs[i, 1])
+
+        dfSlice = dfComplex.loc[dfComplex['Day.Hour'] == combo]
+
+        day = dfSlice["ZeitgeberDay"].iloc[0]
+        hour = dfSlice["ZeitgeberHour"].iloc[0]
+
+        ax2.text(0, 0.5, '{} {:02}:00'.format(day, hour), size='xx-large')
+        ax2.axis("off")
+
+        # adding the initiatorHist fig to the current plot?
+        if i == 0:
+            sjdl = False
+            sjrl = True
+        elif i == len(uniqueCombos) - 1:
+            sjdl = True
+            sjrl = False
+        else:
+            sjdl = False
+            sjrl = False
+
+        figures.initiatiorsHistogramFigure(combo, ax1, dfSlice, rhopos, rholab, vertical=False, show_title=False,
+                                           show_degreeLabels=False,
+                                           show_just_degree_labels=sjdl,
+                                           show_just_rhopalia_labels=sjrl,
+                                           constraints=[0, 0.1])
+
+    # save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Histogram4DayHourSlices')
+    fig.savefig(str(outpath), bbox_inches='tight')
+
+    plt.close()
+
+
+def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
+    updateparameters()
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
+    """
+
+    dfComplex["Day.LightCycle"] = dfComplex["ZeitgeberDay"].astype(str) + str('.') + dfComplex["DayOrNight"].astype(str)
+
+    uniqueCombos = dfComplex["Day.LightCycle"].unique()
+
+    fig = plt.figure(figsize=(xfigurelen, len(uniqueCombos)*yfigurelen), constrained_layout=True)
+
+    # gridspec organization
+    heights = [1]*len(uniqueCombos)
+    widths = [xfigurelen, 2]
+    gs = fig.add_gridspec(ncols=2, nrows=len(uniqueCombos), height_ratios=heights, width_ratios=widths)
+
+    # subplot
+    for i, combo in enumerate(uniqueCombos):
+        print(combo)
+
+        ax1 = fig.add_subplot(gs[i, 0])
+        ax2 = fig.add_subplot(gs[i, 1])
+
+        dfSlice = dfComplex.loc[dfComplex['Day.LightCycle'] == combo]
+
+        day = dfSlice["ZeitgeberDay"].iloc[0]
+        lightcycle = dfSlice["DayOrNight"].iloc[0]
+
+        ax2.text(0, 0.5, '{} {}'.format(day, lightcycle), size='xx-large')
+        ax2.axis("off")
+
+        # adding the initiatorHist fig to the current plot?
+        if i == 0:
+            sjdl = False
+            sjrl = True
+        elif i == len(uniqueCombos) - 1:
+            sjdl = True
+            sjrl = False
+        else:
+            sjdl = False
+            sjrl = False
+
+        figures.initiatiorsHistogramFigure(combo, ax1, dfSlice, rhopos, rholab, vertical=False, show_title=False,
+                                           show_degreeLabels=False,
+                                           show_just_degree_labels=sjdl,
+                                           show_just_rhopalia_labels=sjrl,
+                                           constraints=[0, 0.05])
+
+    # save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Histogram4DayLightSlices')
+    fig.savefig(str(outpath), bbox_inches='tight')
+
+    plt.close()
+
 
 def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, plotBar=True, colormap=cm.binary):
     """
@@ -356,7 +470,7 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, 
 
 ##############################################################
 
-def main(jelly_title, outdir, dfComplex, rhopos,rholab, stdYlen = None, stdXlen = None, Framerate=120):
+def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120):
     """
     :param jelly_title: name of jellyfish
     :param outdir: output directory where png's will be saved
