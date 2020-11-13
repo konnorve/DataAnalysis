@@ -3,15 +3,9 @@
 
 import matplotlib.pylab as pylab
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 import matplotlib.cm as cm
-import math
-import matplotlib.gridspec as gridspec
-from scipy import stats
-import DataFrameCreationMethods as cdf
-
-import figures as figures
+from . import DataFrameCreationMethods as cdf
+from . import figures as figures
 
 
 # Helper Methods
