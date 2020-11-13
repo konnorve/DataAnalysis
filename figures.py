@@ -1,13 +1,8 @@
 
 
-import matplotlib.pylab as pylab
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import matplotlib.cm as cm
 import math
-from scipy import stats
-import DataFrameCreationMethods as cdf
 
 # def readCSV2pandasDF(CSVpath):
 #     return pd.read_csv(str(CSVpath), index_col=0)
@@ -435,7 +430,7 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[],
 
 
 
-def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertical=True, show_title=True, show_degreeLabels = True):
+def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, rhopos, rholab, vertical=True, show_title=True, show_degreeLabels = True):
     """
     lets you query the complex dataframe data to look at differences in subsets of data. Filtered Complex DF is an input
     for the 'initiatiorsHistogramFigure' method.
@@ -457,7 +452,7 @@ def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, vertic
 
     dfQuery = dfComplex.query(question)
 
-    initiatiorsHistogramFigure(jelly_title, ax, dfQuery, vertical, show_title, show_degreeLabels)
+    initiatiorsHistogramFigure(jelly_title, ax, dfQuery, rhopos, rholab, vertical, show_title, show_degreeLabels)
 
 
 def ysensitivity(dataframe, metric):

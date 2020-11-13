@@ -3,15 +3,9 @@
 
 import matplotlib.pylab as pylab
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 import matplotlib.cm as cm
-import math
-import matplotlib.gridspec as gridspec
-from scipy import stats
-import DataFrameCreationMethods as cdf
-
-import figures as figures
+from . import DataFrameCreationMethods as cdf
+from . import figures as figures
 
 
 # Helper Methods
@@ -67,7 +61,7 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, yfigurelen, xfigurele
     plt.close()
 
 
-def plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, yfigurelen, xfigurelen):
+def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
     """
     Input: complex dataframe for a jellyfish
     Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
@@ -424,8 +418,8 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
     figures.interpulseIntervalFigure(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
     figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
 
-    figures.initiatiorsHistogramQueryFigure('Day', fig_ax5, dfComplex, 'DayOrNight == \'Day\'', show_title=True, show_degreeLabels=False)
-    figures.initiatiorsHistogramQueryFigure('Night', fig_ax6, dfComplex, 'DayOrNight == \'Night\'', show_title=True, show_degreeLabels=False)
+    figures.initiatiorsHistogramQueryFigure('Day', fig_ax5, dfComplex, 'DayOrNight == \'Day\'', rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False)
+    figures.initiatiorsHistogramQueryFigure('Night', fig_ax6, dfComplex, 'DayOrNight == \'Night\'', rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False)
 
     #save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_II_CC_AND_CHDayNight')
@@ -434,7 +428,7 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
     plt.close()
 
 
-def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
+def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
     """
     Input: complex dataframe for a jellyfish
     Output: figure vizualizing distribution of centers by degree angle for one day and night period
@@ -449,9 +443,9 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, yfigurelen, 
     fig_ax1 = fig.add_subplot(gs[0,0])
     fig_ax2 = fig.add_subplot(gs[1,0])
 
-    figures.initiatiorsHistogramQueryFigure('Day', fig_ax1, dfComplex, 'DayOrNight == \'Day\'', vertical=False, show_title=True,
+    figures.initiatiorsHistogramQueryFigure('Day', fig_ax1, dfComplex, 'DayOrNight == \'Day\'', rhopos, rholab, vertical=False, show_title=True,
                                             show_degreeLabels=True)
-    figures.initiatiorsHistogramQueryFigure('Night', fig_ax2, dfComplex, 'DayOrNight == \'Night\'', vertical=False, show_title=True,
+    figures.initiatiorsHistogramQueryFigure('Night', fig_ax2, dfComplex, 'DayOrNight == \'Night\'', rhopos, rholab, vertical=False, show_title=True,
                                             show_degreeLabels=True)
 
     fig.suptitle(jelly_title)
@@ -506,6 +500,11 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, 17, stdXlen)
 
-    centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, 20, 36)
+    centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, 20, 36)
 
     plotBar(outdir, jelly_title, dfComplex, 2, stdXlen)
+
+    plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15)
+
+    plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15)
+

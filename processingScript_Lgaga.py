@@ -24,13 +24,26 @@ def makeOutDir(outputDir, folderName):
 
 homePath = Path('/Users/kve/Desktop/Clubs/Harland_Lab/Round_11.nosync/Lgaga/')
 
-rec1path = homePath / '20200720_Lgaga_604pm_cam2_1'
+recPath = homePath / '20200723_Lgaga_730pm_cam2_1'
 
-rec1name = '20200720_Lgaga_604pm'
+anglePath = recPath / '20200723_Lgaga_730pm_cam2_1_AngleData'
 
-rec1FigureOutDir = makeOutDir(rec1path, 'Figures')
+orientationDataPath = recPath / '20200723_Lgaga_730pm_cam2_1_Orientations_complete.csv'
 
-rec1ComplexDFOutpath = makeOutDir(rec1path, 'ComplexDF') / '{}_complexDF.csv'.format(rec1path.name)
+rec1name = '20200723_Lgaga_730pm'
+
+rec1FigureOutDir = makeOutDir(recPath, 'Figures')
+
+rec1ComplexDFOutpath = makeOutDir(recPath, 'ComplexDF') / '{}_complexDF.csv'.format(recPath.name)
+
+orientationDF = pd.read_csv(orientationDataPath)
+
+
+complexDF = cdf.createComplexDF(anglePath,
+                    orientationDF,
+                    120,
+                    datetime(2020,7,23,19,30),
+                    True)
 
 rhopos = [
             0.235,
@@ -52,18 +65,9 @@ rhopos = [
 
 rholab = list(range(1, len(rhopos)+1))
 
+complexDF.to_csv(rec1ComplexDFOutpath)
 
-complexDF1 = pd.read_csv(rec1ComplexDFOutpath)
+complexDF = pd.read_csv(rec1ComplexDFOutpath)
 
-# pm.main(rec1name, rec1FigureOutDir, complexDF1, rhopos, rholab)
-
-
-
-pm.plotCenterHistogramHorizontal(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 5, 15)
-
-pm.plotCenterHistogramVertical(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 15, 5)
-
-pm.plotHistorgram4DayLightSlices(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 5, 15)
-
-pm.plotHistorgram4DayHourSlices(rec1FigureOutDir, rec1name, complexDF1, rhopos, rholab, 5, 15)
+pm.main(rec1name, rec1FigureOutDir, complexDF, rhopos, rholab)
 
