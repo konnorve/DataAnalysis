@@ -25,6 +25,13 @@ centroid = center of the jellyfish
 ##### Utility Functions #######
 ###############################
 
+def makeOutDir(outputDir, folderName):
+    outdir = outputDir / folderName
+    if not outdir.exists():
+        outdir.mkdir()
+    return outdir
+
+
 def calculateDistance(c1, c2):
     """Distance Formula
     Calculates how far the jellyfish has moved by
