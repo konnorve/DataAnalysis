@@ -3,12 +3,12 @@
 #update imports
 # imports
 
-import DataFrameCreationMethods as cdf
+from . import DataFrameCreationMethods as cdf
 from pathlib import Path
 import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
-import plottingMethods as pm
+from . import plottingMethods as pm
 import matplotlib.cm as cm
 import figures as fig
 
@@ -67,7 +67,7 @@ rholab = list(range(1, len(rhopos)+1))
 
 complexDF.to_csv(rec1ComplexDFOutpath)
 
-complexDF = pd.read_csv(rec1ComplexDFOutpath)
-
-pm.main(rec1name, rec1FigureOutDir, complexDF, rhopos, rholab)
+# complexDF = pd.read_csv(rec1ComplexDFOutpath)
+#
+# pm.main(rec1name, rec1FigureOutDir, complexDF, rhopos, rholab)
 

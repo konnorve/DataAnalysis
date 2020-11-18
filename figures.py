@@ -358,7 +358,7 @@ def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = Tr
     ax.margins(x=0)
 
     #fixed limits. Makes graphs compareable
-    ax.set_ylim(0, 3)
+    ax.set_ylim(0, 1.5)
 
     # x tick method.
     if show_xLabels:

@@ -275,6 +275,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'InitiatorSameAfterS30',
                      'distanceMoved',
                      'isHourMark',
+                     'is10MinuteMark',
+                     'isMinuteMark',
                      'isLightChange',
                      'by eye verification']
     
@@ -357,6 +359,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         isS3 = None
         dm = np.nan
         hourMark = False
+        minMark10 = False
+        minMark = False
         lightChange = 'None'
         
         # determine if it is day or night in zeitgeber hours
@@ -377,9 +381,18 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             # get last zeithour and see if it's changed
             lastHour = addedDataRow[addedDataCols.index('ZeitgeberHour')]
             currHour = zt.hour
+            lastMinute = addedDataRow[addedDataCols.index('ZeitgeberMin')]
+            currMinute = zt.minute
+
             # if the last hour is not the current hour, than there is an hour mark. that pulse represents the xtick should be a xtick
             if lastHour != currHour:
                 hourMark = True
+
+            if lastMinute != currMinute:
+                minMark = True
+                if currMinute % 10 == 0:
+                    minMark10 = True
+
             # specifies a light to dark transition for the xtick df 
             lastDN = addedDataRow[addedDataCols.index('DayOrNight')]
             if lastDN != dn:
@@ -398,7 +411,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             isS3 = nearbyAngle(a1, a2, 30)
 
         # should match added data columns
-        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, pr, isS1, isS2, isS3, dm, hourMark, lightChange, np.nan]
+        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, pr, isS1, isS2, isS3, dm, hourMark, minMark10, minMark, lightChange, np.nan]
 
         addedDataFrame.append(addedDataRow)
         
