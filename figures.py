@@ -16,7 +16,7 @@ import math
 ###  Definitions, look at () for ex so i remember what is what for now -deb ###
 # bar4MovementDayNight- the skinny bar with the yellow/blue day/night, and the red ticks for movement // (plotBar)
 # actigramFigure- the blue graph with time vs degrees // (SeismicActigram)
-# interpulseIntervalFigure- the spikey grey one with the blue line going through the middle // (InterpulseInterval)
+# interpulseInterval- the spikey grey one with the blue line going through the middle // (InterpulseInterval)
 # initiatiorsHistogramFigure- blue histogram // (CenterHistogramHorizonatal/Vertical)
 # initiatiorsHistogramQueryFigure- (centersHistogramDayANDNightPlot)
 # ysensitivity- IGNORE FOR NOW
@@ -252,7 +252,7 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
     ax1.set_title(title)
 
 
-def interpulseIntervalFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
+def interpulseInterval(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType ='Long'):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -310,7 +310,66 @@ def interpulseIntervalFigure(jelly_title, axis, dfComplex, show_title = True, sh
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
-    if show_title: ax.set_title(jelly_title + '- Interpulse Interval')
+    if show_title: ax.set_title(jelly_title + ' Interpulse Interval')
+
+
+def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
+    """
+
+    :param jelly_title: title of Jellyfish to be used in naming of figure
+    :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param dfComplex: Takes in the complex dataframe. Uses the global frame and 'PulseRate'
+    :param show_title: True if title is desired, False otherwise. Default is True.
+    :param show_xLabels: True if x labels are desired, False otherwise. Default is True.
+    :param show_average: True if average line is desired, False otherwise. Default is True. Average line gets worse the shorter the video is.
+    :return: axes object filled with IPI figure.
+    """
+
+    # takes pulses where Pulse Rate is not null
+    df = dfComplex[dfComplex.PulseRate.notnull() & (dfComplex.PulseRate < 30)]
+
+    # renames axes object for convenience
+    ax = axis
+
+    # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
+    # global frame taken from complex dataframe for x axis data
+    x = df['global frame']
+
+    # interpulse interval taken from dataframe for y axis data
+    y = df['PulseRate']
+
+    # plotting method
+    ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Pulse Rate')  # specifying color, linewidth, label text   x
+
+    # averaging method
+    # shown as a blue line
+    if show_average:
+        ym = y.rolling(window=250).mean()  # calculates rolling average in/of groups of 250   x
+
+        ax.plot(x, ym, c = 'b', lw = 2, label= 'average')  # adds to ax a plot of the global dataframe vs rolling avg  x
+
+        ax.set_xlabel(xlabel=r'Zeitgeber Time')  # sets x and y labels
+        ax.set_ylabel(ylabel='Pulse Rate (Hz)')
+
+    # adds gridlines. Major and minor ticks. Only y axis. Alpha is the opacity of the lines.
+    ax.grid(which = 'both', axis = 'y', alpha=0.5, linestyle='--')
+
+    # zeros the margins
+    ax.margins(x=0)
+
+    #fixed limits. Makes graphs compareable
+    ax.set_ylim(0, 3)
+
+    # x tick method.
+    if show_xLabels:
+        # setting x ticks
+        applyXticks(dfComplex, ax, figType)
+
+    else:
+        ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
+
+    if show_title: ax.set_title(jelly_title + ' Pulse Rate')
+
 
 def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[], vertical = True, show_title = True, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = []):
     """
@@ -511,101 +570,13 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
 
     ax.fill_between(x = x, y1 = ya, y2 = yb, color = fillColor, alpha = fillShade)
 
-
-def sensitivityCCFigure(jelly_title, axis, dfComplex, figType='Long', show_title = True, show_xLabels = True, show_Legend = True):
-    """
-    Plots the different sensitivities of the center changed figure. S10, S20, S30 are all plotted together. [konnorspellsgrate]
-    Does not seem to be working rn?
-    TODO: fix sensitivityCCFigure.
-
-    :param jelly_title: title of Jellyfish to be used in naming of figure
-    :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
-    :param dfComplex: Takes in the complex dataframe. Uses the global frame and all of the CenterChangedS** columns.
-    :param show_title: True if title is desired, False otherwise. Default is True. same for two below   x
-    :param show_xLabels:
-    :param show_Legend:
-    :return:
-    """
-
-
-    ax = axis
-
-    df = dfComplex[dfComplex.AbsoluteMinute.notnull()]
-
-    #BINSIZE is number of minutes to use in each bin
-    BINSIZE = 5
-    colorDN = 'b'
-    colorND = '#fcd12a'
-    windowSize = 20
-
-    #establishes column to group by and use bins
-    df['binCount'] = df['AbsoluteMinute']/BINSIZE
-    df['counter'] = 1
-
-    binCount = []
-    for item in df['binCount']:  # gives a number to each resident of binCount?  x
-        binCount.append(int(item))
-
-    df['binCount'] = binCount
-
-
-
-    x = ysensitivity(df, 'CenterChangedAfterS10')['min time'].tolist()
-
-    x = list(range(len(x)))
-
-
-    yA1S1 = ysensitivity(df, 'CenterChangedAfterS10')['count'].rolling(window=windowSize).mean()
-
-    yA1S2 = ysensitivity(df, 'CenterChangedAfterS20')['count'].rolling(window=windowSize).mean()
-
-    yA1S3 = ysensitivity(df, 'CenterChangedAfterS30')['count'].rolling(window=windowSize).mean()
-
-    print(len(x))
-    print(len(yA1S1))
-    print(len(yA1S2))
-    print(len(yA1S3))
-
-    ax.plot(x, yA1S1, c = 'b', lw = 2, label= 'level of change 1 center after, s = 1');  # should i nix the ;?  x
-    ax.plot(x, yA1S2, c = 'g', lw = 2, label= 'level of change 1 center after, s = 2');
-    ax.plot(x, yA1S3, c = 'r', lw = 2, label= 'level of change 1 center after, s = 3');
-
-
-    ax.axis(ymin = 0, ymax = 1)
-
-    ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% pulses IC')
-
-    ax.grid(axis = 'y', alpha=0.5, linestyle='--')
-    ax.margins(x=0)
-
-    # x ticks and labels - nearly identical to this section in centersChangedFigure   x
-    if show_xLabels:
-        # setting x ticks
-        applyXticks(dfComplex, ax, figType)
-
-    else:
-        ax.get_xaxis().set_visible(False)
-    if show_Legend: ax.legend()
-
-    if show_title: ax.set_title(jelly_title + ' Jellyfish Centers Changed sensitivity Testing')
-
-
-# In[39]:
-
-
-def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
+# def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
+def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLabels=True, show_Legend=True,
+                             sensitivity=30, bounds=(0, 1), figType='Long'):
     """
     Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to
     another. This is done by aggregating the True/False "CentersChangedS__' columns.
 
-
-    "centers" describes the angle of a pulse, specifically the bounded angle. If the bounded angle of the next pulse is
-    within the sensitivity distance
-
-    TODO: refactor the columns involved to say "AngleChangedS10"
-    TODO: change this so it is the inverse, and a measure of centralization, not decentralization
-    TODO: We're not in Kansas anymore!
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
@@ -656,9 +627,9 @@ def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_x
     df['binCount'] = binCount
 
     switcher = {
-        10 : 'CenterChangedAfterS10',
-        20 : 'CenterChangedAfterS20',
-        30 : 'CenterChangedAfterS30',
+        10 : 'InitiatorSameAfterS10',
+        20 : 'InitiatorSameAfterS20',
+        30 : 'InitiatorSameAfterS30',
     }
 
     # gets the figure dataframe by binning various items.
@@ -678,7 +649,7 @@ def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_x
 
     # sets labels
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% pulses IC')
+    ax.set_ylabel(ylabel='% pulses')
 
     # sets grid
     ax.grid(axis = 'y', alpha=0.5, linestyle='--')
@@ -694,4 +665,4 @@ def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_x
 
     if show_Legend: ax.legend()
 
-    if show_title: ax.set_title(jelly_title + ' Interpulse Change')
+    if show_title: ax.set_title(jelly_title + ' Centralization Plot')

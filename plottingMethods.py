@@ -5,7 +5,7 @@ import matplotlib.pylab as pylab
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from . import DataFrameCreationMethods as cdf
-from . import figures as figures
+from . import figures
 
 
 # Helper Methods
@@ -41,7 +41,7 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, yfigurelen, xfigurele
 
         figures.bar4MovementDayNight(dfComplex, ax2)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'plotInterpulseIntervalWithBar')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'InterpulseIntervalWithBar')
 
     else:
         # gridspec organization
@@ -53,7 +53,48 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, yfigurelen, xfigurele
     # subplot
     ax1 = fig.add_subplot(gs[0, 0])
     # generate interpulse figure with inputted data from complexDF
-    figures.interpulseIntervalFigure(jelly_title, ax1, dfComplex)
+    figures.interpulseInterval(jelly_title, ax1, dfComplex)
+
+    #save fig
+    fig.savefig(str(outpath),bbox_inches='tight')
+    # "bbox_inches" removes extra whitespace from around the rendered figure.
+    plt.close()
+
+
+def plotPulseRate(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBar=True):
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing the Pulse Rate of a given jelly
+    """
+
+    updateparameters()
+    # create empty figure
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+    # "constrained_layout" automatically adjusts subplots to fit window size
+
+    if plotBar:
+        # gridspec organization
+        heights = [5, 1]
+        gs = fig.add_gridspec(ncols=1, nrows=2, height_ratios=heights)
+
+        # subplot
+        ax2 = fig.add_subplot(gs[1, 0])
+
+        figures.bar4MovementDayNight(dfComplex, ax2)
+
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'PulseRateWithBar')
+
+    else:
+        # gridspec organization
+        heights = [1]
+        gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
+
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'PulseRate')
+
+    # subplot
+    ax1 = fig.add_subplot(gs[0, 0])
+    # generate pulse rate figure with inputted data from complexDF
+    figures.pulseRate(jelly_title, ax1, dfComplex)
 
     #save fig
     fig.savefig(str(outpath),bbox_inches='tight')
@@ -263,10 +304,10 @@ def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions36
     plt.close()
 
 
-def plotCentersChanged(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBar=True):
+def plotCentralization(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBar=True):
     """
     Input: complex dataframe for a given jellyfish
-    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centersChangedFigure
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centralizationFigure
     """
     updateparameters()
 
@@ -292,7 +333,7 @@ def plotCentersChanged(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, p
         outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
 
     ax1 = fig.add_subplot(gs[0, 0])
-    figures.centersChangedFigure(jelly_title, ax1, dfComplex)
+    figures.centralizationFigure(jelly_title, ax1, dfComplex)
 
     fig.savefig(str(outpath),bbox_inches='tight')
 
@@ -325,7 +366,7 @@ def plotBar(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
     plt.close()
 
 
-def ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+def ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
     """
     Input: ComplexDF
     Ouput: Actigram figure with corresponding Interpulse Interval and Day/Night Bar
@@ -345,16 +386,16 @@ def ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, dfComp
 
     figures.actigramFigure(dfActigram, dfComplex, ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
     figures.bar4MovementDayNight(dfComplex, ax2)
-    figures.interpulseIntervalFigure(jelly_title, ax3, dfComplex, show_title=False, show_xLabels=False)
+    figures.pulseRate(jelly_title, ax3, dfComplex, show_title=False, show_xLabels=False)
 
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'ActigramANDInterpulseInterval')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, 'ActigramANDPulseRate')
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
 
 
-def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
     """ input: complex dataframe for a jelly
     Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and vertical
     CenterHistogram with the day/night bar"""
@@ -377,18 +418,18 @@ def Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex,
 
     figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
     figures.bar4MovementDayNight(dfComplex,  fig_ax2)
-    figures.interpulseIntervalFigure(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
-    figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
+    figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
+    figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
     figures.initiatiorsHistogramFigure(jelly_title, fig_ax5, dfComplex, vertical=True, show_title=False, show_degreeLabels=False)
     # individual titles, legends and labels are turned off
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_II_CC_AND_CHVert')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_AND_CHVert')
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
 
 
-def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
     """
     input: complex dataframe for a jelly
     Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and
@@ -415,14 +456,14 @@ def Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
 
     figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
     figures.bar4MovementDayNight(dfComplex, fig_ax2)
-    figures.interpulseIntervalFigure(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
-    figures.centersChangedFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
+    figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
+    figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
 
     figures.initiatiorsHistogramQueryFigure('Day', fig_ax5, dfComplex, 'DayOrNight == \'Day\'', rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False)
     figures.initiatiorsHistogramQueryFigure('Night', fig_ax6, dfComplex, 'DayOrNight == \'Night\'', rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False)
 
     #save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_II_CC_AND_CHDayNight')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_AND_CHDayNight')
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -484,21 +525,23 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotInterpulseInterval(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
+    plotPulseRate(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
+
     plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, 36, 10)
 
     plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 10, 36)
 
     plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen, stdXlen)
 
-    plotCentersChanged(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
+    plotCentralization(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
     # combined
 
-    ActigramANDInterpulseIntervalWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+2, stdXlen)
+    ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+2, stdXlen)
 
-    Actigram_II_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen)
+    Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen)
 
-    Actigram_II_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, 17, stdXlen)
+    Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, 17, stdXlen)
 
     centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, 20, 36)
 

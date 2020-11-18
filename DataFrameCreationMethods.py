@@ -16,7 +16,8 @@ CHIME = True
 
 ########################################################################################################################
 
-"""Definitions:
+"""
+Definitions:
 center = a site of initiations
 centroid = center of the jellyfish
 """
@@ -26,6 +27,13 @@ centroid = center of the jellyfish
 ###############################
 
 def makeOutDir(outputDir, folderName):
+    """
+    Makes an out directory if there is not one. Returns file path as Path object
+
+    Inputs:
+    outputDir - Pathlib directory object that directory will be created within
+    folderName - Name of directory to be made/returned
+    """
     outdir = outputDir / folderName
     if not outdir.exists():
         outdir.mkdir()
@@ -42,14 +50,8 @@ def calculateDistance(c1, c2):
 
 def distanceBetween(a1, a2):
     """ 
-    Returns the shortest difference in degrees betwene two positive, bounded angles. 
-    
-    # Don't think the following applies anymore: -KVE
-    # Finds the distance between two centers values in number of segements
-    # if 5 degree data is used there will be 72 segemnets and each segment will
-    # be 5 degrees. Therefore a distance of 3 segments will be 15 degrees.
+    Returns the shortest difference in degrees between two positive, bounded angles.
     """
-    
     
     if(a1 == a2):
         return 0
@@ -69,28 +71,27 @@ def distanceBetween(a1, a2):
     d2 = m - l
     d = min([d1,d2])
 
-    if d < 360:
-        return d
-    else:
-        return "ERROR, fix this function :("
+    assert d < 360
+    return d
 
-# im so sorry but i swear it's spelled 'sensitivity'?,, idk lmao im tired -deb
-def centerChanged(a1, a2, sensativity):
+
+def nearbyAngle(a1, a2, sensitivity):
     """
-        Determines if the center has changed between two center values where each center value is an angle.
-        Distance between the two centers is calculated using distance().
-        If the distance between the two is less than or equal to the
-        sensativity interval this indicates the center has not changed and
-        thus false is returned.
+        Determines if the angles has changed between two initiation angle values .
+        Distance between the two angle is calculated using distance().
 
-        Sensativity is the integer value determining whether the center will or not.
+        If the distance from a1 to a2 is less than the sensitivity then True will be returned because we can assume that
+        the they are roughly from the same initiator
+
+        Sensitivity is the integer value determining whether the angle will or not.
     """
     d = distanceBetween(a1, a2)
 
-    if d <= sensativity:
-        return False
-    else:
+    if d <= sensitivity:
         return True
+    else:
+        return False
+
 
 #########################################################
 #########################################################
@@ -111,7 +112,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     DAYLIGHTSAVINGS = specifies if during daylight savings or not
 
     # OUTPUTS
-    DF with information on frame, centroid, angle (raw and bounded), time, movement (center changed boolean and distance)
+    DF with information on frame, centroid, angle (raw and bounded), time, movement (initiator same boolean and distance)
     """
 
     # initiate angle data dataframe from directory
@@ -234,14 +235,11 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     centroidYindex = header.index('centroid y')
 
     #############################
-    ######## Time Data #########
+    ##### Pulse Level Data ######
     #############################
 
-    
+    # addeing additional columns (detailed below) to ComplexDF specifying time, center changes, and movement
 
-    # added additional columns to ComplexDF specifying time, center changes, and movement
-
-    # added additional columns to ComplexDF specifying time, center changes, and movement
     # TimeDelta = time elapsed in seconds, normalized by the frame rate (??)- deb     
     # AbsoluteMinute = converts the delta time into minutes 
     # DateTime = takes into account when the recording started and adds changes in time
@@ -252,9 +250,10 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # ZeitgeberDay = Zeitgeber Day associated with DateTime
     # DayOrNight = determines if it is Day or Night
     # InterpulseInterval = the time between pulses in seconds
-    # CenterChangedAfterS10 = determines if center has changed after sensitivity = 10
-    # CenterChangedAfterS20 = determines if center has changed after sensitivity = 20
-    # CenterChangedAfterS30 = determines if center has changed after sensitivity = 30
+    # PulseRate = frequency of pulsation (pulse level)
+    # InitiatorSameAfterS10 = determines if angle has not changed in the next pulse when sensitivity = 10
+    # InitiatorSameAfterS20 = determines if angle has not changed in the next pulse when sensitivity = 20
+    # InitiatorSameAfterS30 = determines if angle has not changed in the next pulse when sensitivity = 30
     # distanceMoved = distance between 2 centroids between pulses 
     # isHourMark = determines if there is an XTick or not
     # isLightChange = determines the switch between day and night
@@ -270,13 +269,15 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'ZeitgeberDay',
                      'DayOrNight',
                      'InterpulseInterval',
-                     'CenterChangedAfterS10',
-                     'CenterChangedAfterS20',
-                     'CenterChangedAfterS30',
+                     'PulseRate',
+                     'InitiatorSameAfterS10',
+                     'InitiatorSameAfterS20',
+                     'InitiatorSameAfterS30',
                      'distanceMoved',
                      'isHourMark',
                      'isLightChange',
                      'by eye verification']
+    
     # initiate a new empty DataFrame for time data
     addedDataFrame = []
 
@@ -303,14 +304,15 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # absM = (AbsoluteMinute)
     # dt = (DateTime) 
     # zt = (ZeitgeberTime) 
-    # ipi = (Interpulse Interval) 
+    # ipi = (Interpulse Interval)
+    # pr = Pulse Rate
     # dn = (Day or Night) 
     # centroid = X,Y coordinates of the jellyfish centroid
     # a1 = angle 1
     # a2 = angle 2
-    # ccS1 = (CenterChangedAfterS1) 
-    # ccS2 = (CenterChangedAfterS20) 
-    # ccS3 = (CenterChangedAfterS30) 
+    # isS1 = (InitiatorSameAfterS10) 
+    # isS2 = (InitiatorSameAfterS20) 
+    # isS3 = (InitiatorSameAfterS30) 
     # dm = (distancedMoved) 
     # hourMark = (isHourMark) 
     # lightChange = (isLightChange)
@@ -322,16 +324,17 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # dt = date time, datetime object of the exact date and time a pulse takes place. 
     # zt = zeitgeber time. Datetime object. Shift of dt by the time the lights turn on which is ~7am normally and ~8am during daylight savings time
     # ipi = interpulse interval
+    # pr = Pulse Rate
     # dn = day/night. Specifies 'day' if pulse occured during circadium day (zt time is < 12) and 'night' if pulse occurs during circadium night (zt time is >12, < 24)
     # centroid = (X,Y) position of the jellyfish in pixels, in the tank. 
     # a1 = angle 1 -- angle of the current pulse
     # a2 = angle 2 -- angle of the pulse 1 after the current pulse
-    # ccS1, ccS2m, ccS3 = determines if center has changed, True or False. 
-    #       True if angle of the pulse after is outside the sensativity distance. 
-    #       False if the angle of the pulse after is inside the sensativity distance
+    # isS1, ccS2m, isS3 = determines if initator angle has changed, True or False. 
+    #       True if angle of the pulse after is outside the sensitivity distance. 
+    #       False if the angle of the pulse after is inside the sensitivity distance
     #       Sensativities are 10, 20, and 30 degrees. 
     #       False at S==10 degrees means the next pulse lies within 10 degrees to either side of the current pulse.
-    ### ^^^ we should change these to AngleChanged and give actual sensativity (therefore: acS10, acS20, acS30... etc.) Centers is depricated.  
+    ### ^^^ we should change these to AngleChanged and give actual sensitivity (therefore: acS10, acS20, acS30... etc.) Centers is depricated.  
     # dm = distance moved. distance between 2 centroids in pixels
     # hourMark = determines if there is a change in hour to determine if that frame location should be used as an XTick or not.
     # lightChange = determines the switch between day and night. Useful in marking Day/Night changes on bar graph and xtickDf
@@ -344,13 +347,14 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         dt = STARTDATETIME + td
         zt = dt - timedelta2Zeitgeber
         ipi = np.nan
+        pr = np.nan
         dn = 'Day'  # initalized as Day. All night pulses are then changed to night. 
         centroid = (simpleConcatArr[i][centroidXindex], simpleConcatArr[i][centroidYindex])
         a1 = float(simpleConcatArr[i][angleArrIndex])
         a2 = float(simpleConcatArr[i][angles1AfterIndex])
-        ccS1 = None
-        ccS2 = None
-        ccS3 = None
+        isS1 = None
+        isS2 = None
+        isS3 = None
         dm = np.nan
         hourMark = False
         lightChange = 'None'
@@ -364,6 +368,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         if i < numPulses-1:
             centroidAfter = (simpleConcatArr[i+1][centroidXindex], simpleConcatArr[i+1][centroidYindex])
             ipi = (simpleConcatArr[i+1][0] - simpleConcatArr[i][0])/FRAMERATE
+            if ipi != 0:
+                pr = 1/ipi
             dm = calculateDistance(centroid, centroidAfter)
         
         # just checks that the previous pulse exists for comparison
@@ -382,17 +388,17 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                 else:
                     lightChange = 'toDay'
         
-       # centerChanged(angle1, angle2, sensitivity)
+       # nearbyAngle(angle1, angle2, sensitivity)
        # if distance between the two angles is less than the sensitivity then
        # center can be treated as unchanged.
-       # various sensitivites are offered depending on sensativity of experiment and of videoProcessing program. 
+       # various sensitivites are offered depending on sensitivity of experiment and of videoProcessing program. 
         if not math.isnan(a1) and not math.isnan(a2):
-            ccS1 = centerChanged(a1, a2, 10)
-            ccS2 = centerChanged(a1, a2, 20)
-            ccS3 = centerChanged(a1, a2, 30)
+            isS1 = nearbyAngle(a1, a2, 10)
+            isS2 = nearbyAngle(a1, a2, 20)
+            isS3 = nearbyAngle(a1, a2, 30)
 
         # should match added data columns
-        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, ccS1, ccS2, ccS3, dm, hourMark, lightChange, np.nan]
+        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, pr, isS1, isS2, isS3, dm, hourMark, lightChange, np.nan]
 
         addedDataFrame.append(addedDataRow)
         
@@ -433,7 +439,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     INPUTS
     Complex Dataframe
     FRAMERATE: frames per second
-    INTERVAL: number of points either side of center to set to 1
+    INTERVAL: number of points either side of initiator angle to set to 1
 
     pulseExtension: seconds to represent the pulse by. pulseExtension * frames gives a framecount which is used to extend the "tick mark" that represents each pulse.
 
