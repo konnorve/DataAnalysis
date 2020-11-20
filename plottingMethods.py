@@ -102,6 +102,47 @@ def plotPulseRate(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBa
     plt.close()
 
 
+def plotDistanceMoved(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBar=True):
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing the Distance Moved of a given jelly
+    """
+
+    updateparameters()
+    # create empty figure
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+    # "constrained_layout" automatically adjusts subplots to fit window size
+
+    if plotBar:
+        # gridspec organization
+        heights = [5, 1]
+        gs = fig.add_gridspec(ncols=1, nrows=2, height_ratios=heights)
+
+        # subplot
+        ax2 = fig.add_subplot(gs[1, 0])
+
+        figures.bar4MovementDayNight(dfComplex, ax2)
+
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'DistanceMovedWithBar')
+
+    else:
+        # gridspec organization
+        heights = [1]
+        gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
+
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'DistanceMoved')
+
+    # subplot
+    ax1 = fig.add_subplot(gs[0, 0])
+    # generate pulse rate figure with inputted data from complexDF
+    figures.distanceMoved(jelly_title, ax1, dfComplex)
+
+    #save fig
+    fig.savefig(str(outpath),bbox_inches='tight')
+    # "bbox_inches" removes extra whitespace from around the rendered figure.
+    plt.close()
+
+
 def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
     """
     Input: complex dataframe for a jellyfish
@@ -531,9 +572,13 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 10, 36)
 
-    plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen, stdXlen)
+    plotDistanceMoved(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
     plotCentralization(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
+
+    plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen, stdXlen)
+
+    plotBar(outdir, jelly_title, dfComplex, 2, stdXlen)
 
     # combined
 
@@ -543,9 +588,9 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, 17, stdXlen)
 
-    centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, 20, 36)
+    # histogram partitions
 
-    plotBar(outdir, jelly_title, dfComplex, 2, stdXlen)
+    centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, 20, 36)
 
     plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15)
 

@@ -92,6 +92,16 @@ def nearbyAngle(a1, a2, sensitivity):
     else:
         return False
 
+def convertTo360(a):
+    """
+    converts and angle a (degrees) into an angle bounded between 360
+    """
+    while a < 0:
+        a += 360
+    while a >= 360:
+        a -= 360
+    return a
+
 
 #########################################################
 #########################################################
@@ -160,10 +170,6 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # turns the column of angle data into a python list
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
 
-    # defines the limits of an angle from [zero to 360 degrees) -kve
-    # angle range from 0 to 360 degrees
-    angleLimits = list(range(360))
-
     # turns the orientated angles into integer angle measurements within angleLimits
     boundAngles = []
 
@@ -172,7 +178,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         if math.isnan(ang):
             boundAngles.append(None)
         else:
-            boundAngles.append(angleLimits[int(ang)%360])
+            boundAngles.append(convertTo360(ang))
     # kve:
     # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
     # bounded angle is most important for data analysis. It maps each pulse on the normal jelly axis. 
@@ -189,15 +195,15 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
 
     ###################################
-    ###### Additional Angle Data ######      
+    ###### Additional Angle Data ######
     ###################################
-    
-    # creates list of angles 1 after current angle. Useful for short pattern recognition. Shifts list by 1 entry. 
+
+    # creates list of angles 1 after current angle. Useful for short pattern recognition. Shifts list by 1 entry.
     # angles1 after is the first angle after an angle the angle column
     # angles2 after is the second angle after an angle in the angle column
     # angles3 after is the third angle after an angle in the angle column
 
-    # The purpose of creating 3 different angle columns is to easily inspect how much the 
+    # The purpose of creating 3 different angle columns is to easily inspect how much the
     # jellyfish is (rotating?) within a short time frame -deb -- not really, we just want to see what the next position of initiation is and if the site has changed from previous. -kve
 
     angles1After = angles[1:]
@@ -240,8 +246,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # addeing additional columns (detailed below) to ComplexDF specifying time, center changes, and movement
 
-    # TimeDelta = time elapsed in seconds, normalized by the frame rate (??)- deb     
-    # AbsoluteMinute = converts the delta time into minutes 
+    # TimeDelta = time elapsed in seconds, normalized by the frame rate (??)- deb
+    # AbsoluteMinute = converts the delta time into minutes
     # DateTime = takes into account when the recording started and adds changes in time
     # ZeitgeberTime = Zeitgeber Time associated with DateTime
     # ZeitgeberSec = Zeitgeber Second associated with DateTime
@@ -254,7 +260,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # InitiatorSameAfterS10 = determines if angle has not changed in the next pulse when sensitivity = 10
     # InitiatorSameAfterS20 = determines if angle has not changed in the next pulse when sensitivity = 20
     # InitiatorSameAfterS30 = determines if angle has not changed in the next pulse when sensitivity = 30
-    # distanceMoved = distance between 2 centroids between pulses 
+    # distanceMoved = distance between 2 centroids between pulses
     # isHourMark = determines if there is an XTick or not
     # isLightChange = determines the switch between day and night
 
@@ -300,47 +306,47 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     if DEBUG: print(numPulses)
 
-    # () corresponds to the column the variable is associated with 
-    
-    # td = (TimeDelta) 
+    # () corresponds to the column the variable is associated with
+
+    # td = (TimeDelta)
     # absM = (AbsoluteMinute)
-    # dt = (DateTime) 
-    # zt = (ZeitgeberTime) 
+    # dt = (DateTime)
+    # zt = (ZeitgeberTime)
     # ipi = (Interpulse Interval)
     # pr = Pulse Rate
-    # dn = (Day or Night) 
+    # dn = (Day or Night)
     # centroid = X,Y coordinates of the jellyfish centroid
     # a1 = angle 1
     # a2 = angle 2
-    # isS1 = (InitiatorSameAfterS10) 
-    # isS2 = (InitiatorSameAfterS20) 
-    # isS3 = (InitiatorSameAfterS30) 
-    # dm = (distancedMoved) 
-    # hourMark = (isHourMark) 
+    # isS1 = (InitiatorSameAfterS10)
+    # isS2 = (InitiatorSameAfterS20)
+    # isS3 = (InitiatorSameAfterS30)
+    # dm = (distancedMoved)
+    # hourMark = (isHourMark)
     # lightChange = (isLightChange)
-    
+
     # Konnor's comments on Deborah's notes:
-    # td = time delta, a time delta object that represents the time elapsed from the start of the recording. HH:MM:SS.sss format? 
-    #       time delta is calculated using frame of pulse, divided by framerate to get raw seconds, which is then used by timedelta to calculate the rest. 
-    # absM = absolute minute. Takes the minute of each pulse. Useful for binning purposes. 
-    # dt = date time, datetime object of the exact date and time a pulse takes place. 
+    # td = time delta, a time delta object that represents the time elapsed from the start of the recording. HH:MM:SS.sss format?
+    #       time delta is calculated using frame of pulse, divided by framerate to get raw seconds, which is then used by timedelta to calculate the rest.
+    # absM = absolute minute. Takes the minute of each pulse. Useful for binning purposes.
+    # dt = date time, datetime object of the exact date and time a pulse takes place.
     # zt = zeitgeber time. Datetime object. Shift of dt by the time the lights turn on which is ~7am normally and ~8am during daylight savings time
     # ipi = interpulse interval
     # pr = Pulse Rate
     # dn = day/night. Specifies 'day' if pulse occured during circadium day (zt time is < 12) and 'night' if pulse occurs during circadium night (zt time is >12, < 24)
-    # centroid = (X,Y) position of the jellyfish in pixels, in the tank. 
+    # centroid = (X,Y) position of the jellyfish in pixels, in the tank.
     # a1 = angle 1 -- angle of the current pulse
     # a2 = angle 2 -- angle of the pulse 1 after the current pulse
-    # isS1, ccS2m, isS3 = determines if initator angle has changed, True or False. 
-    #       True if angle of the pulse after is outside the sensitivity distance. 
+    # isS1, ccS2m, isS3 = determines if initator angle has changed, True or False.
+    #       True if angle of the pulse after is outside the sensitivity distance.
     #       False if the angle of the pulse after is inside the sensitivity distance
-    #       Sensativities are 10, 20, and 30 degrees. 
+    #       Sensativities are 10, 20, and 30 degrees.
     #       False at S==10 degrees means the next pulse lies within 10 degrees to either side of the current pulse.
-    ### ^^^ we should change these to AngleChanged and give actual sensitivity (therefore: acS10, acS20, acS30... etc.) Centers is depricated.  
+    ### ^^^ we should change these to AngleChanged and give actual sensitivity (therefore: acS10, acS20, acS30... etc.) Centers is depricated.
     # dm = distance moved. distance between 2 centroids in pixels
     # hourMark = determines if there is a change in hour to determine if that frame location should be used as an XTick or not.
     # lightChange = determines the switch between day and night. Useful in marking Day/Night changes on bar graph and xtickDf
-    
+
     # initializing various components to create fully complex dataframe
     for i in range(numPulses):
         if i % 1000 == 0: print(i)
@@ -494,6 +500,45 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
                 actigramArr[frame-startFrame+extension][(angle + offset)%360] = 1
 
     return actigramArr
+
+
+def dfValidator(complexDFpostvalidation, chunks2remove=[]):
+    validationDF = complexDFpostvalidation[complexDFpostvalidation['by eye verification'].notnull()]
+
+    validationSubsetDF = validationDF[['chunk name', 'angle', 'by eye verification']]
+
+    chunks4validation = list(validationSubsetDF['chunk name'].unique())
+
+    for chunk in chunks2remove:
+        if chunk in chunks4validation: chunks4validation.remove(chunk)
+
+    validationSubsetDF = validationSubsetDF[validationSubsetDF['chunk name'].isin(chunks4validation)]
+
+    def getStd_Dev(validationSubset):
+        rawAngles = validationSubset['angle'].tolist()
+        byEyeAngles = validationSubset['by eye verification'].tolist()
+
+        diff2byeye = []
+        for i in range(len(rawAngles)):
+            raw_angle = rawAngles[i]
+            byeye_angle = convertTo360(byEyeAngles[i])
+            if not (math.isnan(raw_angle) or math.isnan(byeye_angle)):
+                diff2byeye.append(distanceBetween(raw_angle, byeye_angle))
+
+        squaredDiffs = np.square(diff2byeye)
+        summedDiffs = np.sum(squaredDiffs)
+        variance = summedDiffs / len(squaredDiffs)
+        sd = np.sqrt(variance)
+
+        return sd
+
+    std_dev = getStd_Dev(validationSubsetDF)
+
+    std_dev_bychunk = np.array(list(zip(chunks4validation,
+                                        [getStd_Dev(validationSubsetDF[validationSubsetDF['chunk name'] == x]) for x in
+                                         chunks4validation])))
+
+    return std_dev, std_dev_bychunk
 
 
 def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120):

@@ -4,16 +4,12 @@ import numpy as np
 import matplotlib.cm as cm
 import math
 
-# def readCSV2pandasDF(CSVpath):
-#     return pd.read_csv(str(CSVpath), index_col=0)
-
 ####### Key things to know #######
 # Axis refers to the axes object, not the x or y axis. Every figure must be added in
 # similarly, all of the titles, x/y ticks, and visibility methods are from the axes class, not pyplt.
 # a lot of these need to be worked on and organized. That is likely to be a future project for you guys.
 
-
-###  Definitions, look at () for ex so i remember what is what for now -deb ###
+###  Definitions
 # bar4MovementDayNight- the skinny bar with the yellow/blue day/night, and the red ticks for movement // (plotBar)
 # actigramFigure- the blue graph with time vs degrees // (SeismicActigram)
 # interpulseInterval- the spikey grey one with the blue line going through the middle // (InterpulseInterval)
@@ -358,7 +354,7 @@ def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = Tr
     ax.margins(x=0)
 
     #fixed limits. Makes graphs compareable
-    ax.set_ylim(0, 1.5)
+    ax.set_ylim(0.25, 1.25)
 
     # x tick method.
     if show_xLabels:
@@ -369,6 +365,64 @@ def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = Tr
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
     if show_title: ax.set_title(jelly_title + ' Pulse Rate')
+
+
+def distanceMoved(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
+    """
+
+    :param jelly_title: title of Jellyfish to be used in naming of figure
+    :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
+    :param dfComplex: Takes in the complex dataframe. Uses the global frame and 'PulseRate'
+    :param show_title: True if title is desired, False otherwise. Default is True.
+    :param show_xLabels: True if x labels are desired, False otherwise. Default is True.
+    :param show_average: True if average line is desired, False otherwise. Default is True. Average line gets worse the shorter the video is.
+    :return: axes object filled with IPI figure.
+    """
+
+    # takes pulses where Pulse Rate is not null
+    df = dfComplex[dfComplex.distanceMoved.notnull()]
+
+    # renames axes object for convenience
+    ax = axis
+
+    # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
+    # global frame taken from complex dataframe for x axis data
+    x = df['global frame']
+
+    # interpulse interval taken from dataframe for y axis data
+    y = df['distanceMoved']
+
+    # plotting method
+    ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Distance Moved')  # specifying color, linewidth, label text   x
+
+    # averaging method
+    # shown as a blue line
+    if show_average:
+        ym = y.rolling(window=250).mean()  # calculates rolling average in/of groups of 250   x
+
+        ax.plot(x, ym, c = 'b', lw = 2, label= 'average')  # adds to ax a plot of the global dataframe vs rolling avg  x
+
+        ax.set_xlabel(xlabel=r'Zeitgeber Time')  # sets x and y labels
+        ax.set_ylabel(ylabel='Distance Moved (px)')
+
+    # adds gridlines. Major and minor ticks. Only y axis. Alpha is the opacity of the lines.
+    ax.grid(which = 'both', axis = 'y', alpha=0.5, linestyle='--')
+
+    # zeros the margins
+    ax.margins(x=0)
+
+    #fixed limits. Makes graphs compareable
+    # ax.set_ylim(0, 50)
+
+    # x tick method.
+    if show_xLabels:
+        # setting x ticks
+        applyXticks(dfComplex, ax, figType)
+
+    else:
+        ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
+
+    if show_title: ax.set_title(jelly_title + ' Distance Moved')
 
 
 def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[], vertical = True, show_title = True, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = []):
@@ -666,3 +720,4 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
     if show_Legend: ax.legend()
 
     if show_title: ax.set_title(jelly_title + ' Centralization Plot')
+
