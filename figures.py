@@ -354,7 +354,7 @@ def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = Tr
     ax.margins(x=0)
 
     #fixed limits. Makes graphs compareable
-    ax.set_ylim(0.25, 1.25)
+    ax.set_ylim(0.5, 1.5)
 
     # x tick method.
     if show_xLabels:
@@ -631,7 +631,6 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
     Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to
     another. This is done by aggregating the True/False "CentersChangedS__' columns.
 
-
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param dfComplex: Takes in the complex dataframe. Uses the global frame and all of the CenterChangedS** columns.
@@ -703,7 +702,7 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
 
     # sets labels
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% pulses')
+    ax.set_ylabel(ylabel='% centralized')
 
     # sets grid
     ax.grid(axis = 'y', alpha=0.5, linestyle='--')
@@ -713,7 +712,6 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
     if show_xLabels:
         # setting x ticks
         applyXticks(dfComplex, ax, figType)
-
     else:
         ax.get_xaxis().set_visible(False)
 
