@@ -408,8 +408,13 @@ def distanceMoved(jelly_title, axis, dfComplex, show_title = True, show_xLabels 
     # adds gridlines. Major and minor ticks. Only y axis. Alpha is the opacity of the lines.
     ax.grid(which = 'both', axis = 'y', alpha=0.5, linestyle='--')
 
+    ax.semilogy()
+
     # zeros the margins
     ax.margins(x=0)
+
+    # fixed limits. Makes graphs compareable
+    ax.set_ylim(0.1, 300)
 
     #fixed limits. Makes graphs compareable
     # ax.set_ylim(0, 50)
@@ -425,7 +430,7 @@ def distanceMoved(jelly_title, axis, dfComplex, show_title = True, show_xLabels 
     if show_title: ax.set_title(jelly_title + ' Distance Moved')
 
 
-def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[], vertical = True, show_title = True, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = []):
+def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[], vertical = True, show_title = True, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = [], question=None):
     """
     Shows a normalized histogram of usage across the degrees of a jellyfish. Each entry represents the total pulses of
     that particular degree on the jellyfish as a percent of total pulses.
@@ -437,11 +442,17 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[],
                         if vertical is false, the plot is plotted horizontally, with the degree locations on the x axis.
     :param show_title:  True if title is desired, False otherwise. Default is True.
     :param show_degreeLabels:  True if labels (x or y ticks depending on orientation) are desired, False otherwise. Default is True.
+    :param question: Query to filter the complex dataframe. questions are written as pandas query functions.
     :return: axes object filled with IPI figure.
     """
 
+    if question:
+        dfQuery = dfComplex.query(question)
+    else:
+        dfQuery = dfComplex
+
     # aggregates angle measurements from 'bounded angle' column
-    dfGrouped = dfComplex.groupby(['bounded angle'])['bounded angle'].agg('count')
+    dfGrouped = dfQuery.groupby(['bounded angle'])['bounded angle'].agg('count')
 
     degrees = dfGrouped.index.tolist()  # sets 'degrees' as contents of dfGrouped, in list form   x
     counts = dfGrouped.tolist()  # populates 'counts' with dfGrouped in index form.  possibe it's vice versa but I dont think so  x
@@ -540,32 +551,6 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[],
             ax1.get_xaxis().set_visible(False)
 
     if show_title: ax1.set_title(jelly_title)
-
-
-
-def initiatiorsHistogramQueryFigure(jelly_title, ax, dfComplex, question, rhopos, rholab, vertical=True, show_title=True, show_degreeLabels = True):
-    """
-    lets you query the complex dataframe data to look at differences in subsets of data. Filtered Complex DF is an input
-    for the 'initiatiorsHistogramFigure' method.
-
-    useful questions:
-        'DayOrNight == \'Night\''   # queries all the night pulses
-        'DayOrNight == \'Day\''     # queries all the day pulses
-
-    :param jelly_title: title of Jellyfish to be used in naming of figure
-    :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
-    :param dfComplex: Takes in the complex dataframe. Only uses the 'bounded angle'
-    :param question: Query to filter the complex dataframe. questions are written as pandas query functions.
-    :param vertical:    if vertical is true, the plot is plotted vertically, with the degree locations on the y axis.
-                        if vertical is false, the plot is plotted horizontally, with the degree locations on the x axis.
-    :param show_title:  True if title is desired, False otherwise. Default is True.
-    :param show_degreeLabels:  True if labels (x or y ticks depending on orientation) are desired, False otherwise. Default is True.
-    :return: axes object filled with IPI figure.
-    """
-
-    dfQuery = dfComplex.query(question)
-
-    initiatiorsHistogramFigure(jelly_title, ax, dfQuery, rhopos, rholab, vertical, show_title, show_degreeLabels)
 
 
 def ysensitivity(dataframe, metric):
@@ -718,4 +703,6 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
     if show_Legend: ax.legend()
 
     if show_title: ax.set_title(jelly_title + ' Centralization Plot')
+
+
 

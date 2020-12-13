@@ -143,7 +143,7 @@ def plotDistanceMoved(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, pl
     plt.close()
 
 
-def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
+def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     """
     Input: complex dataframe for a jellyfish
     Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
@@ -159,7 +159,7 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, 
     # subplot
     ax = fig.add_subplot(gs[0, 0])
 
-    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab)
+    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab, constraints=hist_constraints)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterHistogramVertical')
@@ -169,7 +169,7 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, 
 
 
 
-def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
+def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     updateparameters()
     """
     Input: complex dataframe for a jellyfish
@@ -185,7 +185,7 @@ def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab
     ax = fig.add_subplot(gs[0, 0])
 
     # adding the initiatorHist fig to the current plot?
-    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos, rholab, vertical = False)
+    figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos, rholab, vertical = False, constraints=hist_constraints)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterHistogramHorizontal')
@@ -196,7 +196,7 @@ def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab
 
 # ### Centers
 
-def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
+def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     updateparameters()
     """
     Input: complex dataframe for a jellyfish
@@ -244,7 +244,7 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
                                            show_degreeLabels=False,
                                            show_just_degree_labels=sjdl,
                                            show_just_rhopalia_labels=sjrl,
-                                           constraints=[0, 0.1])
+                                           constraints=hist_constraints)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'Histogram4DayHourSlices')
@@ -253,7 +253,7 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
     plt.close()
 
 
-def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
+def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     updateparameters()
     """
     Input: complex dataframe for a jellyfish
@@ -301,7 +301,7 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
                                            show_degreeLabels=False,
                                            show_just_degree_labels=sjdl,
                                            show_just_rhopalia_labels=sjrl,
-                                           constraints=[0, 0.05])
+                                           constraints=hist_constraints)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'Histogram4DayLightSlices')
@@ -436,7 +436,7 @@ def ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhop
     plt.close()
 
 
-def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, hist_constraints=[]):
     """ input: complex dataframe for a jelly
     Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and vertical
     CenterHistogram with the day/night bar"""
@@ -461,7 +461,7 @@ def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex,
     figures.bar4MovementDayNight(dfComplex,  fig_ax2)
     figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
     figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
-    figures.initiatiorsHistogramFigure(jelly_title, fig_ax5, dfComplex, vertical=True, show_title=False, show_degreeLabels=False)
+    figures.initiatiorsHistogramFigure(jelly_title, fig_ax5, dfComplex, vertical=True, show_title=False, show_degreeLabels=False, constraints=hist_constraints)
     # individual titles, legends and labels are turned off
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_AND_CHVert')
@@ -470,7 +470,7 @@ def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex,
     plt.close()
 
 
-def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, hist_constraints=[]):
     """
     input: complex dataframe for a jelly
     Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and
@@ -484,7 +484,7 @@ def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
 
     # gridspec organization: 3 columns, 4 rows, with boxes of their respective size ratio
     heights = [15, 1, 5, 5]
-    widths = [10, 1, 1]
+    widths = [20, 1, 1]
     gs = fig.add_gridspec(ncols=3, nrows=4, height_ratios = heights, width_ratios = widths)
 
     # subplots  - created and assigned to a graph below
@@ -500,11 +500,53 @@ def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
     figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
     figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
 
-    figures.initiatiorsHistogramQueryFigure('Day', fig_ax5, dfComplex, 'DayOrNight == \'Day\'', rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False)
-    figures.initiatiorsHistogramQueryFigure('Night', fig_ax6, dfComplex, 'DayOrNight == \'Night\'', rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False)
+    figures.initiatiorsHistogramFigure('Day', fig_ax5, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Day\'')
+    figures.initiatiorsHistogramFigure('Night', fig_ax6, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Night\'')
 
     #save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_AND_CHDayNight')
+    fig.savefig(str(outpath),bbox_inches='tight')
+
+    plt.close()
+
+
+def Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, hist_constraints=[]):
+    """
+    input: complex dataframe for a jelly
+    Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and
+    pulse initiation day-night Histogram with the day/night bar
+    """
+
+    updateparameters()
+
+    # create empty figure with customized dimensions. "constrained_layout" automatically adjusts subplots to fit window
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    # gridspec organization: 3 columns, 4 rows, with boxes of their respective size ratio
+    heights = [15, 1, 5, 5, 5]
+    widths = [20, 1, 1]
+    gs = fig.add_gridspec(ncols=3, nrows=5, height_ratios = heights, width_ratios = widths)
+
+    # subplots  - created and assigned to a graph below
+    fig_ax1 = fig.add_subplot(gs[0,0])
+    fig_ax2 = fig.add_subplot(gs[1,0])
+    fig_ax3 = fig.add_subplot(gs[2,0])
+    fig_ax4 = fig.add_subplot(gs[3,0])
+    fig_ax5 = fig.add_subplot(gs[4,0])
+    fig_ax6 = fig.add_subplot(gs[0,1])
+    fig_ax7 = fig.add_subplot(gs[0,2])
+
+    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
+    figures.bar4MovementDayNight(dfComplex, fig_ax2)
+    figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
+    figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
+    figures.distanceMoved(jelly_title, fig_ax5, dfComplex, show_title = False, show_xLabels=False)
+
+    figures.initiatiorsHistogramFigure('Day', fig_ax6, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Day\'')
+    figures.initiatiorsHistogramFigure('Night', fig_ax7, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Night\'')
+
+    #save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_DM_AND_CHDayNightWithBar')
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -525,10 +567,10 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhol
     fig_ax1 = fig.add_subplot(gs[0,0])
     fig_ax2 = fig.add_subplot(gs[1,0])
 
-    figures.initiatiorsHistogramQueryFigure('Day', fig_ax1, dfComplex, 'DayOrNight == \'Day\'', rhopos, rholab, vertical=False, show_title=True,
-                                            show_degreeLabels=True)
-    figures.initiatiorsHistogramQueryFigure('Night', fig_ax2, dfComplex, 'DayOrNight == \'Night\'', rhopos, rholab, vertical=False, show_title=True,
-                                            show_degreeLabels=True)
+    figures.initiatiorsHistogramFigure('Day', fig_ax1, dfComplex, rhopos, rholab, vertical=False, show_title=True,
+                                            show_degreeLabels=True, question='DayOrNight == \'Day\'')
+    figures.initiatiorsHistogramFigure('Night', fig_ax2, dfComplex, rhopos, rholab, vertical=False, show_title=True,
+                                            show_degreeLabels=True, question='DayOrNight == \'Night\'')
 
     fig.suptitle(jelly_title)
 
@@ -546,7 +588,7 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhol
 
 ##############################################################
 
-def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120):
+def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120, histogram_constraints=[]):
     """
     :param jelly_title: name of jellyfish
     :param outdir: output directory where png's will be saved
@@ -568,9 +610,9 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotPulseRate(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
-    plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, 36, 10)
+    plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, 18, 5, hist_constraints = histogram_constraints)
 
-    plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 10, 36)
+    plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 5, 18, hist_constraints = histogram_constraints)
 
     plotDistanceMoved(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
@@ -584,15 +626,17 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+2, stdXlen)
 
-    Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen)
+    Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen, hist_constraints = histogram_constraints)
 
-    Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, 17, stdXlen)
+    Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen, hist_constraints = histogram_constraints)
+
+    Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+11, stdXlen, hist_constraints = histogram_constraints)
 
     # histogram partitions
 
     centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, 20, 36)
 
-    plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15)
+    plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
 
-    plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15)
+    plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
 
