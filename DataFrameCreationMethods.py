@@ -478,6 +478,8 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     
     # converts the bounded angles into ints
     df = df.astype({'bounded angle': 'int64'})
+
+    df = df.astype({'global frame': 'int64'})
     
     # changes the frame and angles to python lists
     pulseFrames = df['global frame'].tolist()
