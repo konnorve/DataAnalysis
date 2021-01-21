@@ -434,6 +434,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # pieces together the entire complex datframe, complete with all data and the header
     complexDF = pd.DataFrame(complexDFArr, columns = header)
 
+    complexDF = complexDF.astype({'global frame': 'int64'})
+
     if DEBUG: print(complexDF.head())
     
     #returns a pandas dataframe
@@ -478,8 +480,6 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     
     # converts the bounded angles into ints
     df = df.astype({'bounded angle': 'int64'})
-
-    df = df.astype({'global frame': 'int64'})
     
     # changes the frame and angles to python lists
     pulseFrames = df['global frame'].tolist()
