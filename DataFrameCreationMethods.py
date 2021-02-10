@@ -71,8 +71,20 @@ def distanceBetween(a1, a2):
     d2 = m - l
     d = min([d1,d2])
 
-    assert d < 360
     return d
+
+def getClosestRhopalia(raw_angle, rhopos, rholab):
+
+    closet_rholab = rholab[0]
+    shortest_distance = distanceBetween(raw_angle, rhopos[0])
+
+    for i in range(1, len(rhopos)):
+        dist = distanceBetween(raw_angle, rhopos[i])
+        if dist < shortest_distance:
+            closet_rholab = rholab[i]
+            shortest_distance = dist
+
+    return closet_rholab
 
 
 def nearbyAngle(a1, a2, sensitivity):
@@ -100,7 +112,7 @@ def convertTo360(a):
         a += 360
     while a >= 360:
         a -= 360
-    return int(a)
+    return a
 
 
 #########################################################
@@ -110,7 +122,7 @@ def convertTo360(a):
 #########################################################
 
 
-def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
+def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, rhopos, rholab, DAYLIGHTSAVINGS = False):
     """
     Creates a complex data frame as a CSV and takes in angle and orientation data during a specified time frame.
 
@@ -157,8 +169,6 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # concats all the dataframes into one pandas df
     simpleConcatDF = pd.concat(simpleDFs)
-
-    print(simpleConcatDF['chunk name'].iloc[0])
     
     # adds the orientation data from the orientationDF to the simpleConcatDF
     simpleConcatDF = simpleConcatDF.merge(orientationDF, how='left', left_on=['movement segment', 'chunk name'], right_on=['movement segment', 'chunk name'])
@@ -173,13 +183,17 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # turns the orientated angles into integer angle measurements within angleLimits
     boundAngles = []
+    closestRhopalia = []
 
     # bounded angle is valid integer value angle that and the site on initiation
     for ang in orientedAngleList:
         if math.isnan(ang):
             boundAngles.append(None)
+            closestRhopalia.append(None)
         else:
             boundAngles.append(convertTo360(ang))
+            closestRhopalia.append(getClosestRhopalia(ang, rhopos, rholab))
+
     # kve:
     # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
     # bounded angle is most important for data analysis. It maps each pulse on the normal jelly axis. 
@@ -187,7 +201,10 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # creates column 'bounded angle' which is the modulo of angle by 360 (final oriented angle)
     simpleConcatDF['bounded angle'] = boundAngles
     # ^^^^^^^MOST IMPORTANT COLUMN^^^^^^^
-    
+
+    # creates column that lists the rhopalia closest to the given angle
+    simpleConcatDF['closest rhopalia'] = closestRhopalia
+
     # indicates the properly oriented angle at which contraction occured
     if DEBUG: print(simpleConcatDF.head())
     
