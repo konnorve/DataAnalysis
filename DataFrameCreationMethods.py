@@ -459,6 +459,50 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, rhop
     #returns a pandas dataframe
     return complexDF
 
+
+
+###################################
+###################################
+######## Data Aggregation #########
+###################################
+###################################
+
+
+def createUsageDF(complexDF):
+    """
+    creates a dataframe with each pulse representing a row and each rhopalia a column.
+    1's are assigned to the presumed initiating rhopalia of each pulse
+    pulses are timestamped with Zeigeber Time
+    """
+    usage_df = pd.get_dummies(complexDF['closest rhopalia'], prefix='rho')
+
+    usage_df['ZeitgeberTime'] = pd.to_datetime(
+        complexDF['ZeitgeberTime'],
+        format='%Y-%m-%d %H:%M:%S')
+
+    usage_df = usage_df.set_index('ZeitgeberTime')
+
+    return usage_df
+
+
+def createAggUsageDF(usageDF, time_bin):
+    """
+    aggregates the usage dataframe on the specified time bin.
+
+    documentation on resampling options at the timeseries pandas documentation page:
+    https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
+
+    returns dataframe with time bins that have percent usage for each rhopalia
+
+    """
+
+    aggDF = usageDF.resample(time_bin).sum()
+
+    aggDF = aggDF.div(usageDF.sum(axis=1).resample(time_bin).sum(), axis=0)
+
+    return aggDF
+
+
 ###################################
 ###################################
 ########## Figure Data ############
