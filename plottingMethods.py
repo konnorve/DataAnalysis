@@ -143,7 +143,7 @@ def plotDistanceMoved(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, pl
     plt.close()
 
 
-def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
+def plotAngleHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     """
     Input: complex dataframe for a jellyfish
     Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
@@ -169,7 +169,7 @@ def plotCenterHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, 
 
 
 
-def plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
+def plotAngleHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     updateparameters()
     """
     Input: complex dataframe for a jellyfish
@@ -552,7 +552,7 @@ def Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfC
     plt.close()
 
 
-def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
+def anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen):
     """
     Input: complex dataframe for a jellyfish
     Output: figure vizualizing distribution of centers by degree angle for one day and night period
@@ -576,7 +576,7 @@ def centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhol
 
     #save fig
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'centersHistogramDayANDNightPlot')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, 'anglesHistogramDayANDNightPlot')
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -610,9 +610,9 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotPulseRate(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
-    plotCenterHistogramVertical(outdir, jelly_title, dfComplex,rhopos,rholab, 18, 5, hist_constraints = histogram_constraints)
+    plotAngleHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, 18, 5, hist_constraints = histogram_constraints)
 
-    plotCenterHistogramHorizontal(outdir, jelly_title, dfComplex,rhopos,rholab, 5, 18, hist_constraints = histogram_constraints)
+    plotAngleHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 18, hist_constraints = histogram_constraints)
 
     plotDistanceMoved(outdir, jelly_title, dfComplex, stdYlen, stdXlen)
 
@@ -634,7 +634,7 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     # histogram partitions
 
-    centersHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, 20, 36)
+    anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rholab, 20, 36)
 
     plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
 

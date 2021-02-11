@@ -122,7 +122,7 @@ def convertTo360(a):
 #########################################################
 
 
-def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, rhopos, rholab, DAYLIGHTSAVINGS = False):
+def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
     """
     Creates a complex data frame as a CSV and takes in angle and orientation data during a specified time frame.
 
@@ -138,7 +138,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, rhop
     """
 
     # initiate angle data dataframe from directory
-    dfPaths = [dir for dir in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
+    dfPaths = [csv for csv in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
 
     # simple DFs aka raw angle data are put together into a list and concatenated 
 
@@ -175,8 +175,16 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, rhop
 
     simpleConcatDF = simpleConcatDF.astype({'angle': 'float64'})
 
+    # in order to get an accurate angle measurement, the marker angle must be measured
+    # selects the marker rhopalia from the list of rhopalia
+    orientationRhopalia = orientationDF.loc[orientationDF['Orientation Rho']=='YES']
+
+    assert len(orientationRhopalia) == 1
+
+    orientationMarkerAngle = orientationRhopalia['Rhopalia Position'].iloc[0]
+
     # creates column in simple simpleConcatDF with properly oriented angles of jellyfish by adding angle and orientation factor from orientation segments
-    simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor']
+    simpleConcatDF['oriented angle'] = simpleConcatDF['angle'] - simpleConcatDF['orientation factor'] + orientationMarkerAngle
 
     # turns the column of angle data into a python list
     orientedAngleList = simpleConcatDF['oriented angle'].tolist()
@@ -184,6 +192,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, rhop
     # turns the orientated angles into integer angle measurements within angleLimits
     boundAngles = []
     closestRhopalia = []
+    rhopos = orientationDF['Rhopalia Position'].tolist()
+    rholab = orientationDF['Rhopalia Label'].tolist()
 
     # bounded angle is valid integer value angle that and the site on initiation
     for ang in orientedAngleList:

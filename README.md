@@ -44,7 +44,7 @@ In being able to track jellyfish pulse initiation we can study jellyfish behavio
 ### plottingMethods.py
 `plotInterpulseInterval(outdir, jelly_title, dfComplex, dfxTicks, yfigurelen, xfigurelen)`
 `plotInterpulseIntervalWithBar(outdir, jelly_title, dfComplex, dfxTicks, barArr, yfigurelen, xfigurelen)`
-`plotCenterHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen)`
+`plotAngleHistogramVertical(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen)`
 
 ### figures.py
 
