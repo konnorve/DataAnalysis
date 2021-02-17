@@ -3,7 +3,11 @@
 
 import matplotlib.pylab as pylab
 import matplotlib.pyplot as plt
+# import seaborn as sns; sns.set() # pretty plotting... hopefully?... maybe not...
 import matplotlib.cm as cm
+import imageio
+import os
+
 from . import DataFrameCreationMethods as cdf
 from . import figures
 
@@ -310,7 +314,127 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
     plt.close()
 
 
-def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, plotBar=True, colormap=cm.binary):
+def plotJellyTrajectory(outdir, jelly_title, dfComplex, distanceMovedThreshold=50, image_max_x=640, image_max_y=480):
+    complexDFfiltered = dfComplex.loc[dfComplex['DistanceMoved_After'] < distanceMovedThreshold]
+
+    fig, ax = plt.subplots(figsize=(image_max_x / 50, image_max_y / 50))
+
+    ax.set_title(jelly_title)
+
+    figures.jelly_trajectory(complexDFfiltered, fig, ax, image_max_x, image_max_y, a=0.4)
+
+    plt.savefig(outdir / '{}_jelly_trajectory.png'.format(jelly_title))
+
+
+def plotJellyTrajectoryDayNight(outdir, jelly_title, dfComplex, distanceMovedThreshold=50, image_max_x=640,
+                                image_max_y=480):
+    complexDFfiltered = dfComplex.loc[dfComplex['DistanceMoved_After'] < distanceMovedThreshold]
+
+    fig, (ax1, ax2) = plt.subplots(nrows=2, sharex='all', figsize=(image_max_x / 50, image_max_y / 25))
+    ax1.set_title("{} Day".format(jelly_title))
+    ax2.set_title("{} Night".format(jelly_title))
+
+    complexDFDaySegments = complexDFfiltered.loc[complexDFfiltered['DayOrNight'] == 'Day']
+    complexDFNightSegments = complexDFfiltered.loc[complexDFfiltered['DayOrNight'] == 'Night']
+
+    figures.jelly_trajectory(complexDFDaySegments, fig, ax1, image_max_x, image_max_y, a=0.4)
+    figures.jelly_trajectory(complexDFNightSegments, fig, ax2, image_max_x, image_max_y, a=0.4)
+
+    plt.savefig(outdir / '{}_jelly_trajectory_daynight.png'.format(jelly_title))
+
+
+def plotJellyTrajectoryFiltered(outdir, jelly_title, dfComplex, column_name, distanceMovedThreshold=50, image_max_x=640,
+                                image_max_y=480):
+    complexDFfiltered = dfComplex.loc[dfComplex['DistanceMoved_After'] < distanceMovedThreshold]
+
+    unique_vars = complexDFfiltered[column_name].unique()
+
+    fig, axes = plt.subplots(nrows=len(unique_vars), sharex='all',
+                             figsize=(image_max_x / 50, image_max_y * len(unique_vars) / 50))
+
+    for ax, var in zip(axes, unique_vars):
+        ax.set_title("{} {}".format(jelly_title, var))
+
+        complexDFslice = complexDFfiltered.loc[complexDFfiltered[column_name] == var]
+
+        figures.jelly_trajectory(complexDFslice, fig, ax, image_max_x, image_max_y, a=0.4)
+
+    plt.savefig(outdir / '{}_jelly_trajectory_{}.png'.format(jelly_title, column_name))
+
+
+def create_trajectory_gif(complexDFslice, jelly_title, outDir, distanceMovedThreshold=50, a=0.4, image_max_x=640,
+                          image_max_y=480):
+    complexDFfiltered = complexDFslice.loc[complexDFslice['DistanceMoved_After'] < distanceMovedThreshold]
+
+    x_arr = complexDFfiltered['centroid x'].to_numpy()
+    y_arr = complexDFfiltered['centroid y'].to_numpy()
+    # converts Zeitgeber time into int (epoch time)
+    time_arr = complexDFfiltered['ZeitgeberTime'].astype(int).to_numpy()
+
+    # shape all the coordinate points into segments to plot continuous line
+    points = np.array([x_arr, y_arr]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    gif_frames = np.linspace(0, len(time_arr), 100, dtype=int)
+    gif_frame_paths = [outDir / '{}.png'.format(i) for i in gif_frames]
+
+    fig, ax = plt.subplots(figsize=(image_max_x / 50, image_max_y / 50))
+    ax.set_title(jelly_title)
+    ax.set_xlim(0, image_max_x)
+    ax.set_ylim(0, image_max_y)
+
+    # Create a continuous norm to map from data points to colors
+    norm = plt.Normalize(time_arr.min(), time_arr.max())
+
+    fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cm.viridis), ax=ax)
+
+    for n in range(1, len(gif_frames)):
+        print(n)
+
+        start = gif_frames[n - 1]
+        end = gif_frames[n]
+        path = gif_frame_paths[n]
+
+        lc = LineCollection(segments[start:end], cmap='viridis', norm=norm, alpha=a)  # change opacity with alpha
+
+        # Set the values used for colormapping
+        lc.set_array(time_arr[start:end])
+        lc.set_linewidth(2)
+        line = ax.add_collection(lc)
+
+        # normalize the color scale to the color map
+        cmap = cm.viridis
+
+        # color a portion of the color scale according to the normalized colors we've set
+        for i in range(len(time_arr[start:end])):
+            color = cmap(norm(time_arr[start + i]))
+            ax.plot(x_arr[start + i], y_arr[start + i], marker='o', c=color, alpha=a)
+
+        # labelling stuff
+        ax.set_xlabel('X Position')
+        ax.set_ylabel('Y Position')
+
+        plt.savefig(path)
+
+    plt.savefig(outDir / '{}_trajectory_plot_final.png'.format(jelly_title))
+
+    gif_frame_paths.pop(0)
+
+    # build gif
+    with imageio.get_writer(outDir / '{}_trajectory_movie.gif'.format(jelly_title), mode='I') as writer:
+        for filename in gif_frame_paths:
+            image = imageio.imread(filename)
+            writer.append_data(image)
+        final_image = imageio.imread(gif_frame_paths[-1])
+        for i in range(20):
+            writer.append_data(final_image)
+
+            # Remove files
+    for filename in set(gif_frame_paths):
+        os.remove(filename)
+
+
+def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, plotBar=True):
     """
     Input: complex dataframe for a jellyfish
     Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
@@ -327,17 +451,17 @@ def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions36
         ax2 = fig.add_subplot(gs[1, 0])
         figures.bar4MovementDayNight(complexDF, ax2)
 
-        outpath = outdir / '{}_{}{}.png'.format(jelly_title, colormap.name, 'ActigramWithBar')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'ActigramWithBar')
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
-        outpath = outdir / '{}_{}{}.png'.format(jelly_title, colormap.name, 'Actigram')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, 'Actigram')
 
     # actigram plotting on gridspec
     ax1 = fig.add_subplot(gs[0, 0])
-    figures.actigramFigure(dfActigram, complexDF, ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, colormap)
+    figures.actigramFigure(dfActigram, complexDF, ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
 
     #save fig
     fig.savefig(str(outpath),bbox_inches='tight')
@@ -425,7 +549,7 @@ def ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhop
     ax2 = fig.add_subplot(gs[1,0])
     ax3 = fig.add_subplot(gs[2,0])
 
-    figures.actigramFigure(dfActigram, dfComplex, ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
+    figures.actigramFigure(dfActigram, dfComplex, ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex, ax2)
     figures.pulseRate(jelly_title, ax3, dfComplex, show_title=False, show_xLabels=False)
 
@@ -457,7 +581,7 @@ def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex,
     fig_ax4 = fig.add_subplot(gs[3,0])
     fig_ax5 = fig.add_subplot(gs[0,1])
 
-    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
+    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex,  fig_ax2)
     figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
     figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
@@ -495,7 +619,7 @@ def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
     fig_ax5 = fig.add_subplot(gs[0,1])
     fig_ax6 = fig.add_subplot(gs[0,2])
 
-    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
+    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex, fig_ax2)
     figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
     figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
@@ -536,7 +660,7 @@ def Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfC
     fig_ax6 = fig.add_subplot(gs[0,1])
     fig_ax7 = fig.add_subplot(gs[0,2])
 
-    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels, cm.binary)
+    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex, fig_ax2)
     figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
     figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
@@ -640,3 +764,10 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
 
+    # trajectory plotting
+
+    plotJellyTrajectory(outdir, jelly_title, dfComplex)
+
+    plotJellyTrajectoryDayNight(outdir, jelly_title, dfComplex)
+
+    create_trajectory_gif(dfComplex, jelly_title, outdir)

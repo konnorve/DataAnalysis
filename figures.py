@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.cm as cm
 import math
+from datetime import timedelta as td
 
 ####### Key things to know #######
 # Axis refers to the axes object, not the x or y axis. Every figure must be added in
@@ -75,19 +76,12 @@ def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], day
     return barArr
 
 
-def createCompressedActigram(actigramCSV, compression_factor):
-    # takes slice of actigram array.
-    # slice contains one row of every n $compression_factors
-    # if there were 50 rows, and compression_factor == 10, it would return rows 0,10,20,30,40,50.
-    return actigramCSV[::compression_factor]
-
-
 def createCompressedMovementDayNightBar(barArr, compression_factor):
     # takes slice of bar array
     # see documentation for Compressed Actigram
     return barArr[::compression_factor]
 
-
+"""
 def applyXticks(complexDF, ax, figType):
     # turn off ticks on first axis
     ax.get_xaxis().set_visible(False)
@@ -130,7 +124,75 @@ def applyXticks(complexDF, ax, figType):
 
     tickAx.set_xticks(xtickMarks)
     tickAx.set_xticklabels(xticklabels)
+"""
 
+
+def chooseFigType(complexDF):
+    start_datetime = complexDF.ZeitgeberTime.min()
+    end_datetime = complexDF.ZeitgeberTime.max()
+
+    timeperiod_length = end_datetime - start_datetime
+
+    long_td = td(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=4, weeks=0)
+    short_td = td(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=25, hours=0, weeks=0)
+
+    if timeperiod_length > long_td:
+        return 'Long'
+    elif timeperiod_length < short_td:
+        return 'Short'
+    else:
+        return 'Medium'
+
+
+def applyXticks(complexDF, ax):
+    # designed to fix the issues in the last plotting method, make them not reliant on ticking
+    # from dataframe, only on start and end time points
+    # turn off ticks on first axis
+    ax.get_xaxis().set_visible(False)
+
+    # create a new axis to tick on
+    tickAx = ax.twiny()
+
+    # move that twin axis from top of plot to bottom of plot
+    tickAx.get_xaxis().set_ticks_position('bottom')
+
+    start_datetime = complexDF.ZeitgeberTime.min()
+    end_datetime = complexDF.ZeitgeberTime.max()
+
+    num_seconds = (start_datetime - end_datetime).total_seconds()
+
+    figType = chooseFigType(complexDF)
+
+    print('figType: {}'.format(figType))
+
+    if figType == 'Long':
+        tick_start = start_datetime.replace(second=0, minute=0, microsecond=0, hour=start_datetime.hour + 1)
+        tick_spacing = td(hours=1)
+    elif figType == 'Medium':
+        tick_start = start_datetime.replace(second=0, minute=(start_datetime.minute // 10) * 10 + 10, microsecond=0)
+        tick_spacing = td(minutes=10)
+    elif figType == 'Short':
+        tick_start = start_datetime.replace(second=0, minute=start_datetime.minute + 1, microsecond=0)
+        tick_spacing = td(minutes=1)
+
+    tick_datetime = tick_start
+    tick_datetimes = []
+    while True:
+        if tick_datetime < end_datetime:
+            tick_datetimes.append(tick_datetime)
+            tick_datetime += tick_spacing
+        else:
+            break
+
+    if figType == 'Long':
+        xticklabels = [t.hour for t in tick_datetimes]
+    else:
+        xticklabels = ['{}:{:02}'.format(t.hour, t.minute) for t in tick_datetimes]
+
+    xtickMarks = [(start_datetime - dt).total_seconds() / num_seconds for dt in tick_datetimes]
+
+    tickAx.set_xticks(xtickMarks)
+    tickAx.set_xticklabels(xticklabels)
 
 
 ###################################
@@ -157,7 +219,7 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
 
     # imshow == Image show. Shows the np array as an image.
     # np.transpose flips the array from vertical to horizontal. It goes from being n frames long to n frames wide
-    ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto')
+    ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto', interpolation='none')
 
     # labels the Day/Night section on the top half and the Movement section on the bottom half of the plotBar
     ax.set_yticks([width/4, width*3/4])
@@ -166,7 +228,8 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
     # x axis not visible
     ax.get_xaxis().set_visible(False)
 
-def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], colormap = cm.seismic, figType='Long'):
+
+def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], figType='Long'):
     """
     :param dfActigram:  np actigram array. n frames long by 360 degrees wide. Must be transposed in order to be made into horizontal image.
                         often these are huge images. Plots that utilize this figure take a while to compile.
@@ -180,15 +243,11 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
     :return: axes object filled with actigram image.
     """
 
-    # takes slice of actigram to compress the image to be manageable for our purposes. Otherwise image is thousands of megabytes.
-    # takes every 10th row of the actigram to create a sliced image.
-    dfActigramComp = createCompressedActigram(dfActigram, 10)
-
     # renames axes object for convenience
     ax1 = axis
 
     # imshow function - show the sliced actogram; ('.T' flips rows and columns, because it's a transposed array?)
-    ax1.imshow(dfActigramComp.T, origin='lower', aspect='auto', cmap=colormap, interpolation='bilinear')
+    ax1.imshow(dfActigram.transpose((1,0,2)), origin='lower', aspect='auto', interpolation='bilinear')
 
     # if statement setting y ticks, both axes
     rp360 = rhopaliaPositions360
@@ -231,15 +290,7 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
         ax2.grid(False)
 
     # grids. Changes colors so that grids show regardless of colormap.
-    # colormaps
-    # binary: black and white
-    # seismic: dark blues
-    if colormap == cm.binary:
-        ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
-    elif colormap == cm.seismic:
-        ax1.grid(which='major', color='w', linestyle=':', linewidth=1)
-    else:
-        ax1.grid(which='major', color='#7f7f7f', linestyle=':', linewidth=1)
+    ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
 
     #setting x ticks
     applyXticks(complexDF, ax1, figType)
@@ -248,9 +299,8 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
     ax1.set_title(title)
 
 
-def interpulseInterval(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType ='Long'):
+def interpulseInterval(jelly_title, axis, dfComplex, ipi_after = True, show_title = True, show_xLabels = True, show_average = True, figType ='Long'):
     """
-
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param dfComplex: Takes in the complex dataframe. Uses the global frame and 'InterpulseInterval'
@@ -259,9 +309,21 @@ def interpulseInterval(jelly_title, axis, dfComplex, show_title = True, show_xLa
     :param show_average: True if average line is desired, False otherwise. Default is True. Average line gets worse the shorter the video is.
     :return: axes object filled with IPI figure.
     """
+    try:
+        if ipi_after:
+            # takes pulses where Interpulse interval is not null [and is lower than thirty?  x]
+            df = dfComplex[dfComplex.InterpulseInterval_After.notnull() & (dfComplex.InterpulseInterval_After < 30)]
 
-    # takes pulses where Interpulse interval is not null [and is lower than thirty?  x]
-    df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex.InterpulseInterval < 30)]
+            # interpulse interval taken from dataframe for y axis data
+            y = df['InterpulseInterval_After']
+        else:
+            df = dfComplex[dfComplex.InterpulseInterval_before.notnull() & (dfComplex.InterpulseInterval_before < 30)]
+            y = df['InterpulseInterval_before']
+
+    except Exception as error:
+        # could happen with older dataframes without Ipi_after or ipi_before
+        df = dfComplex[dfComplex.InterpulseInterval.notnull() & (dfComplex.InterpulseInterval < 30)]
+        y = df['InterpulseInterval']
 
     # renames axes object for convenience
     ax = axis
@@ -270,8 +332,6 @@ def interpulseInterval(jelly_title, axis, dfComplex, show_title = True, show_xLa
     # global frame taken from complex dataframe for x axis data
     x = df['global frame']
 
-    # interpulse interval taken from dataframe for y axis data
-    y = df['InterpulseInterval']
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'IPI')  # specifying color, linewidth, label text   x
@@ -309,7 +369,7 @@ def interpulseInterval(jelly_title, axis, dfComplex, show_title = True, show_xLa
     if show_title: ax.set_title(jelly_title + ' Interpulse Interval')
 
 
-def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
+def pulseRate(jelly_title, axis, dfComplex, pr_after = True, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -320,9 +380,22 @@ def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = Tr
     :param show_average: True if average line is desired, False otherwise. Default is True. Average line gets worse the shorter the video is.
     :return: axes object filled with IPI figure.
     """
+    
+    try:
+        if pr_after:
+            # takes pulses where Interpulse interval is not null [and is lower than thirty?  x]
+            df = dfComplex[dfComplex.PulseRate_After.notnull() & (dfComplex.PulseRate_After < 30)]
 
-    # takes pulses where Pulse Rate is not null
-    df = dfComplex[dfComplex.PulseRate.notnull() & (dfComplex.PulseRate < 30)]
+            # interpulse interval taken from dataframe for y axis data
+            y = df['PulseRate_After']
+        else:
+            df = dfComplex[dfComplex.PulseRate_Before.notnull() & (dfComplex.PulseRate_Before < 30)]
+            y = df['PulseRate_Before']
+
+    except Exception as error:
+        # could happen with older dataframes without Ipi_after or ipi_before
+        df = dfComplex[dfComplex.PulseRate.notnull() & (dfComplex.PulseRate < 30)]
+        y = df['PulseRate']
 
     # renames axes object for convenience
     ax = axis
@@ -330,9 +403,6 @@ def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = Tr
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
     x = df['global frame']
-
-    # interpulse interval taken from dataframe for y axis data
-    y = df['PulseRate']
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Pulse Rate')  # specifying color, linewidth, label text   x
@@ -367,7 +437,7 @@ def pulseRate(jelly_title, axis, dfComplex, show_title = True, show_xLabels = Tr
     if show_title: ax.set_title(jelly_title + ' Pulse Rate')
 
 
-def distanceMoved(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
+def distanceMoved(jelly_title, axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -379,8 +449,18 @@ def distanceMoved(jelly_title, axis, dfComplex, show_title = True, show_xLabels 
     :return: axes object filled with IPI figure.
     """
 
-    # takes pulses where Pulse Rate is not null
-    df = dfComplex[dfComplex.distanceMoved.notnull()]
+    try:
+        if dm_after:
+            df = dfComplex[dfComplex.DistanceMoved_After.notnull() & (dfComplex.DistanceMoved_After < maxDMthreshold)]
+            y = df['DistanceMoved_After']
+        else:
+            df = dfComplex[dfComplex.DistanceMoved_Before.notnull() & (dfComplex.DistanceMoved_Before < maxDMthreshold)]
+            y = df['DistanceMoved_Before']
+
+    except Exception as error:
+        df = dfComplex[dfComplex.distanceMoved.notnull() & (dfComplex.distanceMoved < maxDMthreshold)]
+        y = df['distanceMoved']
+
 
     # renames axes object for convenience
     ax = axis
@@ -388,9 +468,6 @@ def distanceMoved(jelly_title, axis, dfComplex, show_title = True, show_xLabels 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
     x = df['global frame']
-
-    # interpulse interval taken from dataframe for y axis data
-    y = df['distanceMoved']
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Distance Moved')  # specifying color, linewidth, label text   x
@@ -428,6 +505,44 @@ def distanceMoved(jelly_title, axis, dfComplex, show_title = True, show_xLabels 
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
     if show_title: ax.set_title(jelly_title + ' Distance Moved')
+
+
+def jelly_trajectory(complexDFslice, fig, ax, image_max_x, image_max_y, a=0.4):
+    ax.set_xlim(0, image_max_x)
+    ax.set_ylim(0, image_max_y)
+
+    x_arr = complexDFslice['centroid x'].to_numpy()
+    y_arr = complexDFslice['centroid y'].to_numpy()
+    # converts Zeitgeber time into int (epoch time)
+    time_arr = complexDFslice['ZeitgeberTime'].astype(int).to_numpy()
+
+    # shape all the coordinate points into segments to plot continuous line
+    points = np.array([x_arr, y_arr]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    # Create a continuous norm to map from data points to colors
+    norm = plt.Normalize(time_arr.min(), time_arr.max())
+
+    fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cm.viridis), ax=ax)
+
+    lc = LineCollection(segments, cmap='viridis', norm=norm, alpha=a)  # change opacity with alpha
+
+    # Set the values used for colormapping
+    lc.set_array(time_arr)
+    lc.set_linewidth(2)
+    line = ax.add_collection(lc)
+
+    # normalize the color scale to the color map
+    cmap = cm.viridis
+
+    # color a portion of the color scale according to the normalized colors we've set
+    for i in range(len(time_arr)):
+        color = cmap(norm(time_arr[i]))
+        ax.plot(x_arr[i], y_arr[i], marker='o', c=color, alpha=a)
+
+    # labelling stuff
+    ax.set_xlabel('X Position')
+    ax.set_ylabel('Y Position')
 
 
 def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[], vertical = True, show_title = True, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = [], question=None):
