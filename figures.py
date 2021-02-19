@@ -36,7 +36,7 @@ from datetime import timedelta as td
 ###################################
 
 
-def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127]):
+def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127], compression_factor=10):
     """
     Creates a movement bar indicating movement during the daytime or nightime
     Movement Color: Red
@@ -73,13 +73,8 @@ def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], day
         else:
             barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = dayColor
 
-    return barArr
-
-
-def createCompressedMovementDayNightBar(barArr, compression_factor):
-    # takes slice of bar array
-    # see documentation for Compressed Actigram
     return barArr[::compression_factor]
+
 
 """
 def applyXticks(complexDF, ax, figType):
@@ -215,8 +210,6 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
 
     dfBar = createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127])
 
-    dfBar = createCompressedMovementDayNightBar(dfBar, 10)
-
     # imshow == Image show. Shows the np array as an image.
     # np.transpose flips the array from vertical to horizontal. It goes from being n frames long to n frames wide
     ax.imshow(np.transpose(dfBar, (1, 0, 2)), origin='lower', aspect='auto', interpolation='none')
@@ -229,7 +222,7 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
     ax.get_xaxis().set_visible(False)
 
 
-def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = [], figType='Long'):
+def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = []):
     """
     :param dfActigram:  np actigram array. n frames long by 360 degrees wide. Must be transposed in order to be made into horizontal image.
                         often these are huge images. Plots that utilize this figure take a while to compile.
@@ -293,13 +286,13 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
     ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
 
     #setting x ticks
-    applyXticks(complexDF, ax1, figType)
+    applyXticks(complexDF, ax1)
 
     #graph title
     ax1.set_title(title)
 
 
-def interpulseInterval(jelly_title, axis, dfComplex, ipi_after = True, show_title = True, show_xLabels = True, show_average = True, figType ='Long'):
+def interpulseInterval(jelly_title, axis, dfComplex, ipi_after = True, show_title = True, show_xLabels = True, show_average = True):
     """
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
@@ -361,7 +354,7 @@ def interpulseInterval(jelly_title, axis, dfComplex, ipi_after = True, show_titl
     # x tick method.
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax, figType)
+        applyXticks(dfComplex, ax)
 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
@@ -369,7 +362,7 @@ def interpulseInterval(jelly_title, axis, dfComplex, ipi_after = True, show_titl
     if show_title: ax.set_title(jelly_title + ' Interpulse Interval')
 
 
-def pulseRate(jelly_title, axis, dfComplex, pr_after = True, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
+def pulseRate(jelly_title, axis, dfComplex, pr_after = True, show_title = True, show_xLabels = True, show_average = True):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -429,7 +422,7 @@ def pulseRate(jelly_title, axis, dfComplex, pr_after = True, show_title = True, 
     # x tick method.
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax, figType)
+        applyXticks(dfComplex, ax)
 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
@@ -437,7 +430,7 @@ def pulseRate(jelly_title, axis, dfComplex, pr_after = True, show_title = True, 
     if show_title: ax.set_title(jelly_title + ' Pulse Rate')
 
 
-def distanceMoved(jelly_title, axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_title = True, show_xLabels = True, show_average = True, figType = 'Long'):
+def distanceMoved(jelly_title, axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_title = True, show_xLabels = True, show_average = True):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -499,7 +492,7 @@ def distanceMoved(jelly_title, axis, dfComplex, dm_after = True, maxDMthreshold 
     # x tick method.
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax, figType)
+        applyXticks(dfComplex, ax)
 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
@@ -726,7 +719,7 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
 
 # def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
 def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLabels=True, show_Legend=True,
-                             sensitivity=30, bounds=(0, 1), figType='Long'):
+                             sensitivity=30, bounds=(0, 1)):
     """
     Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to
     another. This is done by aggregating the True/False "CentersChangedS__' columns.
@@ -753,6 +746,8 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
 
     # filters the dataframe [to fill 'df' with every cell from AbsoluteMinute with any value present? i think?   x]
     df = dfComplex[dfComplex.AbsoluteMinute.notnull()]
+
+    figType = chooseFigType(dfComplex)
 
     # BINSIZE is number of minutes to use in each bin
     # WINDOWSIZE is the number of bins to use in the rolling average and standard error analysis
@@ -811,7 +806,7 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
     # x ticks and labels
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax, figType)
+        applyXticks(dfComplex, ax)
     else:
         ax.get_xaxis().set_visible(False)
 
