@@ -457,7 +457,7 @@ def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions36
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
-        outpath = outdir / '{}_{}{}.png'.format(jelly_title, 'Actigram')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram')
 
     # actigram plotting on gridspec
     ax1 = fig.add_subplot(gs[0, 0])
@@ -499,6 +499,42 @@ def plotCentralization(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, p
 
     ax1 = fig.add_subplot(gs[0, 0])
     figures.centralizationFigure(jelly_title, ax1, dfComplex)
+
+    fig.savefig(str(outpath),bbox_inches='tight')
+
+    plt.close()
+
+
+def plot_ganglia_centralization(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBar=True):
+    """
+    Input: complex dataframe for a given jellyfish
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centralizationFigure
+    """
+    updateparameters()
+
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    if plotBar:
+        # gridspec organization
+        heights = [4, 1]
+        gs = fig.add_gridspec(ncols=1, nrows=2, height_ratios=heights)
+
+        # plot bar
+        ax2 = fig.add_subplot(gs[1, 0])
+        figures.bar4MovementDayNight(dfComplex, ax2)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'GangliaChangedWithBar')
+    else:
+        # gridspec organization
+        heights = [1]
+        gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
+
+        #save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'GangliaChanged')
+
+    ax1 = fig.add_subplot(gs[0, 0])
+    figures.ganglia_centralization(jelly_title, ax1, dfComplex)
 
     fig.savefig(str(outpath),bbox_inches='tight')
 

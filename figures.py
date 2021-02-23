@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.cm as cm
+import matplotlib.patches as mpatches
 import math
 from datetime import timedelta as td
 
@@ -236,11 +237,16 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
     :return: axes object filled with actigram image.
     """
 
+    # parses actigram dataframe
+    actigramArr = dfActigram[0]
+    legend_labels = dfActigram[1]
+    legend_colors = dfActigram[2]
+
     # renames axes object for convenience
     ax1 = axis
 
     # imshow function - show the sliced actogram; ('.T' flips rows and columns, because it's a transposed array?)
-    ax1.imshow(dfActigram.transpose((1,0,2)), origin='lower', aspect='auto', interpolation='bilinear')
+    ax1.imshow(actigramArr.transpose((1,0,2)), origin='lower', aspect='auto', interpolation='bilinear')
 
     # if statement setting y ticks, both axes
     rp360 = rhopaliaPositions360
@@ -281,6 +287,12 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
         ax2.set_ylabel(ylabel='Degrees')
 
         ax2.grid(False)
+
+    # if actigram is colored, it adds labels
+    if legend_labels is not None and legend_labels is not None:
+        rgb_float_colors = np.array(legend_colors) / 255
+        patches = [mpatches.Patch(color=c, label=l) for l, c in zip(legend_labels, rgb_float_colors)]
+        plt.legend(handles=patches, loc=1, bbox_to_anchor=(1.05, 1), borderaxespad=0.)
 
     # grids. Changes colors so that grids show regardless of colormap.
     ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
@@ -813,6 +825,71 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
     if show_Legend: ax.legend()
 
     if show_title: ax.set_title(jelly_title + ' Centralization Plot')
+
+
+def ganglia_centralization(jelly_title, axis, dfComplex, show_title=True, show_xLabels=True, show_Legend=True, bounds=(0, 1)):
+
+
+
+    ax = axis
+
+    figType = chooseFigType(dfComplex)
+
+    # BINSIZE is number of minutes to use in each bin
+    # WINDOWSIZE is the number of bins to use in the rolling average and standard error analysis
+    if figType == 'Long':
+        BINSIZE = 'H'
+    elif figType == 'Medium':
+        BINSIZE = '10T'
+    elif figType == 'Short':
+        BINSIZE = 'T'
+
+    dfY = createRhoplaiaCentralizationDF(complexDF, BINSIZE)
+
+    ax.plot(dfY)
+
+    # sets y bounds using input
+    ax.axis(ymin=bounds[0], ymax=bounds[1])
+
+    # sets labels
+    ax.set_xlabel(xlabel=r'Zeitgeber Time')
+    ax.set_ylabel(ylabel='% centralized')
+
+    # sets grid
+    ax.grid(axis='y', alpha=0.5, linestyle='--')
+    ax.margins(x=0)
+
+    # x ticks and labels
+    if show_xLabels:
+        # setting x ticks
+        applyXticks(dfComplex, ax)
+    else:
+        ax.get_xaxis().set_visible(False)
+
+    if show_Legend: ax.legend()
+
+    if show_title: ax.set_title(jelly_title + ' Centralization Plot')
+
+
+def createRhoplaiaCentralizationDF(complexDF, time_bin):
+    """
+    creates a dataframe with each pulse representing a row and each rhopalia a column.
+    1's are assigned to the presumed initiating rhopalia of each pulse
+    pulses are timestamped with Zeigeber Time
+    """
+    usage_df = pd.get_dummies(complexDF['RhopaliaSameAfter'], prefix='RhoSameAfter')
+
+    usage_df['ZeitgeberTime'] = pd.to_datetime(
+        complexDF['ZeitgeberTime'],
+        format='%Y-%m-%d %H:%M:%S')
+
+    usage_df = usage_df.set_index('ZeitgeberTime')
+
+    aggDF = usage_df.resample(time_bin).sum()
+
+    aggDF = aggDF.div(usage_df.sum(axis=1).resample(time_bin).sum(), axis=0)
+
+    return aggDF.RhoSameAfter_True
 
 
 

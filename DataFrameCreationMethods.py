@@ -140,7 +140,11 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
     # initiate angle data dataframe from directory
     dfPaths = [csv for csv in sorted(angleDataPath.iterdir()) if csv.name != '.DS_Store']
 
-    # simple DFs aka raw angle data are put together into a list and concatenated 
+    # takes out timestamp in chunk name if present:
+    if orientationDF.loc[0, 'chunk name'].find('_ts') != -1:
+        orientationDF['chunk name'] = [name[:name.find('_ts')] for name in orientationDF['chunk name'].tolist()]
+
+    # simple DFs aka raw angle data are put together into a list and concatenated
 
     simpleDFs = []
     # segment angleData in to chunks based on naming conventions? ***clarify AJ***
@@ -217,22 +221,18 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
 
     # indicates the properly oriented angle at which contraction occured
     if DEBUG: print(simpleConcatDF.head())
-    
-    #turns bounded angles back into a python list
-    angles = list(simpleConcatDF['bounded angle'])
-
 
     ###################################
     ###### Additional Angle Data ######
     ###################################
 
+    # turns bounded angles back into a python list
+    angles = list(simpleConcatDF['bounded angle'])
+
     # creates list of angles 1 after current angle. Useful for short pattern recognition. Shifts list by 1 entry.
     # angles1 after is the first angle after an angle the angle column
     # angles2 after is the second angle after an angle in the angle column
     # angles3 after is the third angle after an angle in the angle column
-
-    # The purpose of creating 3 different angle columns is to easily inspect how much the
-    # jellyfish is (rotating?) within a short time frame -deb -- not really, we just want to see what the next position of initiation is and if the site has changed from previous. -kve
 
     angles1After = angles[1:]
     angles1After.append(np.nan)
@@ -253,6 +253,34 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
     simpleConcatDF['angles2After'] = angles2After
     simpleConcatDF['angles3After'] = angles3After
 
+    ###################################
+    ###### Additional Angle Data ######
+    ###################################
+
+    # turns bounded angles back into a python list
+    rhopalia_use = list(simpleConcatDF['closest rhopalia'])
+
+    rho1After = rhopalia_use[1:]
+    rho1After.append(np.nan)
+
+    # creates list of rho 2 after current angle. Useful for short pattern recognition. Shifts list by 2 entries.
+    rho2After = rhopalia_use[2:]
+    rho2After.append(np.nan)
+    rho2After.append(np.nan)
+
+    # creates list of rho 3 after current angle. Useful for short pattern recognition. Shifts list by 3 entries.
+    rho3After = rhopalia_use[3:]
+    rho3After.append(np.nan)
+    rho3After.append(np.nan)
+    rho3After.append(np.nan)
+
+    # adds columns of rho1, rho2, and rho3 after
+    simpleConcatDF['rho1After'] = rho1After
+    simpleConcatDF['rho2After'] = rho2After
+    simpleConcatDF['rho3After'] = rho3After
+
+    ############################################################
+
     if DEBUG: print(simpleConcatDF.head())
 
     # convert simpleConcatDF from DataFrame array to NumPy array
@@ -264,7 +292,10 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
     # finds the index of important columns because numpy does not have String indexing, everything must be indexed to specific numeric indicides in the array
     angleArrIndex = header.index('bounded angle')
     angles1AfterIndex = header.index('angles1After')
-    
+
+    rhoArrIndex = header.index('closest rhopalia')
+    rho1AfterIndex = header.index('rho1After')
+
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
 
@@ -311,6 +342,7 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
                      'InitiatorSameAfterS10',
                      'InitiatorSameAfterS20',
                      'InitiatorSameAfterS30',
+                     'RhopaliaSameAfter',
                      'isHourMark',
                      'is10MinuteMark',
                      'isMinuteMark',
@@ -398,6 +430,9 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
         isS1 = None
         isS2 = None
         isS3 = None
+        r1 = float(simpleConcatArr[i][rhoArrIndex])
+        r2 = float(simpleConcatArr[i][rho1AfterIndex])
+        rs = None
         hourMark = False
         minMark10 = False
         minMark = False
@@ -459,8 +494,12 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
             isS2 = nearbyAngle(a1, a2, 20)
             isS3 = nearbyAngle(a1, a2, 30)
 
+        if r1 is not None and r2 is not None:
+            rs = (r1 == r2)
+
         # should match added data columns
-        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi_a, pr_a, dm_a, ipi_b, pr_b, dm_b, isS1, isS2, isS3, hourMark, minMark10, minMark, lightChange, np.nan]
+        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi_a, pr_a, dm_a, ipi_b, pr_b,
+                        dm_b, isS1, isS2, isS3, rs, hourMark, minMark10, minMark, lightChange, np.nan]
 
         addedDataFrame.append(addedDataRow)
         
@@ -637,7 +676,7 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
                 for offset in range(-INTERVAL, INTERVAL+1):
                     actigramArr[frame- startFrame + extension][(angle + offset)%360] = tickColor
 
-    return actigramArr, zip(uniqueVars, colors)
+    return actigramArr, uniqueVars, colors
 
 
 def dfValidator(complexDFpostvalidation, chunks2remove=[]):
