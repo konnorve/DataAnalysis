@@ -773,6 +773,8 @@ def plot_usage_lines(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfi
         # save fig
         outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
 
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     ax1 = fig.add_subplot(gs[0, 0])
     figures.usage_lines(jelly_title, ax1, dfComplex, aggUsageDF)
 
