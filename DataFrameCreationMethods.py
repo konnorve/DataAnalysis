@@ -541,13 +541,13 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
 ###################################
 
 
-def createUsageDF(complexDF):
+def createUsageDF(complexDF, metric='closest rhopalia'):
     """
     creates a dataframe with each pulse representing a row and each rhopalia a column.
     1's are assigned to the presumed initiating rhopalia of each pulse
     pulses are timestamped with Zeigeber Time
     """
-    usage_df = pd.get_dummies(complexDF['closest rhopalia'], prefix='rho')
+    usage_df = pd.get_dummies(complexDF[metric], prefix='rho')
 
     usage_df['ZeitgeberTime'] = pd.to_datetime(
         complexDF['ZeitgeberTime'],

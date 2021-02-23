@@ -892,4 +892,88 @@ def createRhoplaiaCentralizationDF(complexDF, time_bin):
     return aggDF.RhoSameAfter_True
 
 
+def usage_lines(jelly_title, ax, dfComplex, aggUsageDF, show_title=True, show_xLabels=True, show_Legend=True,
+                sensitivity=30, bounds=(0, 1)):
+    for column in aggUsageDF.columns:
+        ax.plot(aggUsageDF.index, aggUsageDF[column], label=column)
 
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2)
+
+    # sets y bounds using input
+    ax.axis(ymin=bounds[0], ymax=bounds[1])
+
+    # sets labels
+    ax.set_xlabel(xlabel=r'Zeitgeber Time')
+    ax.set_ylabel(ylabel='% usage')
+
+    # sets grid
+    ax.grid(axis='y', alpha=0.5, linestyle='--')
+    ax.margins(x=0)
+
+    # x ticks and labels
+    if show_xLabels:
+        # setting x ticks
+        applyXticks(dfComplex, ax)
+    else:
+        ax.get_xaxis().set_visible(False)
+
+    if show_title: ax.set_title(jelly_title + ' Centralization Plot')
+
+
+def usage_areas(jelly_title, ax, dfComplex, aggUsageDF, show_title=True, show_xLabels=True, show_Legend=True,
+                sensitivity=30, bounds=(0, 1)):
+    trans_agg = aggUsageDF.transpose()
+    trans_agg["sum"] = trans_agg.sum(axis=1)
+    trans_agg = trans_agg.sort_values('sum', ascending=False)
+
+    trans_agg = trans_agg.drop(columns='sum')
+
+    ax.stackplot(trans_agg.columns, trans_agg, labels=trans_agg.index.tolist(), colors=cm.tab20(np.linspace(0, 1, 16)))
+
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2)
+
+    # sets y bounds using input
+    ax.axis(ymin=bounds[0], ymax=bounds[1])
+
+    # sets labels
+    ax.set_xlabel(xlabel=r'Zeitgeber Time')
+    ax.set_ylabel(ylabel='% usage')
+
+    # sets grid
+    ax.grid(axis='y', alpha=0.5, linestyle='--')
+    ax.margins(x=0)
+
+    # x ticks and labels
+    if show_xLabels:
+        # setting x ticks
+        applyXticks(dfComplex, ax)
+    else:
+        ax.get_xaxis().set_visible(False)
+
+    if show_title: ax.set_title(jelly_title + ' Centralization Plot')
+
+
+def usage_activity_level(jelly_title, ax, dfComplex, aggUsageDF, activity_thresh, show_title=True, show_xLabels=True,
+                         show_Legend=True):
+    activityThreshDF = aggUsageDF > activity_thresh
+
+    ax.plot(activityThreshDF.sum(axis=1), label=str(activity_thresh))
+
+    # sets labels
+    ax.set_xlabel(xlabel=r'Zeitgeber Time')
+    ax.set_ylabel(ylabel='active count')
+
+    # sets grid
+    ax.grid(axis='y', alpha=0.5, linestyle='--')
+    ax.margins(x=0)
+
+    # x ticks and labels
+    if show_xLabels:
+        # setting x ticks
+        applyXticks(dfComplex, ax)
+    else:
+        ax.get_xaxis().set_visible(False)
+
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2)
+
+    if show_title: ax.set_title(jelly_title + ' above {} activity threshold'.format(activity_thresh))

@@ -742,6 +742,169 @@ def anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhola
     plt.close()
 
 
+
+### BEST EXAMPLE ####
+def plot_usage_lines(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfigurelen, plotBar=True):
+    """
+    Input: complex dataframe for a given jellyfish
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centralizationFigure
+    """
+
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'UsageLines'
+
+    if plotBar:
+        # gridspec organization
+        heights = [4, 1]
+        gs = fig.add_gridspec(ncols=1, nrows=2, height_ratios=heights)
+
+        # plot bar
+        ax2 = fig.add_subplot(gs[1, 0])
+        figures.bar4MovementDayNight(dfComplex, ax2)
+
+        # save fig
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, 'WITHBar')
+    else:
+        # gridspec organization
+        heights = [1]
+        gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    ax1 = fig.add_subplot(gs[0, 0])
+    figures.usage_lines(jelly_title, ax1, dfComplex, aggUsageDF)
+
+    fig.savefig(str(outpath),bbox_inches='tight')
+
+    plt.close()
+
+
+def plot_usage_areas_stacked(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfigurelen, plotBar=True):
+    """
+    Input: complex dataframe for a given jellyfish
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centralizationFigure
+    """
+
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    if plotBar:
+        # gridspec organization
+        heights = [4, 1]
+        gs = fig.add_gridspec(ncols=1, nrows=2, height_ratios=heights)
+
+        # plot bar
+        ax2 = fig.add_subplot(gs[1, 0])
+        figures.bar4MovementDayNight(dfComplex, ax2)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'Usage Area Stacked')
+    else:
+        # gridspec organization
+        heights = [1]
+        gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
+
+    ax1 = fig.add_subplot(gs[0, 0])
+    figures.usage_areas(jelly_title, ax1, dfComplex, aggUsageDF)
+
+    fig.savefig(str(outpath),bbox_inches='tight')
+
+    plt.close()
+
+
+def plot_usage_activity_levels(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfigurelen, plotBar=True):
+    """
+    Input: complex dataframe for a given jellyfish
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centralizationFigure
+    """
+
+    activity_levels = [0.02, 0.05, 0.1, 0.2, 0.3]
+
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    if plotBar:
+        # gridspec organization
+        heights = [4] * len(activity_levels) + [1]
+        gs = fig.add_gridspec(ncols=1, nrows=len(heights), height_ratios=heights, gridspec_kw={'hspace': 0})
+
+        # plot bar
+        ax2 = fig.add_subplot(gs[1, 0])
+        figures.bar4MovementDayNight(dfComplex, ax2)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChangedWithBar')
+    else:
+        # gridspec organization
+        heights = [1] * len(activity_levels)
+        gs = fig.add_gridspec(ncols=1, nrows=len(heights), height_ratios=heights)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
+
+    for i in range(len(activity_levels)):
+        ax = fig.add_subplot(gs[i, 0])
+        figures.usage_activity_level(jelly_title, ax, dfComplex, aggUsageDF, activity_levels[i])
+
+    for ax in fig.get_axes():
+        ax.label_outer()
+
+    fig.savefig(str(outpath),bbox_inches='tight')
+
+    plt.close()
+
+
+def plot_ganglia_usage_metrics(outdir, jelly_title, dfComplex, time_bin, yfigurelen, xfigurelen):
+    usageDF = cdf.createUsageDF(complexDF, 'closest rhopalia')
+    aggUsageDF = cdf.createAggUsageDF(usageDF, time_bin)
+
+    plot_usage_lines(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfigurelen)
+    plot_usage_areas_stacked(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfigurelen)
+    plot_usage_activity_levels(outdir, jelly_title, dfComplex, aggUsageDF, 3 * yfigurelen, xfigurelen)
+
+
+def plot_sleep_area(outdir, jelly_title, dfComplex, time_bin, yfigurelen, xfigurelen, plotBar=True):
+    """
+    Input: complex dataframe for a given jellyfish
+    Output: plots the % of pulses that have changed relative to a bounded angle and a given sensatitivy as defined by centralizationFigure
+    """
+
+    usageDF = cdf.createUsageDF(complexDF, 'SleepWake_median_ipi_after')
+    aggUsageDF = cdf.createAggUsageDF(usageDF, time_bin)
+
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    if plotBar:
+        # gridspec organization
+        heights = [4, 1]
+        gs = fig.add_gridspec(ncols=1, nrows=2, height_ratios=heights)
+
+        # plot bar
+        ax2 = fig.add_subplot(gs[1, 0])
+        figures.bar4MovementDayNight(dfComplex, ax2)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChangedWithBar')
+    else:
+        # gridspec organization
+        heights = [1]
+        gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
+
+        # save fig
+        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
+
+    ax1 = fig.add_subplot(gs[0, 0])
+
+    figures.usage_areas(jelly_title, ax1, dfComplex, aggUsageDF)
+
+    fig.savefig(str(outpath),bbox_inches='tight')
+
+    plt.close()
+
+
 ##############################################################
 
 ##############################################################
@@ -782,6 +945,14 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotBar(outdir, jelly_title, dfComplex, 2, stdXlen)
 
+    # TODO: add colored actigram
+
+    # usage plotting
+
+    plot_ganglia_usage_metrics(outdir, jelly_title, dfComplex, 'H', yfigurelen, xfigurelen)
+
+    plot_sleep_area(outdir, jelly_title, dfComplex, 'H', yfigurelen, xfigurelen)
+
     # combined
 
     ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+2, stdXlen)
@@ -807,3 +978,4 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
     plotJellyTrajectoryDayNight(outdir, jelly_title, dfComplex)
 
     create_trajectory_gif(dfComplex, jelly_title, outdir)
+
