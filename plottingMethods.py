@@ -35,6 +35,8 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, yfigurelen, xfigurele
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
     # "constrained_layout" automatically adjusts subplots to fit window size
 
+    plot_title = 'Interpulse Interval'
+
     if plotBar:
         # gridspec organization
         heights = [5, 1]
@@ -45,14 +47,16 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, yfigurelen, xfigurele
 
         figures.bar4MovementDayNight(dfComplex, ax2)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'InterpulseIntervalWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
 
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'InterpulseInterval')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     # subplot
     ax1 = fig.add_subplot(gs[0, 0])
@@ -63,7 +67,7 @@ def plotInterpulseInterval(outdir, jelly_title, dfComplex, yfigurelen, xfigurele
     fig.savefig(str(outpath),bbox_inches='tight')
     # "bbox_inches" removes extra whitespace from around the rendered figure.
     plt.close()
-
+# x
 
 def plotPulseRate(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBar=True):
     """
@@ -76,6 +80,8 @@ def plotPulseRate(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBa
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
     # "constrained_layout" automatically adjusts subplots to fit window size
 
+    plot_title = 'Pulse Rate'
+
     if plotBar:
         # gridspec organization
         heights = [5, 1]
@@ -86,14 +92,16 @@ def plotPulseRate(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, plotBa
 
         figures.bar4MovementDayNight(dfComplex, ax2)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'PulseRateWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
 
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'PulseRate')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     # subplot
     ax1 = fig.add_subplot(gs[0, 0])
@@ -117,6 +125,8 @@ def plotDistanceMoved(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, pl
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
     # "constrained_layout" automatically adjusts subplots to fit window size
 
+    plot_title = 'Distance Moved'
+
     if plotBar:
         # gridspec organization
         heights = [5, 1]
@@ -127,14 +137,16 @@ def plotDistanceMoved(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, pl
 
         figures.bar4MovementDayNight(dfComplex, ax2)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'DistanceMovedWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
 
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'DistanceMoved')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     # subplot
     ax1 = fig.add_subplot(gs[0, 0])
@@ -156,6 +168,8 @@ def plotAngleHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, y
     # generate empty figure
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
+    plot_title = 'Angle Activity Distribution Vertical Histogram'
+
     # gridspec organization
     heights = [1]
     gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
@@ -166,12 +180,15 @@ def plotAngleHistogramVertical(outdir, jelly_title, dfComplex, rhopos, rholab, y
     figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex,rhopos,rholab, constraints=hist_constraints)
 
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterHistogramVertical')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
 
-
+# This one supertitle + outpath title?^^
 
 def plotAngleHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     updateparameters()
@@ -180,6 +197,8 @@ def plotAngleHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab,
     Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
     """
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'Angle Activity Distribution Horizontal Histogram'
 
     # gridspec organization
     heights = [1]
@@ -192,7 +211,10 @@ def plotAngleHistogramHorizontal(outdir, jelly_title, dfComplex, rhopos, rholab,
     figures.initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos, rholab, vertical = False, constraints=hist_constraints)
 
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterHistogramHorizontal')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -212,6 +234,8 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
     uniqueCombos = dfComplex["Day.Hour"].unique()
 
     fig = plt.figure(figsize=(xfigurelen, len(uniqueCombos)*yfigurelen), constrained_layout=True)
+
+    plot_title = 'Angle Activity Distribution, 4 Day Hour Slices'
 
     # gridspec organization
     heights = [1]*len(uniqueCombos)
@@ -251,11 +275,14 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
                                            constraints=hist_constraints)
 
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Histogram4DayHourSlices')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath), bbox_inches='tight')
 
     plt.close()
-
+## remove show_title full line^^? x
 
 def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     updateparameters()
@@ -269,6 +296,8 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
     uniqueCombos = dfComplex["Day.LightCycle"].unique()
 
     fig = plt.figure(figsize=(xfigurelen, len(uniqueCombos)*yfigurelen), constrained_layout=True)
+
+    plot_title = 'Histogram 4 Day Light Slices'
 
     # gridspec organization
     heights = [1]*len(uniqueCombos)
@@ -308,11 +337,14 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
                                            constraints=hist_constraints)
 
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Histogram4DayLightSlices')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath), bbox_inches='tight')
 
     plt.close()
-
+## delete show_title?
 
 def plotJellyTrajectory(outdir, jelly_title, dfComplex, distanceMovedThreshold=50, image_max_x=640, image_max_y=480):
     complexDFfiltered = dfComplex.loc[dfComplex['DistanceMoved_After'] < distanceMovedThreshold]
@@ -442,6 +474,9 @@ def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions36
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'Angle Activity Actigram'
+
     if plotBar:
         # gridspec organization
         heights = [7, 1]
@@ -451,13 +486,15 @@ def plotActigram(outdir, jelly_title, dfActigram, complexDF, rhopaliaPositions36
         ax2 = fig.add_subplot(gs[1, 0])
         figures.bar4MovementDayNight(complexDF, ax2)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'ActigramWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     # actigram plotting on gridspec
     ax1 = fig.add_subplot(gs[0, 0])
@@ -478,6 +515,8 @@ def plotCentralization(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, p
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
+    plot_title = 'Center Changed'
+
     if plotBar:
         # gridspec organization
         heights = [4, 1]
@@ -488,14 +527,16 @@ def plotCentralization(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, p
         figures.bar4MovementDayNight(dfComplex, ax2)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChangedWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, " With Bar")
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
         #save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     ax1 = fig.add_subplot(gs[0, 0])
     figures.centralizationFigure(jelly_title, ax1, dfComplex)
@@ -514,6 +555,8 @@ def plot_ganglia_centralization(outdir, jelly_title, dfComplex, yfigurelen, xfig
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
+    plot_title = 'Ganglia Changed'
+
     if plotBar:
         # gridspec organization
         heights = [4, 1]
@@ -524,14 +567,16 @@ def plot_ganglia_centralization(outdir, jelly_title, dfComplex, yfigurelen, xfig
         figures.bar4MovementDayNight(dfComplex, ax2)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'GangliaChangedWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
         #save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'GangliaChanged')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     ax1 = fig.add_subplot(gs[0, 0])
     figures.ganglia_centralization(jelly_title, ax1, dfComplex)
@@ -544,12 +589,14 @@ def plot_ganglia_centralization(outdir, jelly_title, dfComplex, yfigurelen, xfig
 def plotBar(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
     """
     Input: Complex Df
-    Ouput: Day/Night Movement Bar, specifies when jellyfish have moved uses a red tick
+    Ouput: Day/Night Movement Bar, specifies when jellyfish have moved using a red tick
     during the corresponding Zeitgeber time
     """
     updateparameters()
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'Day/Night Movement Bar'
 
     # gridspec organization
     heights = [1]
@@ -561,7 +608,10 @@ def plotBar(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen):
     figures.bar4MovementDayNight(dfComplex, ax1)
 
     #save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'plotBar')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -576,6 +626,7 @@ def ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhop
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
+    plot_title = 'Actigram and Pulse Rate With Bar'
     #gridspec organization
     heights = [14, 1, 3]
     gs = fig.add_gridspec(ncols=1, nrows=3, height_ratios = heights)
@@ -590,7 +641,10 @@ def ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhop
     figures.pulseRate(jelly_title, ax3, dfComplex, show_title=False, show_xLabels=False)
 
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'ActigramANDPulseRate')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -605,6 +659,7 @@ def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex,
     # create empty figure with customized dimensions. "constrained_layout" automatically adjusts subplots to fit window
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
+    plot_title = 'Acrigram, Pulse Rate, Center Changed, annd CenterHistVert, With Bar'
     # gridspec organization: fig has two columns, four large figures and several smaller supplementary figs.
     heights = [15, 1, 3, 3]
     widths = [10, 1]
@@ -624,7 +679,10 @@ def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex,
     figures.initiatiorsHistogramFigure(jelly_title, fig_ax5, dfComplex, vertical=True, show_title=False, show_degreeLabels=False, constraints=hist_constraints)
     # individual titles, legends and labels are turned off
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_AND_CHVert')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -642,6 +700,7 @@ def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
     # create empty figure with customized dimensions. "constrained_layout" automatically adjusts subplots to fit window
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
+    plot_title = 'Actigram, PR, CentChange and InitializationHistDayNight, With Bar'
     # gridspec organization: 3 columns, 4 rows, with boxes of their respective size ratio
     heights = [15, 1, 5, 5]
     widths = [20, 1, 1]
@@ -664,7 +723,10 @@ def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
     figures.initiatiorsHistogramFigure('Night', fig_ax6, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Night\'')
 
     #save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_AND_CHDayNight')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -681,7 +743,7 @@ def Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfC
 
     # create empty figure with customized dimensions. "constrained_layout" automatically adjusts subplots to fit window
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
-
+    plot_title = 'Actigram, PR, CentChange, DistMoved, With Bar'
     # gridspec organization: 3 columns, 4 rows, with boxes of their respective size ratio
     heights = [15, 1, 5, 5, 5]
     widths = [20, 1, 1]
@@ -706,7 +768,10 @@ def Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfC
     figures.initiatiorsHistogramFigure('Night', fig_ax7, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Night\'')
 
     #save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'Actigram_PR_CC_DM_AND_CHDayNightWithBar')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -718,6 +783,8 @@ def anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhola
     Output: figure vizualizing distribution of centers by degree angle for one day and night period
     """
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'Pulse Initiators Day and Night'
 
     #gridspec organization
     heights = [1, 1]
@@ -736,7 +803,10 @@ def anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhola
 
     #save fig
     # save fig
-    outpath = outdir / '{}_{}.png'.format(jelly_title, 'anglesHistogramDayANDNightPlot')
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
     fig.savefig(str(outpath),bbox_inches='tight')
 
     plt.close()
@@ -752,7 +822,7 @@ def plot_usage_lines(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfi
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
 
-    plot_title = 'UsageLines'
+    plot_title = 'Usage Lines'
 
     if plotBar:
         # gridspec organization
@@ -764,7 +834,7 @@ def plot_usage_lines(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfi
         figures.bar4MovementDayNight(dfComplex, ax2)
 
         # save fig
-        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, 'WITHBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
     else:
         # gridspec organization
         heights = [1]
@@ -790,7 +860,7 @@ def plot_usage_areas_stacked(outdir, jelly_title, dfComplex, aggUsageDF, yfigure
     """
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
-
+    plot_title = 'Usage Area Stacked'
     if plotBar:
         # gridspec organization
         heights = [4, 1]
@@ -801,14 +871,16 @@ def plot_usage_areas_stacked(outdir, jelly_title, dfComplex, aggUsageDF, yfigure
         figures.bar4MovementDayNight(dfComplex, ax2)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'Usage Area Stacked')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     ax1 = fig.add_subplot(gs[0, 0])
     figures.usage_areas(jelly_title, ax1, dfComplex, aggUsageDF)
@@ -827,7 +899,7 @@ def plot_usage_activity_levels(outdir, jelly_title, dfComplex, aggUsageDF, yfigu
     activity_levels = [0.02, 0.05, 0.1, 0.2, 0.3]
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
-
+    plot_title = 'Usage Activity Levels'
     if plotBar:
         # gridspec organization
         heights = [4] * len(activity_levels) + [1]
@@ -838,14 +910,14 @@ def plot_usage_activity_levels(outdir, jelly_title, dfComplex, aggUsageDF, yfigu
         figures.bar4MovementDayNight(dfComplex, ax2)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChangedWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
     else:
         # gridspec organization
         heights = [1] * len(activity_levels)
         gs = fig.add_gridspec(ncols=1, nrows=len(heights), height_ratios=heights)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
 
     for i in range(len(activity_levels)):
         ax = fig.add_subplot(gs[i, 0])
@@ -853,6 +925,8 @@ def plot_usage_activity_levels(outdir, jelly_title, dfComplex, aggUsageDF, yfigu
 
     for ax in fig.get_axes():
         ax.label_outer()
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     fig.savefig(str(outpath),bbox_inches='tight')
 
@@ -878,7 +952,7 @@ def plot_sleep_area(outdir, jelly_title, dfComplex, time_bin, yfigurelen, xfigur
     aggUsageDF = cdf.createAggUsageDF(usageDF, time_bin)
 
     fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
-
+    plot_title = 'Sleep Area'
     if plotBar:
         # gridspec organization
         heights = [4, 1]
@@ -889,14 +963,16 @@ def plot_sleep_area(outdir, jelly_title, dfComplex, time_bin, yfigurelen, xfigur
         figures.bar4MovementDayNight(dfComplex, ax2)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChangedWithBar')
+        outpath = outdir / '{}_{}{}.png'.format(jelly_title, plot_title, ' With Bar')
     else:
         # gridspec organization
         heights = [1]
         gs = fig.add_gridspec(ncols=1, nrows=1, height_ratios=heights)
 
         # save fig
-        outpath = outdir / '{}_{}.png'.format(jelly_title, 'CenterChanged')
+        outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
 
     ax1 = fig.add_subplot(gs[0, 0])
 
