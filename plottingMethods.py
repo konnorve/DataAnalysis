@@ -268,11 +268,6 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
             sjdl = False
             sjrl = False
 
-        figures.initiatiorsHistogramFigure(combo, ax1, dfSlice, rhopos, rholab, vertical=False, show_title=False,
-                                           show_degreeLabels=False,
-                                           show_just_degree_labels=sjdl,
-                                           show_just_rhopalia_labels=sjrl,
-                                           constraints=hist_constraints)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
@@ -282,7 +277,7 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
     fig.savefig(str(outpath), bbox_inches='tight')
 
     plt.close()
-## remove show_title full line^^? x
+## remove show_title full line^^? x yep
 
 def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[]):
     updateparameters()
@@ -330,12 +325,6 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
             sjdl = False
             sjrl = False
 
-        figures.initiatiorsHistogramFigure(combo, ax1, dfSlice, rhopos, rholab, vertical=False, show_title=False,
-                                           show_degreeLabels=False,
-                                           show_just_degree_labels=sjdl,
-                                           show_just_rhopalia_labels=sjrl,
-                                           constraints=hist_constraints)
-
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
 
@@ -344,7 +333,7 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
     fig.savefig(str(outpath), bbox_inches='tight')
 
     plt.close()
-## delete show_title?
+## delete show_title? yup
 
 def plotJellyTrajectory(outdir, jelly_title, dfComplex, distanceMovedThreshold=50, image_max_x=640, image_max_y=480):
     complexDFfiltered = dfComplex.loc[dfComplex['DistanceMoved_After'] < distanceMovedThreshold]
@@ -638,7 +627,6 @@ def ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhop
 
     figures.actigramFigure(dfActigram, dfComplex, ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex, ax2)
-    figures.pulseRate(jelly_title, ax3, dfComplex, show_title=False, show_xLabels=False)
 
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
@@ -674,9 +662,6 @@ def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex,
 
     figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex,  fig_ax2)
-    figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
-    figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
-    figures.initiatiorsHistogramFigure(jelly_title, fig_ax5, dfComplex, vertical=True, show_title=False, show_degreeLabels=False, constraints=hist_constraints)
     # individual titles, legends and labels are turned off
     # save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
@@ -716,11 +701,6 @@ def Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComp
 
     figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex, fig_ax2)
-    figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
-    figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
-
-    figures.initiatiorsHistogramFigure('Day', fig_ax5, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Day\'')
-    figures.initiatiorsHistogramFigure('Night', fig_ax6, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Night\'')
 
     #save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
@@ -760,13 +740,6 @@ def Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfC
 
     figures.actigramFigure(dfActigram, dfComplex, fig_ax1, jelly_title, rhopaliaPositions360, rhopaliaLabels)
     figures.bar4MovementDayNight(dfComplex, fig_ax2)
-    figures.pulseRate(jelly_title, fig_ax3, dfComplex, show_title=False, show_xLabels=False)
-    figures.centralizationFigure(jelly_title, fig_ax4, dfComplex, show_title=False, show_xLabels=False, show_Legend=False)
-    figures.distanceMoved(jelly_title, fig_ax5, dfComplex, show_title = False, show_xLabels=False)
-
-    figures.initiatiorsHistogramFigure('Day', fig_ax6, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Day\'')
-    figures.initiatiorsHistogramFigure('Night', fig_ax7, dfComplex, rhopaliaPositions360, rhopaliaLabels, show_title=True, show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Night\'')
-
     #save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
 
@@ -793,11 +766,6 @@ def anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhola
     #subplot
     fig_ax1 = fig.add_subplot(gs[0,0])
     fig_ax2 = fig.add_subplot(gs[1,0])
-
-    figures.initiatiorsHistogramFigure('Day', fig_ax1, dfComplex, rhopos, rholab, vertical=False, show_title=True,
-                                            show_degreeLabels=True, question='DayOrNight == \'Day\'')
-    figures.initiatiorsHistogramFigure('Night', fig_ax2, dfComplex, rhopos, rholab, vertical=False, show_title=True,
-                                            show_degreeLabels=True, question='DayOrNight == \'Night\'')
 
     fig.suptitle(jelly_title)
 
