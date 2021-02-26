@@ -122,7 +122,7 @@ def convertTo360(a):
 #########################################################
 
 
-def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
+def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
     """
     Creates a complex data frame as a CSV and takes in angle and orientation data during a specified time frame.
 
@@ -138,9 +138,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     """
 
     # initiate angle data dataframe from directory
-    dfPaths = [csv for csv in sorted(angleDataPath.iterdir()) if dir.name != '.DS_Store']
+    dfPaths = [csv for csv in sorted(angleDataPath.iterdir()) if csv.name != '.DS_Store']
 
-    # simple DFs aka raw angle data are put together into a list and concatenated 
+    # takes out timestamp in chunk name if present:
+    if orientationDF.loc[0, 'chunk name'].find('_ts') != -1:
+        orientationDF['chunk name'] = [name[:name.find('_ts')] for name in orientationDF['chunk name'].tolist()]
+
+    # simple DFs aka raw angle data are put together into a list and concatenated
 
     simpleDFs = []
     # segment angleData in to chunks based on naming conventions? ***clarify AJ***
@@ -177,7 +181,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # in order to get an accurate angle measurement, the marker angle must be measured
     # selects the marker rhopalia from the list of rhopalia
-    orientationRhopalia = orientationDF.loc[orientationDF['Orientation Rho']=='YES']
+    orientationRhopalia = rhopaliaDF.loc[rhopaliaDF['Orientation Rho']=='YES']
 
     assert len(orientationRhopalia) == 1
 
@@ -192,8 +196,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # turns the orientated angles into integer angle measurements within angleLimits
     boundAngles = []
     closestRhopalia = []
-    rhopos = orientationDF['Rhopalia Position'].tolist()
-    rholab = orientationDF['Rhopalia Label'].tolist()
+    rhopos = rhopaliaDF['Rhopalia Position'].tolist()
+    rholab = rhopaliaDF['Rhopalia Label'].tolist()
 
     # bounded angle is valid integer value angle that and the site on initiation
     for ang in orientedAngleList:
@@ -217,22 +221,18 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 
     # indicates the properly oriented angle at which contraction occured
     if DEBUG: print(simpleConcatDF.head())
-    
-    #turns bounded angles back into a python list
-    angles = list(simpleConcatDF['bounded angle'])
-
 
     ###################################
     ###### Additional Angle Data ######
     ###################################
 
+    # turns bounded angles back into a python list
+    angles = list(simpleConcatDF['bounded angle'])
+
     # creates list of angles 1 after current angle. Useful for short pattern recognition. Shifts list by 1 entry.
     # angles1 after is the first angle after an angle the angle column
     # angles2 after is the second angle after an angle in the angle column
     # angles3 after is the third angle after an angle in the angle column
-
-    # The purpose of creating 3 different angle columns is to easily inspect how much the
-    # jellyfish is (rotating?) within a short time frame -deb -- not really, we just want to see what the next position of initiation is and if the site has changed from previous. -kve
 
     angles1After = angles[1:]
     angles1After.append(np.nan)
@@ -253,6 +253,34 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     simpleConcatDF['angles2After'] = angles2After
     simpleConcatDF['angles3After'] = angles3After
 
+    ###################################
+    ###### Additional Angle Data ######
+    ###################################
+
+    # turns bounded angles back into a python list
+    rhopalia_use = list(simpleConcatDF['closest rhopalia'])
+
+    rho1After = rhopalia_use[1:]
+    rho1After.append(np.nan)
+
+    # creates list of rho 2 after current angle. Useful for short pattern recognition. Shifts list by 2 entries.
+    rho2After = rhopalia_use[2:]
+    rho2After.append(np.nan)
+    rho2After.append(np.nan)
+
+    # creates list of rho 3 after current angle. Useful for short pattern recognition. Shifts list by 3 entries.
+    rho3After = rhopalia_use[3:]
+    rho3After.append(np.nan)
+    rho3After.append(np.nan)
+    rho3After.append(np.nan)
+
+    # adds columns of rho1, rho2, and rho3 after
+    simpleConcatDF['rho1After'] = rho1After
+    simpleConcatDF['rho2After'] = rho2After
+    simpleConcatDF['rho3After'] = rho3After
+
+    ############################################################
+
     if DEBUG: print(simpleConcatDF.head())
 
     # convert simpleConcatDF from DataFrame array to NumPy array
@@ -264,7 +292,10 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # finds the index of important columns because numpy does not have String indexing, everything must be indexed to specific numeric indicides in the array
     angleArrIndex = header.index('bounded angle')
     angles1AfterIndex = header.index('angles1After')
-    
+
+    rhoArrIndex = header.index('closest rhopalia')
+    rho1AfterIndex = header.index('rho1After')
+
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
 
@@ -283,12 +314,12 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # ZeitgeberHour = Zeitgeber Hour associated with DateTime
     # ZeitgeberDay = Zeitgeber Day associated with DateTime
     # DayOrNight = determines if it is Day or Night
-    # InterpulseInterval = the time between pulses in seconds
-    # PulseRate = frequency of pulsation (pulse level)
+    # InterpulseInterval_After = the time between pulses in seconds
+    # PulseRate_After = frequency of pulsation (pulse level)
     # InitiatorSameAfterS10 = determines if angle has not changed in the next pulse when sensitivity = 10
     # InitiatorSameAfterS20 = determines if angle has not changed in the next pulse when sensitivity = 20
     # InitiatorSameAfterS30 = determines if angle has not changed in the next pulse when sensitivity = 30
-    # distanceMoved = distance between 2 centroids between pulses
+    # DistanceMoved_After = distance between 2 centroids between pulses
     # isHourMark = determines if there is an XTick or not
     # isLightChange = determines the switch between day and night
 
@@ -302,12 +333,16 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
                      'ZeitgeberHour',
                      'ZeitgeberDay',
                      'DayOrNight',
-                     'InterpulseInterval',
-                     'PulseRate',
+                     'InterpulseInterval_After',
+                     'PulseRate_After',
+                     'DistanceMoved_After',
+                     'InterpulseInterval_Before',
+                     'PulseRate_Before',
+                     'DistanceMoved_Before',
                      'InitiatorSameAfterS10',
                      'InitiatorSameAfterS20',
                      'InitiatorSameAfterS30',
-                     'distanceMoved',
+                     'RhopaliaSameAfter',
                      'isHourMark',
                      'is10MinuteMark',
                      'isMinuteMark',
@@ -340,8 +375,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # absM = (AbsoluteMinute)
     # dt = (DateTime)
     # zt = (ZeitgeberTime)
-    # ipi = (Interpulse Interval)
-    # pr = Pulse Rate
+    # ipi_a = (InterpulseInterval_After)
+    # pr_a = PulseRate_After
     # dn = (Day or Night)
     # centroid = X,Y coordinates of the jellyfish centroid
     # a1 = angle 1
@@ -349,7 +384,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # isS1 = (InitiatorSameAfterS10)
     # isS2 = (InitiatorSameAfterS20)
     # isS3 = (InitiatorSameAfterS30)
-    # dm = (distancedMoved)
+    # dm_a = (distancedMoved)
     # hourMark = (isHourMark)
     # lightChange = (isLightChange)
 
@@ -359,8 +394,8 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     # absM = absolute minute. Takes the minute of each pulse. Useful for binning purposes.
     # dt = date time, datetime object of the exact date and time a pulse takes place.
     # zt = zeitgeber time. Datetime object. Shift of dt by the time the lights turn on which is ~7am normally and ~8am during daylight savings time
-    # ipi = interpulse interval
-    # pr = Pulse Rate
+    # ipi_a = InterpulseInterval_After
+    # pr_a = PulseRate_After
     # dn = day/night. Specifies 'day' if pulse occured during circadium day (zt time is < 12) and 'night' if pulse occurs during circadium night (zt time is >12, < 24)
     # centroid = (X,Y) position of the jellyfish in pixels, in the tank.
     # a1 = angle 1 -- angle of the current pulse
@@ -371,7 +406,7 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     #       Sensativities are 10, 20, and 30 degrees.
     #       False at S==10 degrees means the next pulse lies within 10 degrees to either side of the current pulse.
     ### ^^^ we should change these to AngleChanged and give actual sensitivity (therefore: acS10, acS20, acS30... etc.) Centers is depricated.
-    # dm = distance moved. distance between 2 centroids in pixels
+    # dm_a = distance moved. distance between 2 centroids in pixels
     # hourMark = determines if there is a change in hour to determine if that frame location should be used as an XTick or not.
     # lightChange = determines the switch between day and night. Useful in marking Day/Night changes on bar graph and xtickDf
 
@@ -382,8 +417,12 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         absM = td.days*24*60 + td.seconds//60
         dt = STARTDATETIME + td
         zt = dt - timedelta2Zeitgeber
-        ipi = np.nan
-        pr = np.nan
+        ipi_a = np.nan
+        pr_a = np.nan
+        dm_a = np.nan
+        ipi_b = np.nan
+        pr_b = np.nan
+        dm_b = np.nan
         dn = 'Day'  # initalized as Day. All night pulses are then changed to night. 
         centroid = (simpleConcatArr[i][centroidXindex], simpleConcatArr[i][centroidYindex])
         a1 = float(simpleConcatArr[i][angleArrIndex])
@@ -391,7 +430,9 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         isS1 = None
         isS2 = None
         isS3 = None
-        dm = np.nan
+        r1 = float(simpleConcatArr[i][rhoArrIndex])
+        r2 = float(simpleConcatArr[i][rho1AfterIndex])
+        rs = None
         hourMark = False
         minMark10 = False
         minMark = False
@@ -402,13 +443,22 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
         elif zt.hour == 11 and zt.minute > 54: dn = 'Night'
 
         # finds distance moved if there is a centroid position in the pulse after. -kve
-        # calculates the interpulse interval and the distance moved between pulses
+        # calculates the InterpulseInterval_After and the distance moved between current and future pulse
         if i < numPulses-1:
             centroidAfter = (simpleConcatArr[i+1][centroidXindex], simpleConcatArr[i+1][centroidYindex])
-            ipi = (simpleConcatArr[i+1][0] - simpleConcatArr[i][0])/FRAMERATE
-            if ipi != 0:
-                pr = 1/ipi
-            dm = calculateDistance(centroid, centroidAfter)
+            ipi_a = (simpleConcatArr[i+1][0] - simpleConcatArr[i][0])/FRAMERATE
+            if ipi_a != 0:
+                pr_a = 1/ipi_a
+            dm_a = calculateDistance(centroid, centroidAfter)
+
+        # finds distance moved if there is a centroid position in the pulse after. -kve
+        # calculates the InterpulseInterval_Before and the distance moved between previous and current pulse
+        if i>0:
+            centroidBefore = (simpleConcatArr[i - 1][centroidXindex], simpleConcatArr[i - 1][centroidYindex])
+            ipi_b = (simpleConcatArr[i - 1][0] - simpleConcatArr[i][0]) / FRAMERATE
+            if ipi_b != 0:
+                pr_b = 1 / ipi_b
+            dm_b = calculateDistance(centroid, centroidBefore)
         
         # just checks that the previous pulse exists for comparison
         if i > 0:
@@ -444,8 +494,12 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
             isS2 = nearbyAngle(a1, a2, 20)
             isS3 = nearbyAngle(a1, a2, 30)
 
+        if r1 is not None and r2 is not None:
+            rs = (r1 == r2)
+
         # should match added data columns
-        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi, pr, isS1, isS2, isS3, dm, hourMark, minMark10, minMark, lightChange, np.nan]
+        addedDataRow = [td, absM, dt, zt, zt.second, zt.minute, zt.hour, zt.day, dn, ipi_a, pr_a, dm_a, ipi_b, pr_b,
+                        dm_b, isS1, isS2, isS3, rs, hourMark, minMark10, minMark, lightChange, np.nan]
 
         addedDataFrame.append(addedDataRow)
         
@@ -465,6 +519,15 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
     complexDF = complexDF.astype({'global frame': 'int64'})
 
     if DEBUG: print(complexDF.head())
+
+    # add sleep columns
+    median_ipi = np.median(complexDF['InterpulseInterval_After'].to_numpy())
+
+    complexDF['SleepWake_median_ipi_after'] = complexDF['InterpulseInterval_After'] > median_ipi
+    complexDF = complexDF.replace({'SleepWake_median_ipi_after': {True: 'Sleep', False: 'Wake'}})
+
+    complexDF['SleepWake_median_ipi_before'] = complexDF['InterpulseInterval_Before'] > median_ipi
+    complexDF = complexDF.replace({'SleepWake_median_ipi_before': {True: 'Sleep', False: 'Wake'}})
     
     #returns a pandas dataframe
     return complexDF
@@ -478,13 +541,13 @@ def createComplexDF(angleDataPath, orientationDF, FRAMERATE, STARTDATETIME, DAYL
 ###################################
 
 
-def createUsageDF(complexDF):
+def createUsageDF(complexDF, metric='closest rhopalia'):
     """
     creates a dataframe with each pulse representing a row and each rhopalia a column.
     1's are assigned to the presumed initiating rhopalia of each pulse
     pulses are timestamped with Zeigeber Time
     """
-    usage_df = pd.get_dummies(complexDF['closest rhopalia'], prefix='rho')
+    usage_df = pd.get_dummies(complexDF[metric], prefix='rho')
 
     usage_df['ZeitgeberTime'] = pd.to_datetime(
         complexDF['ZeitgeberTime'],
@@ -519,7 +582,17 @@ def createAggUsageDF(usageDF, time_bin):
 ###################################
 ###################################
 
-def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
+def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
+                      backgroundColor = [255, 255, 255],
+                      tickColor = [0, 0, 0],
+                      filter = None,
+                      colors=[[0, 0, 150],  # blue
+                              [150, 0, 0],  # red
+                              [0, 100, 0],  # green
+                              [200, 100, 0],  # orange
+                              [0, 100, 100],  # teal
+                              ]
+                      ):
     """
     Reads in complex data as a CSV and takes angle and frame data.
     Creates a Numpy Arr m by n, m = number of frames in recording and n = number of degrees
@@ -534,7 +607,8 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     FRAMERATE: frames per second
     INTERVAL: number of points either side of initiator angle to set to 1
 
-    pulseExtension: seconds to represent the pulse by. pulseExtension * frames gives a framecount which is used to extend the "tick mark" that represents each pulse.
+    pulseExtension: seconds to represent the pulse by. pulseExtension * frames gives a framecount which is used to
+                    extend the "tick mark" that represents each pulse.
 
     OUTPUT
     Actigram array which is used in plotting the actigram using imshow.
@@ -542,9 +616,14 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     pulseExtension: the number of frames used to visualize ticks
 
     """
-    framesPerExtension = int(FRAMERATE*pulseExtension)
 
-    print(complexDF['bounded angle'].unique())
+    compression_factor = 30
+
+    framesPerExtension = int(FRAMERATE*pulseExtension/compression_factor)
+    print(framesPerExtension)
+
+    print('unique bounded angles: {}, len: {}'.format(complexDF['bounded angle'].unique(),
+                                                      len(complexDF['bounded angle'].unique())))
 
     # gets a dataframe of bounded angles that are not null
 
@@ -561,19 +640,43 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 1/2):
     lastFrame = max(pulseFrames)
     
     # creates the image array of zeros. m x n (m == all frames of recording, n == degrees on the jellyfish)
-    actigramArr = np.zeros((lastFrame+framesPerExtension-startFrame, 360))
+    actigramArr = np.zeros((int((lastFrame+framesPerExtension-startFrame)/compression_factor)+120, 360, 3))
 
-    # enumerates through pulses. gets the frame and angle from each pulse coming from the complex dataframe and changes the necessary pixels from 0 to 1. 
+    print('actigram array shape: {}'.format(actigramArr.shape))
+
+    actigramArr[:, :] = backgroundColor
+
+    uniqueVars = []
+    if filter is not None:
+        uniqueVars = df[filter].unique()
+        filterColumn = df[filter].tolist()
+        colors = colors[:len(uniqueVars)]
+    else:
+        colors = []
+
+    # enumerates through pulses. gets the frame and angle from each pulse coming from the complex dataframe and
+    # changes the necessary pixels from 0 to 1.
     for i, (frame, angle) in enumerate(zip(pulseFrames, pulseAngles)):
-        if DEBUG and i%1000==0:
+        if DEBUG and i%10000==0:
             print('i: {}, frame: {}, angle: {}'.format(i, frame, angle))
-        
-        for extension in range(framesPerExtension):
-            # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5) 
-            for offset in range(-INTERVAL, INTERVAL+1):
-                actigramArr[frame-startFrame+extension][(angle + offset)%360] = 1
 
-    return actigramArr
+        startFrame = int(startFrame/compression_factor)
+        frame = int(frame/compression_factor)
+
+        if len(uniqueVars) > 0:
+            for var, color in zip(uniqueVars, colors):
+                if filterColumn[i] == var:
+                    for extension in range(framesPerExtension):
+                        # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
+                        for offset in range(-INTERVAL, INTERVAL + 1):
+                            actigramArr[frame - startFrame + extension][(angle + offset) % 360] = color
+        else:
+            for extension in range(framesPerExtension):
+                # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
+                for offset in range(-INTERVAL, INTERVAL+1):
+                    actigramArr[frame- startFrame + extension][(angle + offset)%360] = tickColor
+
+    return actigramArr, uniqueVars, colors
 
 
 def dfValidator(complexDFpostvalidation, chunks2remove=[]):
