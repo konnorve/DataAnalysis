@@ -10,11 +10,11 @@ import pandas as pd
 # datetime(year,month,day,strthr,strtmin) + timedelta(0, sec 0, 0, 0, min 0, hour 0),
 
 
-rho_df_path = Path('/home/kve/Desktop/Labora/Harland_Lab/2021-2/Rhopalia Positions.csv')
+rho_df_path = Path(r'I:\Ganglia_Tracker_Data\Rhopalia_Positions.csv')
 rhopalia_positions = pd.read_csv(rho_df_path)
 
 
-home_dir = Path('/home/kve/Desktop/Labora/Harland_Lab/2021-2/Practice_with_multiprocessing')
+home_dir = Path(r'I:\Ganglia_Tracker_Data')
 
 cumulative_complexDF_dir = cdf.makeOutDir(home_dir, 'complexDFs')
 
@@ -27,6 +27,8 @@ for jelly_dir in home_dir.iterdir():
         rhopaliaDF = None
 
         rhopaliaDF = rhopalia_positions.loc[(rhopalia_positions['Jellyfish'] == jelly_name)]
+
+        print(rhopaliaDF.head())
 
         for recording_dir in jelly_dir.iterdir():
             if recording_dir.is_dir():
@@ -48,19 +50,29 @@ for jelly_dir in home_dir.iterdir():
                             orientation_path = item
 
                 # getting start time and daylight savings bool
+
                 fractions = recording_name.split('_')
+                print(fractions)
 
-                if len(fractions[2]) != 6:
-                    fractions[2] = '0' + fractions[2]
+                date = fractions[0]
+                time = None
+                for frac in fractions:
+                    if search('(\d){3,4}am|pm', frac):
+                            time = frac
 
-                string_datetime = fractions[0] + " " + fractions[2]
-                start_datetime = datetime.strptime(string_datetime, '%Y%m%d %I%M%p')
+                if time is not None:
+                    if len(time) != 6:
+                        time = '0' + time
 
-                timezone = pytz.timezone('US/Pacific')
+                    string_datetime = date + ' ' + time
 
-                start_datetime = timezone.localize(start_datetime)
+                    start_datetime = datetime.strptime(string_datetime, '%Y%m%d %I%M%p')
 
-                isDaylightSavings = start_datetime.dst() != timedelta(0)
+                    timezone = pytz.timezone('US/Pacific')
+
+                    start_datetime = timezone.localize(start_datetime)
+
+                    isDaylightSavings = start_datetime.dst() != timedelta(0)
 
                 print(
                     'rec name: {} \t st: {} \t daylight savings?:{} \t angleDir found: {} \t orientation sheet found: {}'.format(
@@ -69,9 +81,9 @@ for jelly_dir in home_dir.iterdir():
 
                 item_list = [angle_dir, orientation_path, start_datetime, isDaylightSavings]
 
-                if None not in item_list and False:  # todo: this will auto fail because of False
+                if None not in item_list:
                     complexDF = cdf.createComplexDF(angleDataPath=angle_dir,
-                                        orientationDF=orientation_path,
+                                        orientationDF=pd.read_csv(orientation_path),
                                         rhopaliaDF=rhopaliaDF,
                                         FRAMERATE=120,
                                         STARTDATETIME=start_datetime,
@@ -90,6 +102,5 @@ for jelly_dir in home_dir.iterdir():
                         rholab = rhopaliaDF['Rhopalia Label'].tolist()
 
                         pm.main(recording_name, figures_path, complexDF, rhopos, rholab, histogram_constraints=[0, 0.025])
-
 
 

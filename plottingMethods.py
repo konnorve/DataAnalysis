@@ -12,8 +12,8 @@ import matplotlib.cm as cm
 
 
 
-from . import DataFrameCreationMethods as cdf
-from . import figures
+import DataFrameCreationMethods as cdf
+import figures
 
 
 # Helper Methods
