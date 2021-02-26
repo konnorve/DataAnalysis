@@ -1,10 +1,13 @@
 
 
-import numpy as np
-import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 import math
 from datetime import timedelta as td
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+import matplotlib.cm as cm
 
 ####### Key things to know #######
 # Axis refers to the axes object, not the x or y axis. Every figure must be added in
@@ -76,51 +79,6 @@ def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], day
 
     return barArr[::compression_factor]
 
-
-"""
-def applyXticks(complexDF, ax, figType):
-    # turn off ticks on first axis
-    ax.get_xaxis().set_visible(False)
-
-    # create a new axis to tick on
-    tickAx = ax.twiny()
-
-    # move that twin axis from top of plot to bottom of plot
-    tickAx.get_xaxis().set_ticks_position('bottom')
-
-    # see length of twin axis
-    print("xlimits of normal axes: {}".format(ax.get_xlim()))
-    print("xlimits of tick axes: {}".format(tickAx.get_xlim()))
-
-    # get first and last frames to adjust the data to fit the given x axis
-    firstFrame = complexDF.iloc[0]['global frame']
-    lastFrame = complexDF.iloc[-1]['global frame']
-    frameCount = lastFrame - firstFrame
-
-    if figType == 'Long':
-        # takes out just the pulses designated as tick marks
-        tick_pulses_slice = complexDF[complexDF.isHourMark == True]
-    elif figType == 'Medium':
-        tick_pulses_slice = complexDF[complexDF.is10MinuteMark == True]
-    elif figType == 'Short':
-        tick_pulses_slice = complexDF[complexDF.isMinuteMark == True]
-
-    # takes the frames from each of those tick marks
-    globalFrames = tick_pulses_slice['global frame'].tolist()
-
-    # gets the labels which are used for tick labels
-    zeithours = tick_pulses_slice['ZeitgeberHour'].tolist()
-
-    # creates the tick labels
-    xticklabels = ['{}'.format(i) for i in zeithours]
-
-    # adjusts the frame numbers to a float value between 0 and 1 where 0 is the first frame and 1 is the last frame
-    xtickMarks = [(globalFrame-firstFrame)/frameCount for globalFrame in globalFrames]
-
-
-    tickAx.set_xticks(xtickMarks)
-    tickAx.set_xticklabels(xticklabels)
-"""
 
 
 def chooseFigType(complexDF):
@@ -292,7 +250,7 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
     if legend_labels is not None and legend_labels is not None:
         rgb_float_colors = np.array(legend_colors) / 255
         patches = [mpatches.Patch(color=c, label=l) for l, c in zip(legend_labels, rgb_float_colors)]
-        plt.legend(handles=patches, loc=1, bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+        ax1.legend(handles=patches, loc=1, bbox_to_anchor=(1.05, 1), borderaxespad=0.)
 
     # grids. Changes colors so that grids show regardless of colormap.
     ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
@@ -304,7 +262,7 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
     ax1.set_title(title)
 
 
-def interpulseInterval(jelly_title, axis, dfComplex, ipi_after = True, show_title = True, show_xLabels = True, show_average = True):
+def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, show_average = True):
     """
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
@@ -371,10 +329,8 @@ def interpulseInterval(jelly_title, axis, dfComplex, ipi_after = True, show_titl
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
-    if show_title: ax.set_title(jelly_title + ' Interpulse Interval')
 
-
-def pulseRate(jelly_title, axis, dfComplex, pr_after = True, show_title = True, show_xLabels = True, show_average = True):
+def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_average = True):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -439,10 +395,8 @@ def pulseRate(jelly_title, axis, dfComplex, pr_after = True, show_title = True, 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
-    if show_title: ax.set_title(jelly_title + ' Pulse Rate')
 
-
-def distanceMoved(jelly_title, axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_title = True, show_xLabels = True, show_average = True):
+def distanceMoved(axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_xLabels = True, show_average = True):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -509,8 +463,6 @@ def distanceMoved(jelly_title, axis, dfComplex, dm_after = True, maxDMthreshold 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
-    if show_title: ax.set_title(jelly_title + ' Distance Moved')
-
 
 def jelly_trajectory(complexDFslice, fig, ax, image_max_x, image_max_y, a=0.4):
     ax.set_xlim(0, image_max_x)
@@ -550,7 +502,7 @@ def jelly_trajectory(complexDFslice, fig, ax, image_max_x, image_max_y, a=0.4):
     ax.set_ylabel('Y Position')
 
 
-def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[], vertical = True, show_title = True, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = [], question=None):
+def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = True, title=None, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = [], question=None):
     """
     Shows a normalized histogram of usage across the degrees of a jellyfish. Each entry represents the total pulses of
     that particular degree on the jellyfish as a percent of total pulses.
@@ -570,6 +522,10 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[],
         dfQuery = dfComplex.query(question)
     else:
         dfQuery = dfComplex
+
+    dfQuery = dfQuery[dfQuery['bounded angle'].notnull()]
+
+    dfQuery['bounded angle'] = dfQuery['bounded angle'].apply(lambda x: int(x))
 
     # aggregates angle measurements from 'bounded angle' column
     dfGrouped = dfQuery.groupby(['bounded angle'])['bounded angle'].agg('count')
@@ -670,7 +626,7 @@ def initiatiorsHistogramFigure(jelly_title, ax, dfComplex, rhopos=[], rholab=[],
         else:
             ax1.get_xaxis().set_visible(False)
 
-    if show_title: ax1.set_title(jelly_title)
+    if title is not None: ax1.set_title(title)
 
 
 def ysensitivity(dataframe, metric):
@@ -729,8 +685,8 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
 
     ax.fill_between(x = x, y1 = ya, y2 = yb, color = fillColor, alpha = fillShade)
 
-# def centersChangedFigure(jelly_title, axis, dfComplex, show_title = True, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
-def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLabels=True, show_Legend=True,
+# def centersChangedFigure(axis, dfComplex, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
+def centralizationFigure(axis, dfComplex, show_xLabels=True, show_Legend=True,
                              sensitivity=30, bounds=(0, 1)):
     """
     Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to
@@ -824,10 +780,8 @@ def centralizationFigure(jelly_title, axis, dfComplex, show_title=True, show_xLa
 
     if show_Legend: ax.legend()
 
-    if show_title: ax.set_title(jelly_title + ' Centralization Plot')
 
-
-def ganglia_centralization(jelly_title, axis, dfComplex, show_title=True, show_xLabels=True, show_Legend=True, bounds=(0, 1)):
+def ganglia_centralization(axis, dfComplex, show_xLabels=True, show_Legend=True, bounds=(0, 1)):
 
 
 
@@ -844,7 +798,7 @@ def ganglia_centralization(jelly_title, axis, dfComplex, show_title=True, show_x
     elif figType == 'Short':
         BINSIZE = 'T'
 
-    dfY = createRhoplaiaCentralizationDF(complexDF, BINSIZE)
+    dfY = createRhoplaiaCentralizationDF(dfComplex, BINSIZE)
 
     ax.plot(dfY)
 
@@ -868,7 +822,6 @@ def ganglia_centralization(jelly_title, axis, dfComplex, show_title=True, show_x
 
     if show_Legend: ax.legend()
 
-    if show_title: ax.set_title(jelly_title + ' Centralization Plot')
 
 
 def createRhoplaiaCentralizationDF(complexDF, time_bin):
@@ -892,7 +845,7 @@ def createRhoplaiaCentralizationDF(complexDF, time_bin):
     return aggDF.RhoSameAfter_True
 
 
-def usage_lines(jelly_title, ax, dfComplex, aggUsageDF, show_title=True, show_xLabels=True, show_Legend=True,
+def usage_lines(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
                 sensitivity=30, bounds=(0, 1)):
     for column in aggUsageDF.columns:
         ax.plot(aggUsageDF.index, aggUsageDF[column], label=column)
@@ -917,10 +870,8 @@ def usage_lines(jelly_title, ax, dfComplex, aggUsageDF, show_title=True, show_xL
     else:
         ax.get_xaxis().set_visible(False)
 
-    if show_title: ax.set_title(jelly_title + ' Centralization Plot')
 
-
-def usage_areas(jelly_title, ax, dfComplex, aggUsageDF, show_title=True, show_xLabels=True, show_Legend=True,
+def usage_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
                 sensitivity=30, bounds=(0, 1)):
     trans_agg = aggUsageDF.transpose()
     trans_agg["sum"] = trans_agg.sum(axis=1)
@@ -950,10 +901,9 @@ def usage_areas(jelly_title, ax, dfComplex, aggUsageDF, show_title=True, show_xL
     else:
         ax.get_xaxis().set_visible(False)
 
-    if show_title: ax.set_title(jelly_title + ' Centralization Plot')
 
 
-def usage_activity_level(jelly_title, ax, dfComplex, aggUsageDF, activity_thresh, show_title=True, show_xLabels=True,
+def usage_activity_level(ax, dfComplex, aggUsageDF, activity_thresh, show_xLabels=True,
                          show_Legend=True):
     activityThreshDF = aggUsageDF > activity_thresh
 
@@ -976,4 +926,3 @@ def usage_activity_level(jelly_title, ax, dfComplex, aggUsageDF, activity_thresh
 
     ax.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-    if show_title: ax.set_title(jelly_title + ' above {} activity threshold'.format(activity_thresh))

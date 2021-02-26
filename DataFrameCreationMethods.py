@@ -586,8 +586,8 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
                       backgroundColor = [255, 255, 255],
                       tickColor = [0, 0, 0],
                       filter = None,
-                      colors=[[150, 0, 0],  # red
-                              [0, 0, 150],  # blue
+                      colors=[[0, 0, 150],  # blue
+                              [150, 0, 0],  # red
                               [0, 100, 0],  # green
                               [200, 100, 0],  # orange
                               [0, 100, 100],  # teal
