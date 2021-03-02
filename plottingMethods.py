@@ -248,7 +248,7 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
 
     # subplot
     for i, combo in enumerate(uniqueCombos):
-        print(combo)
+        # print(combo)
 
         ax1 = fig.add_subplot(gs[i, 0])
         ax2 = fig.add_subplot(gs[i, 1])
@@ -312,7 +312,7 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
 
     # subplot
     for i, combo in enumerate(uniqueCombos):
-        print(combo)
+        # print(combo)
 
         ax1 = fig.add_subplot(gs[i, 0])
         ax2 = fig.add_subplot(gs[i, 1])
@@ -429,7 +429,6 @@ def create_trajectory_gif(complexDFslice, jelly_title, outDir, distanceMovedThre
     fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cm.viridis), ax=ax)
 
     for n in range(1, len(gif_frames)):
-        print(n)
 
         start = gif_frames[n - 1]
         end = gif_frames[n]
@@ -1000,6 +999,24 @@ def plot_sleep_area(outdir, jelly_title, dfComplex, time_bin, yfigurelen, xfigur
 
 ##############################################################
 
+def core(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120, histogram_constraints=[]):
+    # standard graph sizes
+    if stdYlen is None: stdYlen = 15 / 2
+    if stdXlen is None: stdXlen = dfComplex['AbsoluteMinute'].max() / 60 * 5 / 3
+
+    dfComplex['ZeitgeberTime'] = pd.to_datetime(
+        dfComplex['ZeitgeberTime'],
+        format='%Y-%m-%d %H:%M:%S')
+
+    # actigram
+
+    dfActigram = cdf.createActigramArr(dfComplex, Framerate, filter='SleepWake_median_ipi_after')
+
+    plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
+
+
+
+
 def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120, histogram_constraints=[]):
     """
     :param jelly_title: name of jellyfish
@@ -1086,7 +1103,7 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotJellyTrajectoryDayNight(outdir, jelly_title, dfComplex)
 
-    create_trajectory_gif(dfComplex, jelly_title, outdir)
+    # create_trajectory_gif(dfComplex, jelly_title, outdir)
     # TODO: drop global frame usage from all metrics (noteably actigram creation)
 
     # TODO: active ganglia level - d/n movement bar

@@ -68,7 +68,7 @@ def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], day
         isNight = pulseDayNight[i] == 'Night'
 
         if i%1000==0 and False:
-            print('counter: {}, frame: {}, nextframe: {}, isMoving: {}, is night?: {}'.format(i, currPulseFrame, nextPulseFrame, isMoving, isNight))
+            ('counter: {}, frame: {}, nextframe: {}, isMoving: {}, is night?: {}'.format(i, currPulseFrame, nextPulseFrame, isMoving, isNight))
 
         if isMoving:
             barArr[currPulseFrame:nextPulseFrame, 0:int(width/2)] = movementColor
@@ -117,7 +117,7 @@ def applyXticks(complexDF, ax):
 
     figType = chooseFigType(complexDF)
 
-    print('figType: {}'.format(figType))
+    # print('figType: {}'.format(figType))
 
     if figType == 'Long':
         tick_start = start_datetime.replace(second=0, minute=0, microsecond=0, hour=start_datetime.hour + 1)
@@ -181,7 +181,7 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
     ax.get_xaxis().set_visible(False)
 
 
-def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = [], rhopaliaLabels = []):
+def actigramFigure(dfActigram, complexDF, axis, rhopaliaPositions360 = [], rhopaliaLabels = []):
     """
     :param dfActigram:  np actigram array. n frames long by 360 degrees wide. Must be transposed in order to be made into horizontal image.
                         often these are huge images. Plots that utilize this figure take a while to compile.
@@ -197,8 +197,7 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
 
     # parses actigram dataframe
     actigramArr = dfActigram[0]
-    legend_labels = dfActigram[1]
-    legend_colors = dfActigram[2]
+    legend = dfActigram[1]
 
     # renames axes object for convenience
     ax1 = axis
@@ -247,19 +246,16 @@ def actigramFigure(dfActigram, complexDF, axis, title, rhopaliaPositions360 = []
         ax2.grid(False)
 
     # if actigram is colored, it adds labels
-    if legend_labels is not None and legend_labels is not None:
-        rgb_float_colors = np.array(legend_colors) / 255
-        patches = [mpatches.Patch(color=c, label=l) for l, c in zip(legend_labels, rgb_float_colors)]
-        ax1.legend(handles=patches, loc=1, bbox_to_anchor=(1.05, 1), borderaxespad=0.)
+    if bool(legend):
+        key_rgb_pairs = [(key, [x / 255 for x in legend[key]]) for key in legend.keys()]
+        patches = [mpatches.Patch(color=c, label=l) for l, c in key_rgb_pairs]
+        ax1.legend(handles=patches, loc=1, bbox_to_anchor=(1.1, 1), borderaxespad=0.)
 
     # grids. Changes colors so that grids show regardless of colormap.
     ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
 
     #setting x ticks
     applyXticks(complexDF, ax1)
-
-    #graph title
-    ax1.set_title(title)
 
 
 def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, show_average = True):

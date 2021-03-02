@@ -41,6 +41,8 @@ for jelly_dir in home_dir.iterdir():
 
                 dir_items = [x for x in recording_dir.iterdir()]
 
+                print(dir_items)
+
                 # getting angle dir and orientation csv
                 for item in dir_items:
                     if search('AngleData', str(item)):
@@ -88,12 +90,13 @@ for jelly_dir in home_dir.iterdir():
                                         FRAMERATE=120,
                                         STARTDATETIME=start_datetime,
                                         DAYLIGHTSAVINGS=isDaylightSavings)
-
+                    """
                     complexDFPath1 = recording_dir / '{}_complexDF.csv'.format(recording_name)
                     complexDFPath2 = cumulative_complexDF_dir / '{}_complexDF.csv'.format(recording_name)
 
                     complexDF.to_csv(complexDFPath1)
                     complexDF.to_csv(complexDFPath2)
+                    """
 
                     if False:
                         figures_path = cdf.makeOutDir(recording_dir, 'figures')

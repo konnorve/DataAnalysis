@@ -11,7 +11,7 @@ import math
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
-DEBUG = True
+DEBUG = False
 CHIME = True
 
 ########################################################################################################################
@@ -642,17 +642,30 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
     # creates the image array of zeros. m x n (m == all frames of recording, n == degrees on the jellyfish)
     actigramArr = np.zeros((int((lastFrame+framesPerExtension-startFrame)/compression_factor)+120, 360, 3))
 
-    print('actigram array shape: {}'.format(actigramArr.shape))
+    # print('actigram array shape: {}'.format(actigramArr.shape))
 
     actigramArr[:, :] = backgroundColor
 
     uniqueVars = []
     if filter is not None:
         uniqueVars = df[filter].unique()
+
+        legend = {}
+
+        for i, var in enumerate(uniqueVars):
+            if var == 'Sleep':
+                legend[var] = [0, 0, 150]
+            elif var == 'Wake':
+                legend[var] = [150, 0, 0]
+            else:
+                legend[var] = colors.pop(0)
+
         filterColumn = df[filter].tolist()
-        colors = colors[:len(uniqueVars)]
+
     else:
-        colors = []
+        legend = {}
+
+    startFrame = int(startFrame / compression_factor)
 
     # enumerates through pulses. gets the frame and angle from each pulse coming from the complex dataframe and
     # changes the necessary pixels from 0 to 1.
@@ -660,23 +673,20 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
         if DEBUG and i%10000==0:
             print('i: {}, frame: {}, angle: {}'.format(i, frame, angle))
 
-        startFrame = int(startFrame/compression_factor)
         frame = int(frame/compression_factor)
 
         if len(uniqueVars) > 0:
-            for var, color in zip(uniqueVars, colors):
-                if filterColumn[i] == var:
-                    for extension in range(framesPerExtension):
-                        # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
-                        for offset in range(-INTERVAL, INTERVAL + 1):
-                            actigramArr[frame - startFrame + extension][(angle + offset) % 360] = color
+            for extension in range(framesPerExtension):
+                # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
+                for offset in range(-INTERVAL, INTERVAL + 1):
+                    actigramArr[frame - startFrame + extension][(angle + offset) % 360] = legend[filterColumn[i]]
         else:
             for extension in range(framesPerExtension):
                 # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
                 for offset in range(-INTERVAL, INTERVAL+1):
                     actigramArr[frame- startFrame + extension][(angle + offset)%360] = tickColor
 
-    return actigramArr, uniqueVars, colors
+    return actigramArr, legend
 
 
 def dfValidator(complexDFpostvalidation, chunks2remove=[]):
