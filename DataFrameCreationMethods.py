@@ -122,7 +122,7 @@ def convertTo360(a):
 #########################################################
 
 
-def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False):
+def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDATETIME, DAYLIGHTSAVINGS = False, median_ipi=None):
     """
     Creates a complex data frame as a CSV and takes in angle and orientation data during a specified time frame.
 
@@ -521,7 +521,8 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
     if DEBUG: print(complexDF.head())
 
     # add sleep columns
-    median_ipi = np.median(complexDF['InterpulseInterval_After'].to_numpy())
+    if median_ipi is None:
+        median_ipi = np.median(complexDF['InterpulseInterval_After'].to_numpy())
 
     complexDF['SleepWake_median_ipi_after'] = complexDF['InterpulseInterval_After'] > median_ipi
     complexDF = complexDF.replace({'SleepWake_median_ipi_after': {True: 'Sleep', False: 'Wake'}})
