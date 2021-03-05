@@ -576,6 +576,26 @@ def createAggUsageDF(usageDF, time_bin):
 
     return aggDF
 
+def createSleepWakeAggDFs(complexDF, time_bin='D'):
+    usage_df_rho = pd.get_dummies(complexDF['closest rhopalia'], prefix='rho')
+
+    usage_df_rho['SleepWake_median_ipi_after'] = complexDF['SleepWake_median_ipi_after']
+
+    usage_df_rho['ZeitgeberTime'] = pd.to_datetime(
+        complexDF['ZeitgeberTime'],
+        format='%Y-%m-%d %H:%M:%S')
+
+    usage_df_rho = usage_df_rho.set_index('ZeitgeberTime')
+
+    aggDF_sleep_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Sleep'].resample(time_bin).sum()
+    aggDF_sleep = aggDF_sleep_counts.div(usage_df_rho.sum(axis=1).resample(time_bin).sum(), axis=0)
+
+    aggDF_wake_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Wake'].resample(time_bin).sum()
+    aggDF_wake = aggDF_wake_counts.div(usage_df_rho.sum(axis=1).resample(time_bin).sum(), axis=0)
+
+    diffDF = aggDF_sleep - aggDF_wake
+
+    return aggDF_wake, aggDF_sleep, diffDF
 
 ###################################
 ###################################

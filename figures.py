@@ -498,11 +498,13 @@ def jelly_trajectory(complexDFslice, fig, ax, image_max_x, image_max_y, a=0.4):
     ax.set_ylabel('Y Position')
 
 
-def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = True, title=None, show_degreeLabels = True, show_just_degree_labels=False, show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10, constraints = [], question=None):
+def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = True, title=None,
+                               show_degreeLabels = True, show_just_degree_labels=False,
+                               show_just_rhopalia_labels=False, shadeAroundRhopaliaInterval = 10,
+                               constraints = [], question=None, delta_sleep_wake=None):
     """
     Shows a normalized histogram of usage across the degrees of a jellyfish. Each entry represents the total pulses of
     that particular degree on the jellyfish as a percent of total pulses.
-
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param ax: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
     :param dfComplex: Takes in the complex dataframe. Only uses the 'bounded angle' column
@@ -523,16 +525,37 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
 
     dfQuery['bounded angle'] = dfQuery['bounded angle'].apply(lambda x: int(x))
 
-    # aggregates angle measurements from 'bounded angle' column
-    dfGrouped = dfQuery.groupby(['bounded angle'])['bounded angle'].agg('count')
+    degrees = range(360)
 
-    degrees = dfGrouped.index.tolist()  # sets 'degrees' as contents of dfGrouped, in list form   x
-    counts = dfGrouped.tolist()  # populates 'counts' with dfGrouped in index form.  possibe it's vice versa but I dont think so  x
-    numPulses = sum(counts)
-
-    # normalizes the amount into percent of pulses  [Konnor is a great speller, what are you talking about]
-    percents = [i/numPulses for i in counts]
     ax1 = ax
+
+    # delta_sleep_wake column (determines +/- sleep vs. Wake)
+    if delta_sleep_wake:
+        wake_counts = [0]*360
+        sleep_counts = [0]*360
+
+        for i, row in dfQuery.iterrows():
+            if row['SleepWake_median_ipi_after'] == 'Wake':
+                wake_counts[row['bounded angle']] += 1
+            else:
+                sleep_counts[row['bounded angle']] += 1
+
+        wake_total = sum(wake_counts)
+        sleep_total = sum(sleep_counts)
+
+        wake_percents = [i / wake_total for i in wake_counts]
+        sleep_percents = [i / sleep_total for i in sleep_counts]
+
+        percents = [sp - wp for sp, wp in zip(sleep_percents, wake_percents)]
+    else:
+        counts = [0]*360
+
+        for i, row in dfQuery.iterrows():
+            counts[row['bounded angle']] += 1
+
+        total_pulses = sum(counts)
+
+        percents = [i / total_pulses for i in counts]
 
     rp360 = rhopos
     rl = rholab
@@ -585,7 +608,7 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
     else:
         ax1.bar(degrees, percents)
 
-        ax1.set_ylabel(ylabel=r'% of total counts')
+        ax1.set_ylabel(ylabel=r'fraction of total counts')
 
         ax1.margins(x=0)
 
@@ -623,6 +646,21 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
             ax1.get_xaxis().set_visible(False)
 
     if title is not None: ax1.set_title(title)
+
+
+def rho_usage(ax, aggSeries, vertical=True, title=None, constraints=[]):
+    if vertical:
+        ax.barh(aggSeries.index, aggSeries)
+        ax.set_xlabel(xlabel=r'% of total counts')
+        if len(constraints) != 0:
+            ax.set_xlim(left=constraints[0], right=constraints[1])
+    else:
+        ax.bar(aggSeries)
+        ax.set_ylabel(xlabel=r'% of total counts')
+        if len(constraints) != 0:
+            ax.set_ylim(bottom=constraints[0], top=constraints[1])
+
+    if title is not None: ax.set_title(title)
 
 
 def ysensitivity(dataframe, metric):
@@ -866,6 +904,33 @@ def usage_lines(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
     else:
         ax.get_xaxis().set_visible(False)
 
+
+def sleep_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
+                sensitivity=30, bounds=(0, 1)):
+    trans_agg = aggUsageDF.transpose()
+    trans_agg = trans_agg.sort_index()
+
+    ax.stackplot(trans_agg.columns, trans_agg, labels=trans_agg.index.tolist(), colors=cm.tab20(np.linspace(0, 1, 16)))
+
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2)
+
+    # sets y bounds using input
+    ax.axis(ymin=bounds[0], ymax=bounds[1])
+
+    # sets labels
+    ax.set_xlabel(xlabel=r'Zeitgeber Time')
+    ax.set_ylabel(ylabel='% usage')
+
+    # sets grid
+    ax.grid(axis='y', alpha=0.5, linestyle='--')
+    ax.margins(x=0)
+
+    # x ticks and labels
+    if show_xLabels:
+        # setting x ticks
+        applyXticks(dfComplex, ax)
+    else:
+        ax.get_xaxis().set_visible(False)
 
 def usage_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
                 sensitivity=30, bounds=(0, 1)):

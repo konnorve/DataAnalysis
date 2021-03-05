@@ -239,7 +239,7 @@ def plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab,
 
     fig = plt.figure(figsize=(xfigurelen, len(uniqueCombos)*yfigurelen), constrained_layout=True)
 
-    plot_title = 'Angle Activity Distribution, 4 Day Hour Slices'
+    plot_title = 'Initiators Histogram, Day Hour Slices'
 
     # gridspec organization
     heights = [1]*len(uniqueCombos)
@@ -303,7 +303,7 @@ def plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab
 
     fig = plt.figure(figsize=(xfigurelen, len(uniqueCombos)*yfigurelen), constrained_layout=True)
 
-    plot_title = 'Histogram 4 Day Light Slices'
+    plot_title = 'Initiators Histogram, Day Light Slices'
 
     # gridspec organization
     heights = [1]*len(uniqueCombos)
@@ -657,6 +657,46 @@ def ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhop
     plt.close()
 
 
+def Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+    """
+    Input: ComplexDF
+    Ouput: Actigram figure with corresponding Interpulse Interval and Day/Night Bar
+    """
+    updateparameters()
+
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'Actigram, Pulse Rate, Sleep Wake 1 Min With Bar'
+    #gridspec organization
+    heights = [14, 1, 3, 6]
+    gs = fig.add_gridspec(ncols=1, nrows=4, height_ratios = heights)
+
+    #subplot
+    ax1 = fig.add_subplot(gs[0,0])
+    ax2 = fig.add_subplot(gs[1,0])
+    ax3 = fig.add_subplot(gs[2,0])
+    ax4 = fig.add_subplot(gs[3,0])
+
+    figures.actigramFigure(dfActigram, dfComplex, ax1, rhopaliaPositions360, rhopaliaLabels)
+    figures.bar4MovementDayNight(dfComplex, ax2)
+    figures.pulseRate(ax3, dfComplex, show_xLabels=False)
+
+    usageDF = cdf.createUsageDF(dfComplex, 'SleepWake_median_ipi_after')
+    aggUsageDF = cdf.createAggUsageDF(usageDF, 'T')
+
+    figures.sleep_areas(ax4, dfComplex, aggUsageDF)
+
+    # save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    fig.savefig(str(outpath),bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
+
+
+
 def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, hist_constraints=[]):
     """ input: complex dataframe for a jelly
     Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and vertical
@@ -802,9 +842,9 @@ def anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhola
     fig_ax2 = fig.add_subplot(gs[1,0])
 
     figures.initiatiorsHistogramFigure(fig_ax1, dfComplex, rhopos, rholab, title='Day',  vertical=False,
-                                            show_degreeLabels=True, question='DayOrNight == \'Day\'')
+                                            show_degreeLabels=True, question='DayOrNight == \'Day\'', constraints=[0, 0.3])
     figures.initiatiorsHistogramFigure(fig_ax2, dfComplex, rhopos, rholab, title='Night',  vertical=False,
-                                            show_degreeLabels=True, question='DayOrNight == \'Night\'')
+                                            show_degreeLabels=True, question='DayOrNight == \'Night\'', constraints=[0, 0.3])
 
     fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
 
@@ -818,6 +858,191 @@ def anglesHistogramDayANDNightPlot(outdir, jelly_title, dfComplex, rhopos, rhola
 
     plt.close()
 
+
+
+################### NEW PLOT ##################
+
+def anglesHistogramSleepVSwakePlot(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen, hist_constraints=[0,0.03]):
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing distribution of centers by degree angle for one day and night period
+    """
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'Pulse Initiators Sleep and Wake'
+
+    #gridspec organization
+    widths = [1, 1]
+    gs = fig.add_gridspec(ncols=2, nrows=1, width_ratios = widths)
+
+    #subplot
+    fig_ax1 = fig.add_subplot(gs[0,0])
+    fig_ax2 = fig.add_subplot(gs[0,1])
+
+    figures.initiatiorsHistogramFigure(fig_ax1, dfComplex, rhopos, rholab, title='Sleep',  vertical=True,
+                                            show_degreeLabels=True, question='SleepWake_median_ipi_after == \'Sleep\'', constraints=hist_constraints)
+    figures.initiatiorsHistogramFigure(fig_ax2, dfComplex, rhopos, rholab, title='Wake',  vertical=True,
+                                            show_degreeLabels=True, question='SleepWake_median_ipi_after == \'Wake\'', constraints=hist_constraints)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    #save fig
+    # save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title))
+
+    fig.savefig(str(outpath),bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
+
+
+def plotSleepVSwakeHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, yfigurelen, xfigurelen,
+                                             hist_constraints=[0, 0.03], withOverlap = True, day_night_separate=False):
+    updateparameters()
+    """
+    Input: complex dataframe for a jellyfish
+    Output: figure vizualizing histogram of activity distribuiton by degree angle (bounded angle)
+    """
+    if day_night_separate:
+
+        dfComplex["Day.LightCycle"] = dfComplex["ZeitgeberDay"].astype(str) + str('.') + dfComplex["DayOrNight"].astype(str)
+
+        uniqueCombos = dfComplex["Day.LightCycle"].unique()
+
+        plot_title = 'Sleep Wake Histogram, Day Light Slices'
+
+    else:
+        dfComplex["Day.LightCycle"] = dfComplex["ZeitgeberDay"].astype(str)
+
+        uniqueCombos = dfComplex["Day.LightCycle"].unique()
+
+        plot_title = 'Sleep Wake Histogram, Date Slices'
+
+    if withOverlap:
+        fig = plt.figure(figsize=(xfigurelen * 3, len(uniqueCombos) * yfigurelen), constrained_layout=True)
+
+        # gridspec organization
+        heights = [1]*len(uniqueCombos)
+        widths = [xfigurelen, xfigurelen, xfigurelen, 2]
+        gs = fig.add_gridspec(ncols=4, nrows=len(uniqueCombos), height_ratios=heights, width_ratios=widths)
+    else:
+        fig = plt.figure(figsize=(xfigurelen * 2, len(uniqueCombos) * yfigurelen), constrained_layout=True)
+
+        # gridspec organization
+        heights = [1] * len(uniqueCombos)
+        widths = [xfigurelen, xfigurelen, 2]
+        gs = fig.add_gridspec(ncols=3, nrows=len(uniqueCombos), height_ratios=heights, width_ratios=widths)
+
+    # subplot
+    for i, combo in enumerate(uniqueCombos):
+        # print(combo)
+
+        ax1 = fig.add_subplot(gs[i, 0])
+        ax2 = fig.add_subplot(gs[i, 1])
+        ax3 = fig.add_subplot(gs[i, 2])
+
+        dfSlice = dfComplex.loc[dfComplex['Day.LightCycle'] == combo]
+
+        day = dfSlice["ZeitgeberDay"].iloc[0]
+        lightcycle = dfSlice["DayOrNight"].iloc[0]
+
+        if withOverlap:
+            ax4 = fig.add_subplot(gs[i, 3])
+            ax4.text(0, 0.5, '{} {}'.format(day, lightcycle), size='xx-large')
+            ax4.axis("off")
+        else:
+            ax3.text(0, 0.5, '{} {}'.format(day, lightcycle), size='xx-large')
+            ax3.axis("off")
+
+        # adding the initiatorHist fig to the current plot?
+        if i == 0:
+            sjdl = False
+            sjrl = True
+        elif i == len(uniqueCombos) - 1:
+            sjdl = True
+            sjrl = False
+        else:
+            sjdl = False
+            sjrl = False
+
+
+        figures.initiatiorsHistogramFigure(ax1, dfSlice, rhopos, rholab,
+                                           vertical=True,
+                                           title=combo + " Wake",
+                                           show_degreeLabels=False,
+                                           question = 'SleepWake_median_ipi_after == \'Wake\'',
+                                           show_just_degree_labels=sjdl,
+                                           show_just_rhopalia_labels=sjrl,
+                                           constraints=hist_constraints)
+
+        figures.initiatiorsHistogramFigure(ax2, dfSlice, rhopos, rholab,
+                                           vertical=True,
+                                           title=combo + " Sleep",
+                                           show_degreeLabels=False,
+                                           question='SleepWake_median_ipi_after == \'Sleep\'',
+                                           show_just_degree_labels=sjdl,
+                                           show_just_rhopalia_labels=sjrl,
+                                           constraints=hist_constraints)
+
+        if withOverlap:
+            figures.initiatiorsHistogramFigure(ax3, dfSlice, rhopos, rholab,
+                                               vertical=True,
+                                               title=combo + ' sleep wake delta',
+                                               show_degreeLabels=False,
+                                               show_just_degree_labels=sjdl,
+                                               show_just_rhopalia_labels=sjrl,
+                                               constraints=[-0.03, 0.03],
+                                               delta_sleep_wake=True)
+
+    # save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    fig.savefig(str(outpath), bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
+
+
+def plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, hist_constraints=[0, 0.25]):
+    plot_title = 'Sleep Wake Histogram, Date Slices'
+
+    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs(dfComplex, 'D')
+
+    fig = plt.figure(figsize=(xfigurelen * 3, len(aggDF_wake) * yfigurelen), constrained_layout=True)
+
+    # gridspec organization
+    heights = [1] * len(aggDF_wake)
+    widths = [xfigurelen, xfigurelen, xfigurelen, 2]
+    gs = fig.add_gridspec(ncols=4, nrows=len(aggDF_wake), height_ratios=heights, width_ratios=widths)
+
+    for i in range(len(aggDF_wake)):
+        w = aggDF_wake.iloc[i]
+        s = aggDF_sleep.iloc[i]
+        d = diffDF.iloc[i]
+
+        date = aggDF_wake.iloc[0].name.date()
+
+        ax1 = fig.add_subplot(gs[i, 0])
+        ax2 = fig.add_subplot(gs[i, 1])
+        ax3 = fig.add_subplot(gs[i, 2])
+        ax4 = fig.add_subplot(gs[i, 3])
+        ax4.text(0, 0.5, '{} \n {:0.4}'.format(date, sum(abs(d))), size='xx-large')
+        ax4.axis("off")
+
+        figures.rho_usage(ax1, w, vertical=True, title='{} {}'.format(date, 'Wake'), constraints=hist_constraints)
+        figures.rho_usage(ax2, s, vertical=True, title='{} {}'.format(date, 'Sleep'), constraints=hist_constraints)
+        figures.rho_usage(ax3, d, vertical=True, title='{} {}'.format(date, 'Difference'),
+                          constraints=[-hist_constraints[1], hist_constraints[1]])
+
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    fig.savefig(str(outpath), bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
 
 
 ### BEST EXAMPLE ####
@@ -986,7 +1211,7 @@ def plot_sleep_area(outdir, jelly_title, dfComplex, time_bin, yfigurelen, xfigur
 
     ax1 = fig.add_subplot(gs[0, 0])
 
-    figures.usage_areas(ax1, dfComplex, aggUsageDF)
+    figures.sleep_areas(ax1, dfComplex, aggUsageDF)
 
     fig.savefig(str(outpath),bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
 
@@ -1008,14 +1233,20 @@ def core(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
         dfComplex['ZeitgeberTime'],
         format='%Y-%m-%d %H:%M:%S')
 
-    # actigram
 
-    dfActigram = cdf.createActigramArr(dfComplex, Framerate, filter='SleepWake_median_ipi_after')
+    plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
 
-    plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
-
-
-
+    # # actigram
+    #
+    # dfActigram = cdf.createActigramArr(dfComplex, Framerate, filter='SleepWake_median_ipi_after')
+    #
+    # plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
+    #
+    # Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen + 5, stdXlen)
+    #
+    # anglesHistogramSleepVSwakePlot(outdir, jelly_title, dfComplex, rhopos, rholab, 15, 10)
+    #
+    # plot_sleep_area(outdir, jelly_title, dfComplex, 'T', stdYlen, stdXlen)
 
 def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120, histogram_constraints=[]):
     """
@@ -1083,6 +1314,8 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     ActigramANDPulseRateWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+2, stdXlen)
 
+    Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+5, stdXlen)
+
     Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen, hist_constraints = histogram_constraints)
 
     Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen, hist_constraints = histogram_constraints)
@@ -1096,6 +1329,11 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
     plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
 
     plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
+
+    plotSleepVSwakeHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 15, 20,
+                                             hist_constraints=histogram_constraints, day_night_separate=True)
+    plotSleepVSwakeHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 15, 20,
+                                             hist_constraints=histogram_constraints, day_night_separate=False)
 
     # trajectory plotting
 
