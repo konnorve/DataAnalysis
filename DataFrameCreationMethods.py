@@ -603,10 +603,119 @@ def createSleepWakeAggDFs(complexDF, time_bin='D'):
 ###################################
 ###################################
 
-def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
-                      backgroundColor = [255, 255, 255],
-                      tickColor = [0, 0, 0],
-                      filter = None,
+# depricated method for actigram array creation. Uses 'global frame' instead of timestamps
+
+# def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
+#                       backgroundColor = [255, 255, 255],
+#                       tickColor = [0, 0, 0],
+#                       filter = None,
+#                       colors=[[0, 0, 150],  # blue
+#                               [150, 0, 0],  # red
+#                               [0, 100, 0],  # green
+#                               [200, 100, 0],  # orange
+#                               [0, 100, 100],  # teal
+#                               ]
+#                       ):
+#     """
+#     Reads in complex data as a CSV and takes angle and frame data.
+#     Creates a Numpy Arr m by n, m = number of frames in recording and n = number of degrees
+#     Pulses are set to 1, all other space is set to 0 (this makes the actigram image)
+#     Pulses are represented by a block of black (1) pixels
+#     Pulse angle and frame number are identified.
+#     Block is built by INTERVAL pixels on either side of pulse
+#     Block is extended by pulseExtension (seconds)
+#
+#     INPUTS
+#     Complex Dataframe
+#     FRAMERATE: frames per second
+#     INTERVAL: number of points either side of initiator angle to set to 1
+#
+#     pulseExtension: seconds to represent the pulse by. pulseExtension * frames gives a framecount which is used to
+#                     extend the "tick mark" that represents each pulse.
+#
+#     OUTPUT
+#     Actigram array which is used in plotting the actigram using imshow.
+#     Pulseas are 1's and non-pulse pixels are 0.
+#     pulseExtension: the number of frames used to visualize ticks
+#
+#     """
+#
+#     compression_factor = 30
+#
+#     framesPerExtension = int(FRAMERATE*pulseExtension/compression_factor)
+#     print(framesPerExtension)
+#
+#     print('unique bounded angles: {}, len: {}'.format(complexDF['bounded angle'].unique(),
+#                                                       len(complexDF['bounded angle'].unique())))
+#
+#     # gets a dataframe of bounded angles that are not null
+#
+#     df = complexDF[complexDF['bounded angle'].notnull()]
+#
+#     # converts the bounded angles into ints
+#     df = df.astype({'bounded angle': 'int64'})
+#
+#     # changes the frame and angles to python lists
+#     pulseFrames = df['global frame'].tolist()
+#     pulseAngles = df['bounded angle'].tolist()
+#
+#     startFrame = min(pulseFrames)
+#     lastFrame = max(pulseFrames)
+#
+#     # creates the image array of zeros. m x n (m == all frames of recording, n == degrees on the jellyfish)
+#     actigramArr = np.zeros((int((lastFrame+framesPerExtension-startFrame)/compression_factor)+120, 360, 3))
+#
+#     # print('actigram array shape: {}'.format(actigramArr.shape))
+#
+#     actigramArr[:, :] = backgroundColor
+#
+#     uniqueVars = []
+#     if filter is not None:
+#         uniqueVars = df[filter].unique()
+#
+#         legend = {}
+#
+#         for i, var in enumerate(uniqueVars):
+#             if var == 'Sleep':
+#                 legend[var] = [0, 0, 150]
+#             elif var == 'Wake':
+#                 legend[var] = [150, 0, 0]
+#             else:
+#                 legend[var] = colors.pop(0)
+#
+#         filterColumn = df[filter].tolist()
+#
+#     else:
+#         legend = {}
+#
+#     startFrame = int(startFrame / compression_factor)
+#
+#     # enumerates through pulses. gets the frame and angle from each pulse coming from the complex dataframe and
+#     # changes the necessary pixels from 0 to 1.
+#     for i, (frame, angle) in enumerate(zip(pulseFrames, pulseAngles)):
+#         if DEBUG and i%10000==0:
+#             print('i: {}, frame: {}, angle: {}'.format(i, frame, angle))
+#
+#         frame = int(frame/compression_factor)
+#
+#         if len(uniqueVars) > 0:
+#             for extension in range(framesPerExtension):
+#                 # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
+#                 for offset in range(-INTERVAL, INTERVAL + 1):
+#                     actigramArr[frame - startFrame + extension][(angle + offset) % 360] = legend[filterColumn[i]]
+#         else:
+#             for extension in range(framesPerExtension):
+#                 # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
+#                 for offset in range(-INTERVAL, INTERVAL+1):
+#                     actigramArr[frame- startFrame + extension][(angle + offset)%360] = tickColor
+#
+#     return actigramArr, legend
+
+
+def createActigramArr(complexDF, INTERVAL=5, pulseExtension=8,
+                      backgroundColor=[255, 255, 255],
+                      tickColor=[0, 0, 0],
+                      filter=None,
                       colors=[[0, 0, 150],  # blue
                               [150, 0, 0],  # red
                               [0, 100, 0],  # green
@@ -638,30 +747,25 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
 
     """
 
-    compression_factor = 30
-
-    framesPerExtension = int(FRAMERATE*pulseExtension/compression_factor)
-    print(framesPerExtension)
-
-    print('unique bounded angles: {}, len: {}'.format(complexDF['bounded angle'].unique(),
-                                                      len(complexDF['bounded angle'].unique())))
-
     # gets a dataframe of bounded angles that are not null
 
     df = complexDF[complexDF['bounded angle'].notnull()]
-    
-    # converts the bounded angles into ints
-    df = df.astype({'bounded angle': 'int64'})
-    
-    # changes the frame and angles to python lists
-    pulseFrames = df['global frame'].tolist()
-    pulseAngles = df['bounded angle'].tolist()
 
-    startFrame = min(pulseFrames)
-    lastFrame = max(pulseFrames)
-    
-    # creates the image array of zeros. m x n (m == all frames of recording, n == degrees on the jellyfish)
-    actigramArr = np.zeros((int((lastFrame+framesPerExtension-startFrame)/compression_factor)+120, 360, 3))
+    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda dt: dt.replace(microsecond=0))
+
+    # converts the bounded angles into ints
+    df = df.astype({'bounded angle': 'int64', 'ZeitgeberTime': 'int'})
+
+    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda x: int(x / np.power(10, 9)))
+
+    pulseTimes = df['ZeitgeberTime'].to_numpy()
+    pulseAngles = df['bounded angle'].to_numpy()
+
+    startTime = min(pulseTimes)
+    lastTime = max(pulseTimes)
+    actigramLen = lastTime - startTime + pulseExtension
+
+    actigramArr = np.zeros((actigramLen, 360, 3))
 
     # print('actigram array shape: {}'.format(actigramArr.shape))
 
@@ -686,26 +790,22 @@ def createActigramArr(complexDF, FRAMERATE, INTERVAL = 5, pulseExtension = 5,
     else:
         legend = {}
 
-    startFrame = int(startFrame / compression_factor)
-
     # enumerates through pulses. gets the frame and angle from each pulse coming from the complex dataframe and
     # changes the necessary pixels from 0 to 1.
-    for i, (frame, angle) in enumerate(zip(pulseFrames, pulseAngles)):
-        if DEBUG and i%10000==0:
-            print('i: {}, frame: {}, angle: {}'.format(i, frame, angle))
-
-        frame = int(frame/compression_factor)
+    for i, (time, angle) in enumerate(zip(pulseTimes, pulseAngles)):
+        if DEBUG and i % 10000 == 0:
+            print('i: {}, frame: {}, angle: {}'.format(i, time, angle))
 
         if len(uniqueVars) > 0:
-            for extension in range(framesPerExtension):
+            for extension in range(pulseExtension):
                 # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
                 for offset in range(-INTERVAL, INTERVAL + 1):
-                    actigramArr[frame - startFrame + extension][(angle + offset) % 360] = legend[filterColumn[i]]
+                    actigramArr[time - startTime + extension][(angle + offset) % 360] = legend[filterColumn[i]]
         else:
-            for extension in range(framesPerExtension):
+            for extension in range(pulseExtension):
                 # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
-                for offset in range(-INTERVAL, INTERVAL+1):
-                    actigramArr[frame- startFrame + extension][(angle + offset)%360] = tickColor
+                for offset in range(-INTERVAL, INTERVAL + 1):
+                    actigramArr[time - startTime + extension][(angle + offset) % 360] = tickColor
 
     return actigramArr, legend
 
@@ -748,19 +848,21 @@ def dfValidator(complexDFpostvalidation, chunks2remove=[]):
 
     return std_dev, std_dev_bychunk
 
-
-def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120):
-    """
-#   concatenates two dataframes together taking into consideration the offset in frames
-    """
-    td = secondDFstarttime - firstDFstarttime
-
-    frameOffset = (td.days*24*3600 + td.seconds)*framerate
-
-    secondDFCopy = secondDF.copy()
-
-    secondDFCopy['global frame'] = secondDFCopy['global frame'] + frameOffset
-
-    return pd.concat([firstDF, secondDFCopy])
-
-
+#
+# Depricated method. Used when plotting replied on global frame count and therefore they needed to be synced.
+#
+# def dfConcatenator(firstDF, firstDFstarttime, secondDF, secondDFstarttime, framerate = 120):
+#     """
+# #   concatenates two dataframes together taking into consideration the offset in frames
+#     """
+#     td = secondDFstarttime - firstDFstarttime
+#
+#     frameOffset = (td.days*24*3600 + td.seconds)*framerate
+#
+#     secondDFCopy = secondDF.copy()
+#
+#     secondDFCopy['global frame'] = secondDFCopy['global frame'] + frameOffset
+#
+#     return pd.concat([firstDF, secondDFCopy])
+#
+#

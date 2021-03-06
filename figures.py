@@ -40,42 +40,48 @@ import matplotlib.cm as cm
 ###################################
 
 
-def createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127], compression_factor=10):
+def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor = [255, 128, 0], dayColor = [255, 255, 0], nightColor = [85,85,85], compression_factor=10):
     """
     Creates a movement bar indicating movement during the daytime or nightime
     Movement Color: Red
     Day Color: Yellow
     Night Color: Navy Blue
     """
-    pulseFrames = complexDF['global frame'].tolist()
+    df = complexDF.copy()
+
+    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda dt: dt.replace(microsecond=0))
+
+    # converts the bounded angles into ints
+    df = df.astype({'ZeitgeberTime': 'int'})
+
+    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda x: int(x / np.power(10, 9)))
+
+    pulseTimes = df['ZeitgeberTime'].tolist()
     pulseMoving = complexDF['bounded angle'].tolist()
     pulseDayNight = complexDF['DayOrNight'].tolist()
 
-    startFrame = min(pulseFrames)
-    lastFrame = max(pulseFrames)
+    startTime = min(pulseTimes)
+    lastTime = max(pulseTimes)
+    actigramLen = lastTime - startTime + pulseExtension
 
-    barArr = np.zeros((lastFrame-startFrame, width, 3), dtype='int')
+    barArr = np.zeros((actigramLen, width, 3), dtype='int')
 
     barArr[:,:] = [255,255,255]
 
-    numPulses = len(pulseFrames)
+    numPulses = len(pulseTimes)
 
     for i in range(numPulses-1):
 
-        currPulseFrame = pulseFrames[i] - startFrame
-        nextPulseFrame = pulseFrames[i + 1] - startFrame
+        currPulseTime = pulseTimes[i] - startTime
         isMoving = math.isnan(pulseMoving[i])
         isNight = pulseDayNight[i] == 'Night'
 
-        if i%1000==0 and False:
-            ('counter: {}, frame: {}, nextframe: {}, isMoving: {}, is night?: {}'.format(i, currPulseFrame, nextPulseFrame, isMoving, isNight))
-
         if isMoving:
-            barArr[currPulseFrame:nextPulseFrame, 0:int(width/2)] = movementColor
+            barArr[currPulseTime:currPulseTime+pulseExtension, 0:int(width/2)] = movementColor
         if isNight:
-            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = nightColor
+            barArr[currPulseTime:currPulseTime+pulseExtension, int(width/2):width] = nightColor
         else:
-            barArr[currPulseFrame:nextPulseFrame, int(width/2):width] = dayColor
+            barArr[currPulseTime:currPulseTime+pulseExtension, int(width/2):width] = dayColor
 
     return barArr[::compression_factor]
 
@@ -167,7 +173,7 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
     # takes slice of bar to compress the image to be manageable for our purposes
     # takes every 10th row of the bar to create a sliced image
 
-    dfBar = createDayNightMovementBar(complexDF, width, movementColor = [255, 0, 0], dayColor = [255, 255, 0], nightColor = [0,0,127])
+    dfBar = createDayNightMovementBar(complexDF, width)
 
     # imshow == Image show. Shows the np array as an image.
     # np.transpose flips the array from vertical to horizontal. It goes from being n frames long to n frames wide
@@ -289,7 +295,7 @@ def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, s
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
-    x = df['global frame']
+    x = df['ZeitgeberTime'].astype(int).to_numpy()
 
 
     # plotting method
@@ -359,7 +365,7 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
-    x = df['global frame']
+    x = df['ZeitgeberTime'].astype(int).to_numpy()
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Pulse Rate')  # specifying color, linewidth, label text   x
@@ -422,7 +428,7 @@ def distanceMoved(axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_xL
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
-    x = df['global frame']
+    x = df['ZeitgeberTime'].astype(int).to_numpy()
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Distance Moved')  # specifying color, linewidth, label text   x

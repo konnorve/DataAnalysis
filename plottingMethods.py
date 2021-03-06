@@ -1234,13 +1234,13 @@ def core(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
         format='%Y-%m-%d %H:%M:%S')
 
 
-    plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
+    # plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
 
-    # # actigram
-    #
-    # dfActigram = cdf.createActigramArr(dfComplex, Framerate, filter='SleepWake_median_ipi_after')
-    #
-    # plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
+    # actigram
+
+    dfActigram = cdf.createActigramArr(dfComplex, filter='SleepWake_median_ipi_after')
+
+    plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
     #
     # Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen + 5, stdXlen)
     #
@@ -1248,7 +1248,7 @@ def core(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
     #
     # plot_sleep_area(outdir, jelly_title, dfComplex, 'T', stdYlen, stdXlen)
 
-def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120, histogram_constraints=[]):
+def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, histogram_constraints=[]):
     """
     :param jelly_title: name of jellyfish
     :param outdir: output directory where png's will be saved
@@ -1304,7 +1304,7 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     # actigram
 
-    dfActigram = cdf.createActigramArr(dfComplex, Framerate, filter='SleepWake_median_ipi_after')
+    dfActigram = cdf.createActigramArr(dfComplex, filter='SleepWake_median_ipi_after')
 
     plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen, stdXlen)
 
