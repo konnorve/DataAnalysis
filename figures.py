@@ -297,7 +297,7 @@ def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, s
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
-    x = df['ZeitgeberTime'].astype(int).to_numpy()
+    x = df['ZeitgeberTime'].apply(lambda dt: dt2int(dt)).to_numpy()
 
 
     # plotting method
@@ -367,7 +367,7 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
-    x = df['ZeitgeberTime'].astype(int).to_numpy()
+    x = df['ZeitgeberTime'].apply(lambda dt: dt2int(dt)).to_numpy()
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Pulse Rate')  # specifying color, linewidth, label text   x
@@ -430,7 +430,7 @@ def distanceMoved(axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_xL
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
-    x = df['ZeitgeberTime'].astype(int).to_numpy()
+    x = df['ZeitgeberTime'].apply(lambda dt: dt2int(dt)).to_numpy()
 
     # plotting method
     ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Distance Moved')  # specifying color, linewidth, label text   x
@@ -475,7 +475,7 @@ def jelly_trajectory(complexDFslice, fig, ax, image_max_x, image_max_y, a=0.4):
     x_arr = complexDFslice['centroid x'].to_numpy()
     y_arr = complexDFslice['centroid y'].to_numpy()
     # converts Zeitgeber time into int (epoch time)
-    time_arr = complexDFslice['ZeitgeberTime'].astype(int).to_numpy()
+    time_arr = complexDFslice['ZeitgeberTime'].apply(lambda dt: dt2int(dt)).to_numpy()
 
     # shape all the coordinate points into segments to plot continuous line
     points = np.array([x_arr, y_arr]).T.reshape(-1, 1, 2)
