@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib.cm as cm
-
+from datetime import datetime
 ####### Key things to know #######
 # Axis refers to the axes object, not the x or y axis. Every figure must be added in
 # similarly, all of the titles, x/y ticks, and visibility methods are from the axes class, not pyplt.
@@ -39,6 +39,12 @@ import matplotlib.cm as cm
 ###################################
 ###################################
 
+def dt2int(dt):
+    """
+    turns datetime object into int
+    """
+    return int(datetime.timestamp(dt))
+
 
 def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor = [255, 128, 0], dayColor = [255, 255, 0], nightColor = [85,85,85]):
     """
@@ -49,12 +55,7 @@ def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor 
     """
     df = complexDF.copy()
 
-    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda dt: dt.replace(microsecond=0))
-
-    # converts the bounded angles into ints
-    df = df.astype({'ZeitgeberTime': 'int'})
-
-    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda x: int(x / np.power(10, 9)))
+    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda dt: dt2int(dt))
 
     pulseTimes = df['ZeitgeberTime'].tolist()
     pulseMoving = complexDF['bounded angle'].tolist()

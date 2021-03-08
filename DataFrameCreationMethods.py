@@ -747,6 +747,12 @@ def createActigramArr(complexDF, INTERVAL=5, pulseExtension=8,
 
     """
 
+    def dt2int(dt):
+        """
+        turns datetime object into int
+        """
+        return int(datetime.timestamp(dt))
+
     # gets a dataframe of bounded angles that are not null
 
     df = complexDF[complexDF['bounded angle'].notnull()]
@@ -754,9 +760,9 @@ def createActigramArr(complexDF, INTERVAL=5, pulseExtension=8,
     df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda dt: dt.replace(microsecond=0))
 
     # converts the bounded angles into ints
-    df = df.astype({'bounded angle': 'int64', 'ZeitgeberTime': 'int'})
+    df = df.astype({'bounded angle': 'int64'})
 
-    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda x: int(x / np.power(10, 9)))
+    df['ZeitgeberTime'] = df['ZeitgeberTime'].apply(lambda x: dt2int(x))
 
     pulseTimes = df['ZeitgeberTime'].to_numpy()
     pulseAngles = df['bounded angle'].to_numpy()
