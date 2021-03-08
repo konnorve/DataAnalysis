@@ -551,8 +551,14 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
         wake_total = sum(wake_counts)
         sleep_total = sum(sleep_counts)
 
-        wake_percents = [i / wake_total for i in wake_counts]
-        sleep_percents = [i / sleep_total for i in sleep_counts]
+        if wake_total == 0:
+            wake_percents = wake_counts
+        else:
+            wake_percents = [i / wake_total for i in wake_counts]
+        if sleep_total == 0:
+            sleep_percents = sleep_counts
+        else:
+            sleep_percents = [i / sleep_total for i in sleep_counts]
 
         percents = [sp - wp for sp, wp in zip(sleep_percents, wake_percents)]
     else:
