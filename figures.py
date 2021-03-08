@@ -563,7 +563,10 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
 
         total_pulses = sum(counts)
 
-        percents = [i / total_pulses for i in counts]
+        if total_pulses == 0:
+            percents = counts
+        else:
+            percents = [i / total_pulses for i in counts]
 
     rp360 = rhopos
     rl = rholab
