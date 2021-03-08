@@ -40,7 +40,7 @@ import matplotlib.cm as cm
 ###################################
 
 
-def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor = [255, 128, 0], dayColor = [255, 255, 0], nightColor = [85,85,85], compression_factor=10):
+def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor = [255, 128, 0], dayColor = [255, 255, 0], nightColor = [85,85,85]):
     """
     Creates a movement bar indicating movement during the daytime or nightime
     Movement Color: Red
@@ -73,17 +73,18 @@ def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor 
     for i in range(numPulses-1):
 
         currPulseTime = pulseTimes[i] - startTime
+        nextPulseTime = pulseTimes[i+1] - startTime
         isMoving = math.isnan(pulseMoving[i])
         isNight = pulseDayNight[i] == 'Night'
 
         if isMoving:
-            barArr[currPulseTime:currPulseTime+pulseExtension, 0:int(width/2)] = movementColor
+            barArr[currPulseTime:nextPulseTime, 0:int(width/2)] = movementColor
         if isNight:
-            barArr[currPulseTime:currPulseTime+pulseExtension, int(width/2):width] = nightColor
+            barArr[currPulseTime:nextPulseTime, int(width/2):width] = nightColor
         else:
-            barArr[currPulseTime:currPulseTime+pulseExtension, int(width/2):width] = dayColor
+            barArr[currPulseTime:nextPulseTime, int(width/2):width] = dayColor
 
-    return barArr[::compression_factor]
+    return barArr
 
 
 

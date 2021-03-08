@@ -44,13 +44,12 @@ def plot_jelly(complexDF_path):
 
         complexDF = pd.read_csv(complexDF_path)
 
-        figures_path = cdf.makeOutDir(recording_dir, 'figures')
+        figures_path = cdf.makeOutDir(home_dir, 'figures')
 
         rhopos = rhopaliaDF['Rhopalia Position'].tolist()
         rholab = rhopaliaDF['Rhopalia Label'].tolist()
 
         pm.core(recording_name, figures_path, complexDF, rhopos, rholab, histogram_constraints=[0, 0.05])
-
 
 if __name__ == "__main__":
     complex_df_path = Path(sys.argv[1])
