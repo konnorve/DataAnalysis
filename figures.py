@@ -67,23 +67,26 @@ def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor 
 
     barArr = np.zeros((actigramLen, width, 3), dtype='int')
 
+    start_datetime = complexDF.ZeitgeberTime.min().replace(microsecond=0)
+
     barArr[:,:] = [255,255,255]
 
     numPulses = len(pulseTimes)
+
+    for i in range(actigramLen):
+        if (start_datetime + td(seconds=i)).hour in range(12,24):
+            barArr[i, int(width / 2):width] = nightColor
+        else:
+            barArr[i, int(width / 2):width] = dayColor
 
     for i in range(numPulses-1):
 
         currPulseTime = pulseTimes[i] - startTime
         nextPulseTime = pulseTimes[i+1] - startTime
         isMoving = math.isnan(pulseMoving[i])
-        isNight = pulseDayNight[i] == 'Night'
 
         if isMoving:
             barArr[currPulseTime:nextPulseTime, 0:int(width/2)] = movementColor
-        if isNight:
-            barArr[currPulseTime:nextPulseTime, int(width/2):width] = nightColor
-        else:
-            barArr[currPulseTime:nextPulseTime, int(width/2):width] = dayColor
 
     return barArr
 
@@ -666,13 +669,15 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
 
 
 def rho_usage(ax, aggSeries, vertical=True, title=None, constraints=[]):
+    posSeries= aggSeries > 0
+
     if vertical:
-        ax.barh(aggSeries.index, aggSeries)
+        ax.barh(aggSeries.index, aggSeries, color=posSeries.map({True: 'b', False: 'r'}))
         ax.set_xlabel(xlabel=r'% of total counts')
         if len(constraints) != 0:
             ax.set_xlim(left=constraints[0], right=constraints[1])
     else:
-        ax.bar(aggSeries)
+        ax.bar(aggSeries, color=posSeries.map({True: 'b', False: 'r'}))
         ax.set_ylabel(xlabel=r'% of total counts')
         if len(constraints) != 0:
             ax.set_ylim(bottom=constraints[0], top=constraints[1])

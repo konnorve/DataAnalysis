@@ -1008,7 +1008,7 @@ def plotSleepVSwakeHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rho
 def plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, hist_constraints=[0, 0.25]):
     plot_title = 'Sleep Wake Histogram, Date Slices'
 
-    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs(dfComplex, 'D')
+    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Unnormalized(dfComplex)
 
     fig = plt.figure(figsize=(xfigurelen * 3, len(aggDF_wake) * yfigurelen), constrained_layout=True)
 
@@ -1045,9 +1045,13 @@ def plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfig
 
 def plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, hist_constraints=[0, 0.25],
                                     justDifferences = True):
-    plot_title = 'Sleep Wake Difference Histogram, Date Slices'
 
-    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs(dfComplex, 'D')
+    if justDifferences:
+        plot_title = 'Sleep Wake Difference Histogram, Date Slices'
+    else:
+        plot_title = 'Sleep Wake and Difference Histogram, Date Slices'
+
+    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Normalized(dfComplex)
 
     # gridspec organization
     if justDifferences:
@@ -1063,27 +1067,24 @@ def plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, yfigurelen,
     gs = fig.add_gridspec(ncols=len(widths), nrows=len(heights), height_ratios=heights, width_ratios=widths)
 
     for i in range(len(diffDF)):
-        if justDifferences:
-            d = diffDF.iloc[i]
-        else:
-            d = diffDF.iloc[i]
+        d = diffDF.iloc[i]
+        date = diffDF.iloc[i].name.date()
+
+        ax1 = fig.add_subplot(gs[0, i])
+
+        figures.rho_usage(ax1, d, vertical=True, title='{} {}'.format(date, 'Difference'),
+                          constraints=[-hist_constraints[1], hist_constraints[1]])
+
+        if not justDifferences:
             w = aggDF_wake.iloc[i]
             s = aggDF_sleep.iloc[i]
 
+            ax2 = fig.add_subplot(gs[1, i])
+            ax3 = fig.add_subplot(gs[2, i])
 
-        date = diffDF.iloc[i].name.date()  # Change to be in 12 hr intervals?
+            figures.rho_usage(ax2, s, vertical=True, title='{} {}'.format(date, 'Sleep'), constraints=hist_constraints)
 
-        ax1 = fig.add_subplot(gs[i, 0])
-        ax2 = fig.add_subplot(gs[i, 1])
-        ax3 = fig.add_subplot(gs[i, 2])
-        ax4 = fig.add_subplot(gs[i, 3])
-        ax4.text(0, 0.5, '{} \n {:0.4}'.format(date, sum(abs(d))), size='xx-large')
-        ax4.axis("off")
-
-        figures.rho_usage(ax1, w, vertical=True, title='{} {}'.format(date, 'Wake'), constraints=hist_constraints)
-        figures.rho_usage(ax2, s, vertical=True, title='{} {}'.format(date, 'Sleep'), constraints=hist_constraints)
-        figures.rho_usage(ax3, d, vertical=True, title='{} {}'.format(date, 'Difference'),
-                          constraints=[-hist_constraints[1], hist_constraints[1]])
+            figures.rho_usage(ax3, w, vertical=True, title='{} {}'.format(date, 'Wake'), constraints=hist_constraints)
 
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
 
@@ -1305,6 +1306,12 @@ def core(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
     dfComplex['ZeitgeberTime'] = pd.to_datetime(
         dfComplex['ZeitgeberTime'],
         format='%Y-%m-%d %H:%M:%S')
+
+    plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, 5, 3, hist_constraints=[0, 0.25],
+                                     justDifferences=True)
+
+    plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, 5, 3, hist_constraints=[0, 0.25],
+                                     justDifferences=False)
 
     plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
 
