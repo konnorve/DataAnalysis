@@ -21,7 +21,9 @@ concatDF = pd.read_csv(concatDF_path)
 unique_jellies = concatDF.Jellyfish.unique()
 
 for jelly in unique_jellies:
-    complexDF = concatDF[concatDF['Jellyfish']==jelly]
+    print(jelly)
+    if jelly == 'Shakira':
+        complexDF = concatDF[concatDF['Jellyfish']==jelly]
 
         rhopaliaDF = rhopalia_positions.loc[(rhopalia_positions['Jellyfish'] == jelly)]
 
