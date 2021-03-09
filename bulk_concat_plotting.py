@@ -23,11 +23,11 @@ unique_jellies = concatDF.Jellyfish.unique()
 for jelly in unique_jellies:
     complexDF = concatDF[concatDF['Jellyfish']==jelly]
 
-    rhopaliaDF = rhopalia_positions.loc[(rhopalia_positions['Jellyfish'] == jelly)]
+        rhopaliaDF = rhopalia_positions.loc[(rhopalia_positions['Jellyfish'] == jelly)]
 
-    concat_jelly_dir = cdf.makeOutDir(concat_figures_dir, jelly)
+        concat_jelly_dir = cdf.makeOutDir(concat_figures_dir, jelly)
 
-    rhopos = rhopaliaDF['Rhopalia Position'].tolist()
-    rholab = rhopaliaDF['Rhopalia Label'].tolist()
+        rhopos = rhopaliaDF['Rhopalia Position'].tolist()
+        rholab = rhopaliaDF['Rhopalia Label'].tolist()
 
-    pm.core(jelly, concat_jelly_dir, complexDF, rhopos, rholab, histogram_constraints=[0, 0.05])
+        pm.core(jelly, concat_jelly_dir, complexDF, rhopos, rholab, histogram_constraints=[0, 0.05])

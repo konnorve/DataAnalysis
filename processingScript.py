@@ -72,9 +72,9 @@ for jelly_dir in home_dir.iterdir():
 
                     timezone = pytz.timezone('US/Pacific')
 
-                    start_datetime = timezone.localize(start_datetime)
+                    temp_time = timezone.localize(start_datetime)
 
-                    isDaylightSavings = start_datetime.dst() != timedelta(0)
+                    isDaylightSavings = temp_time.dst() != timedelta(0)
 
                 print(
                     'rec name: {} \t st: {} \t daylight savings?:{} \t angleDir found: {} \t orientation sheet found: {}'.format(

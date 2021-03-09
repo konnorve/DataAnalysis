@@ -1022,7 +1022,7 @@ def plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfig
         s = aggDF_sleep.iloc[i]
         d = diffDF.iloc[i]
 
-        date = aggDF_wake.iloc[0].name.date()
+        date = aggDF_wake.iloc[i].name.date()
 
         ax1 = fig.add_subplot(gs[i, 0])
         ax2 = fig.add_subplot(gs[i, 1])
