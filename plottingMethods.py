@@ -1041,9 +1041,57 @@ def plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfig
     fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
 
     fig.savefig(str(outpath), bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
-
     plt.close()
 
+def plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, hist_constraints=[0, 0.25],
+                                    justDifferences = True):
+    plot_title = 'Sleep Wake Difference Histogram, Date Slices'
+
+    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs(dfComplex, 'D')
+
+    # gridspec organization
+    if justDifferences:
+        heights = [yfigurelen] * 1
+        widths = [xfigurelen] * len(diffDF)
+
+    else:
+        heights = [yfigurelen] * 3
+        widths = [xfigurelen] * len(diffDF)
+
+    fig = plt.figure(figsize=(sum(widths), sum(heights)), constrained_layout=True)
+
+    gs = fig.add_gridspec(ncols=len(widths), nrows=len(heights), height_ratios=heights, width_ratios=widths)
+
+    for i in range(len(diffDF)):
+        if justDifferences:
+            d = diffDF.iloc[i]
+        else:
+            d = diffDF.iloc[i]
+            w = aggDF_wake.iloc[i]
+            s = aggDF_sleep.iloc[i]
+
+
+        date = diffDF.iloc[i].name.date()  # Change to be in 12 hr intervals?
+
+        ax1 = fig.add_subplot(gs[i, 0])
+        ax2 = fig.add_subplot(gs[i, 1])
+        ax3 = fig.add_subplot(gs[i, 2])
+        ax4 = fig.add_subplot(gs[i, 3])
+        ax4.text(0, 0.5, '{} \n {:0.4}'.format(date, sum(abs(d))), size='xx-large')
+        ax4.axis("off")
+
+        figures.rho_usage(ax1, w, vertical=True, title='{} {}'.format(date, 'Wake'), constraints=hist_constraints)
+        figures.rho_usage(ax2, s, vertical=True, title='{} {}'.format(date, 'Sleep'), constraints=hist_constraints)
+        figures.rho_usage(ax3, d, vertical=True, title='{} {}'.format(date, 'Difference'),
+                          constraints=[-hist_constraints[1], hist_constraints[1]])
+
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    fig.savefig(str(outpath), bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
 
 ### BEST EXAMPLE ####
 def plot_usage_lines(outdir, jelly_title, dfComplex, aggUsageDF, yfigurelen, xfigurelen, plotBar=True):
