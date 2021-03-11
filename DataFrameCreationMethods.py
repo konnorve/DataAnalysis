@@ -182,7 +182,6 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
     # in order to get an accurate angle measurement, the marker angle must be measured
     # selects the marker rhopalia from the list of rhopalia
     orientationRhopalia = rhopaliaDF.loc[rhopaliaDF['Orientation Rho']=='YES']
-
     assert len(orientationRhopalia) == 1
 
     orientationMarkerAngle = orientationRhopalia['Rhopalia Position'].iloc[0]
@@ -412,7 +411,7 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
 
     # initializing various components to create fully complex dataframe
     for i in range(numPulses):
-        if i % 1000 == 0: print(i)
+        if i % 1000 == 0 and DEBUG: print(i)
         td = timedelta(0, simpleConcatArr[i][0]/FRAMERATE)
         absM = td.days*24*60 + td.seconds//60
         dt = STARTDATETIME + td

@@ -33,6 +33,8 @@ for jelly_dir in home_dir.iterdir():
         for recording_dir in jelly_dir.iterdir():
             if recording_dir.is_dir():
                 recording_name = recording_dir.name
+                print()
+                print(recording_name)
 
                 angle_dir = None
                 orientation_path = None
@@ -45,9 +47,10 @@ for jelly_dir in home_dir.iterdir():
 
                 # getting angle dir and orientation csv
                 for item in dir_items:
+                    print(item)
                     if search('AngleData', str(item)):
                         angle_dir = item
-                    elif search('orientations', str(item)):
+                    elif search('(o|O)rientat', str(item)):
                         if search('.csv', str(item)):
                             orientation_path = item
 
@@ -72,9 +75,9 @@ for jelly_dir in home_dir.iterdir():
 
                     timezone = pytz.timezone('US/Pacific')
 
-                    temp_time = timezone.localize(start_datetime)
+                    temp_datetime = timezone.localize(start_datetime)
 
-                    isDaylightSavings = temp_time.dst() != timedelta(0)
+                    isDaylightSavings = temp_datetime.dst() != timedelta(0)
 
                 print(
                     'rec name: {} \t st: {} \t daylight savings?:{} \t angleDir found: {} \t orientation sheet found: {}'.format(
@@ -90,13 +93,12 @@ for jelly_dir in home_dir.iterdir():
                                         FRAMERATE=120,
                                         STARTDATETIME=start_datetime,
                                         DAYLIGHTSAVINGS=isDaylightSavings)
-                    """
+
                     complexDFPath1 = recording_dir / '{}_complexDF.csv'.format(recording_name)
                     complexDFPath2 = cumulative_complexDF_dir / '{}_complexDF.csv'.format(recording_name)
-
+                    #
                     complexDF.to_csv(complexDFPath1)
                     complexDF.to_csv(complexDFPath2)
-                    """
 
                     if False:
                         figures_path = cdf.makeOutDir(recording_dir, 'figures')

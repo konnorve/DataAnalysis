@@ -354,33 +354,32 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
             # takes pulses where Interpulse interval is not null [and is lower than thirty?  x]
             df = dfComplex[dfComplex.PulseRate_After.notnull() & (dfComplex.PulseRate_After < 30)]
 
-            # interpulse interval taken from dataframe for y axis data
-            y = df['PulseRate_After']
+            temp_df = df[['PulseRate_After']]
         else:
             df = dfComplex[dfComplex.PulseRate_Before.notnull() & (dfComplex.PulseRate_Before < 30)]
-            y = df['PulseRate_Before']
+            temp_df = df[['PulseRate_Before']]
 
     except Exception as error:
         # could happen with older dataframes without Ipi_after or ipi_before
         df = dfComplex[dfComplex.PulseRate.notnull() & (dfComplex.PulseRate < 30)]
-        y = df['PulseRate']
+        temp_df = df[['PulseRate']]
 
     # renames axes object for convenience
     ax = axis
 
     # global frame taken from complex dataframe (line sets x to the dataframe column with that label  x)
     # global frame taken from complex dataframe for x axis data
-    x = df['ZeitgeberTime'].apply(lambda dt: dt2int(dt)).to_numpy()
+    temp_df['xaxis'] = df['ZeitgeberTime'].apply(lambda dt: dt2int(dt)).tolist()
+    temp_df = temp_df.set_index('xaxis')
+    temp_df = temp_df.sort_index()
 
     # plotting method
-    ax.plot(x, y, c = '#7f7f7f', lw = 2, label= 'Pulse Rate')  # specifying color, linewidth, label text   x
+    ax.plot(temp_df, c = '#7f7f7f', lw = 2, label= 'Pulse Rate')  # specifying color, linewidth, label text   x
 
     # averaging method
     # shown as a blue line
     if show_average:
-        ym = y.rolling(window=250).mean()  # calculates rolling average in/of groups of 250   x
-
-        ax.plot(x, ym, c = 'b', lw = 2, label= 'average')  # adds to ax a plot of the global dataframe vs rolling avg  x
+        ax.plot(temp_df.rolling(window=250).mean(), c = 'b', lw = 2, label= 'average')  # adds to ax a plot of the global dataframe vs rolling avg  x
 
         ax.set_xlabel(xlabel=r'Zeitgeber Time')  # sets x and y labels
         ax.set_ylabel(ylabel='Pulse Rate (Hz)')
@@ -392,7 +391,7 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
     ax.margins(x=0)
 
     #fixed limits. Makes graphs compareable
-    ax.set_ylim(0.5, 1.5)
+    ax.set_ylim(0, 2)
 
     # x tick method.
     if show_xLabels:
