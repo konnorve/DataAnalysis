@@ -59,7 +59,6 @@ def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor 
 
     pulseTimes = df['ZeitgeberTime'].tolist()
     pulseMoving = complexDF['bounded angle'].tolist()
-    pulseDayNight = complexDF['DayOrNight'].tolist()
 
     startTime = min(pulseTimes)
     lastTime = max(pulseTimes)
@@ -89,7 +88,6 @@ def createDayNightMovementBar(complexDF, width, pulseExtension=8, movementColor 
             barArr[currPulseTime:nextPulseTime, 0:int(width/2)] = movementColor
 
     return barArr
-
 
 
 def chooseFigType(complexDF):
@@ -584,7 +582,7 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
     if vertical:
         ax1.barh(degrees, percents)
 
-        ax1.set_xlabel(xlabel=r'% of total counts')
+        ax1.set_xlabel(xlabel=r'fraction of total counts')
 
         ax1.margins(y=0)
 
@@ -672,12 +670,12 @@ def rho_usage(ax, aggSeries, vertical=True, title=None, constraints=[]):
 
     if vertical:
         ax.barh(aggSeries.index, aggSeries, color=posSeries.map({True: 'b', False: 'r'}))
-        ax.set_xlabel(xlabel=r'% of total counts')
+        ax.set_xlabel(xlabel=r'fraction of total counts')
         if len(constraints) != 0:
             ax.set_xlim(left=constraints[0], right=constraints[1])
     else:
         ax.bar(aggSeries, color=posSeries.map({True: 'b', False: 'r'}))
-        ax.set_ylabel(xlabel=r'% of total counts')
+        ax.set_ylabel(xlabel=r'fraction of total counts')
         if len(constraints) != 0:
             ax.set_ylim(bottom=constraints[0], top=constraints[1])
 
@@ -912,7 +910,7 @@ def usage_lines(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
 
     # sets labels
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% usage')
+    ax.set_ylabel(ylabel='fraction of usage')
 
     # sets grid
     ax.grid(axis='y', alpha=0.5, linestyle='--')
@@ -940,7 +938,7 @@ def sleep_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
 
     # sets labels
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% usage')
+    ax.set_ylabel(ylabel='fraction of usage')
 
     # sets grid
     ax.grid(axis='y', alpha=0.5, linestyle='--')
@@ -970,7 +968,7 @@ def usage_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
 
     # sets labels
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='% usage')
+    ax.set_ylabel(ylabel='fraction of usage')
 
     # sets grid
     ax.grid(axis='y', alpha=0.5, linestyle='--')

@@ -11,7 +11,7 @@ import math
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
-DEBUG = False
+DEBUG = True
 CHIME = True
 
 ########################################################################################################################
@@ -298,6 +298,8 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
     centroidXindex = header.index('centroid x')
     centroidYindex = header.index('centroid y')
 
+    global_frame_index = header.index('global frame')
+
     #############################
     ##### Pulse Level Data ######
     #############################
@@ -412,7 +414,7 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
     # initializing various components to create fully complex dataframe
     for i in range(numPulses):
         if i % 1000 == 0 and DEBUG: print(i)
-        td = timedelta(0, simpleConcatArr[i][0]/FRAMERATE)
+        td = timedelta(0, simpleConcatArr[i][global_frame_index]/FRAMERATE)
         absM = td.days*24*60 + td.seconds//60
         dt = STARTDATETIME + td
         zt = dt - timedelta2Zeitgeber
@@ -802,7 +804,7 @@ def createActigramArr(complexDF, INTERVAL=5, pulseExtension=8,
 
     actigramArr = np.zeros((actigramLen, 360, 3))
 
-    # print('actigram array shape: {}'.format(actigramArr.shape))
+    if DEBUG: print('actigram array shape: {}'.format(actigramArr.shape))
 
     actigramArr[:, :] = backgroundColor
 
@@ -841,6 +843,8 @@ def createActigramArr(complexDF, INTERVAL=5, pulseExtension=8,
                 # offset the pulse + and - INTERVAL (ex: for INTERVAL = 5, width would be 11, (5+1+5)
                 for offset in range(-INTERVAL, INTERVAL + 1):
                     actigramArr[time - startTime + extension][(angle + offset) % 360] = tickColor
+
+    if DEBUG: print('Done with Actigram creation')
 
     return actigramArr, legend
 

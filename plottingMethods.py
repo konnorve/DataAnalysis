@@ -1348,6 +1348,14 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
                                 dfComplex['ZeitgeberTime'],
                                 format='%Y-%m-%d %H:%M:%S')
 
+    plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, 5, 3, hist_constraints=[0, 0.25],
+                                     justDifferences=True)
+
+    plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, 5, 3, hist_constraints=[0, 0.25],
+                                     justDifferences=False)
+
+    plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
+
     # with bar
 
     plotInterpulseInterval(outdir, jelly_title, dfComplex, stdYlen, stdXlen)

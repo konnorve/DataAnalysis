@@ -22,7 +22,7 @@ unique_jellies = concatDF.Jellyfish.unique()
 
 for jelly in unique_jellies:
     print(jelly)
-    if jelly == 'Beyonce':
+    if jelly != 'Lgaga':
         complexDF = concatDF[concatDF['Jellyfish']==jelly]
 
         rhopaliaDF = rhopalia_positions.loc[(rhopalia_positions['Jellyfish'] == jelly)]
