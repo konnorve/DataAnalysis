@@ -203,7 +203,7 @@ def bar4MovementDayNight(complexDF, ax, width = 4):
     ax.get_xaxis().set_visible(False)
 
 
-def actigramFigure(dfActigram, complexDF, axis, rhopaliaPositions360 = [], rhopaliaLabels = []):
+def actigramFigure(dfActigram, complexDF, axis, rhopaliaPositions360 = [], rhopaliaLabels = [], custom_tick_interval = None):
     """
     :param dfActigram:  np actigram array. n frames long by 360 degrees wide. Must be transposed in order to be made into horizontal image.
                         often these are huge images. Plots that utilize this figure take a while to compile.
@@ -280,10 +280,11 @@ def actigramFigure(dfActigram, complexDF, axis, rhopaliaPositions360 = [], rhopa
     ax1.grid(which='major', color='#bebeff', linestyle=':', linewidth=1)
 
     #setting x ticks
-    applyXticks(complexDF, ax1)
+    applyXticks(complexDF, ax1, figType=None, custom_tick_interval=custom_tick_interval)
 
 
-def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, show_average = True):
+def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, show_average = True,
+                       custom_tick_interval=None):
     """
     :param jelly_title: title of Jellyfish to be used in naming of figure
     :param axis: axes object (from matplotlib Axes class) that has been initialized by subplot or gridspec.
@@ -345,13 +346,14 @@ def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, s
     # x tick method.
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
 
-def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_average = True, figType = None):
+def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_average = True, figType = None,
+              custom_tick_interval=None):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -424,13 +426,14 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
     # x tick method.
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
 
-def distanceMoved(axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_xLabels = True, show_average = True):
+def distanceMoved(axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_xLabels = True, show_average = True,
+                  custom_tick_interval=None):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -492,7 +495,7 @@ def distanceMoved(axis, dfComplex, dm_after = True, maxDMthreshold = 50, show_xL
     # x tick method.
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
 
     else:
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
@@ -795,7 +798,7 @@ def plotBinAverageWithErrorBars(dfY, x, ax, windowSize):
 
 # def centersChangedFigure(axis, dfComplex, show_xLabels = True, show_Legend = True, sensitivity = 30, bounds = (0,0.8), figType = 'Long'):
 def centralizationFigure(axis, dfComplex, show_xLabels=True, show_Legend=True,
-                             sensitivity=30, bounds=(0, 1)):
+                             sensitivity=30, bounds=(0, 1), custom_tick_interval=None):
     """
     Creates the "Interpulse Change" figure. This figure tracks the amount of pulses that change from one location to
     another. This is done by aggregating the True/False "CentersChangedS__' columns.
@@ -882,14 +885,15 @@ def centralizationFigure(axis, dfComplex, show_xLabels=True, show_Legend=True,
     # x ticks and labels
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
     else:
         ax.get_xaxis().set_visible(False)
 
     if show_Legend: ax.legend()
 
 
-def ganglia_centralization(axis, dfComplex, show_xLabels=True, show_Legend=True, bounds=(0, 1)):
+def ganglia_centralization(axis, dfComplex, show_xLabels=True, show_Legend=True, bounds=(0, 1),
+                           custom_tick_interval=None):
 
 
 
@@ -924,7 +928,7 @@ def ganglia_centralization(axis, dfComplex, show_xLabels=True, show_Legend=True,
     # x ticks and labels
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
     else:
         ax.get_xaxis().set_visible(False)
 
@@ -954,7 +958,7 @@ def createRhoplaiaCentralizationDF(complexDF, time_bin):
 
 
 def usage_lines(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
-                sensitivity=30, bounds=(0, 1)):
+                sensitivity=30, bounds=(0, 1), custom_tick_interval=None):
     for column in aggUsageDF.columns:
         ax.plot(aggUsageDF.index, aggUsageDF[column], label=column)
 
@@ -974,13 +978,13 @@ def usage_lines(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
     # x ticks and labels
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
     else:
         ax.get_xaxis().set_visible(False)
 
 
 def sleep_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
-                sensitivity=30, bounds=(0, 1)):
+                sensitivity=30, bounds=(0, 1), custom_tick_interval=None):
     trans_agg = aggUsageDF.transpose()
     trans_agg = trans_agg.sort_index()
 
@@ -1002,12 +1006,12 @@ def sleep_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
     # x ticks and labels
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
     else:
         ax.get_xaxis().set_visible(False)
 
 def usage_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
-                sensitivity=30, bounds=(0, 1)):
+                sensitivity=30, bounds=(0, 1), custom_tick_interval=None):
     trans_agg = aggUsageDF.transpose()
     trans_agg["sum"] = trans_agg.sum(axis=1)
     trans_agg = trans_agg.sort_values('sum', ascending=False)
@@ -1032,14 +1036,14 @@ def usage_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
     # x ticks and labels
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
     else:
         ax.get_xaxis().set_visible(False)
 
 
 
 def usage_activity_level(ax, dfComplex, aggUsageDF, activity_thresh, show_xLabels=True,
-                         show_Legend=True):
+                         show_Legend=True, custom_tick_interval=None):
     activityThreshDF = aggUsageDF > activity_thresh
 
     ax.plot(activityThreshDF.sum(axis=1), label=str(activity_thresh))
@@ -1055,7 +1059,7 @@ def usage_activity_level(ax, dfComplex, aggUsageDF, activity_thresh, show_xLabel
     # x ticks and labels
     if show_xLabels:
         # setting x ticks
-        applyXticks(dfComplex, ax)
+        applyXticks(dfComplex, ax, custom_tick_interval=custom_tick_interval)
     else:
         ax.get_xaxis().set_visible(False)
 
