@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib.cm as cm
 from datetime import datetime
+
+
 ####### Key things to know #######
 # Axis refers to the axes object, not the x or y axis. Every figure must be added in
 # similarly, all of the titles, x/y ticks, and visibility methods are from the axes class, not pyplt.
@@ -97,17 +99,17 @@ def chooseFigType(complexDF):
     timeperiod_length = end_datetime - start_datetime
 
     long_td = td(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=4, weeks=0)
-    short_td = td(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=25, hours=0, weeks=0)
+    short_td = td(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=30, hours=0, weeks=0)
 
-    if timeperiod_length > long_td:
+    if timeperiod_length >= long_td:
         return 'Long'
-    elif timeperiod_length < short_td:
+    elif timeperiod_length <= short_td:
         return 'Short'
     else:
         return 'Medium'
 
 
-def applyXticks(complexDF, ax):
+def applyXticks(complexDF, ax, figType=None, custom_tick_interval = None):
     # designed to fix the issues in the last plotting method, make them not reliant on ticking
     # from dataframe, only on start and end time points
     # turn off ticks on first axis
@@ -124,9 +126,14 @@ def applyXticks(complexDF, ax):
 
     num_seconds = (start_datetime - end_datetime).total_seconds()
 
-    figType = chooseFigType(complexDF)
+    if figType == None:
+        figType = chooseFigType(complexDF)
 
     # print('figType: {}'.format(figType))
+
+    if custom_tick_interval:
+        tick_start = start_datetime.replace(second=0, minute=start_datetime.minute + 1, microsecond=0)
+        tick_spacing = custom_tick_interval # in td(minutes=1) format
 
     if figType == 'Long':
         tick_start = start_datetime.replace(second=0, minute=0, microsecond=0, hour=start_datetime.hour + 1)
@@ -137,6 +144,10 @@ def applyXticks(complexDF, ax):
     elif figType == 'Short':
         tick_start = start_datetime.replace(second=0, minute=start_datetime.minute + 1, microsecond=0)
         tick_spacing = td(minutes=1)
+    elif figType == 'XLong':
+        tick_start = start_datetime.replace(second=0, minute=0, microsecond=0, hour=start_datetime.hour + 1)
+        tick_spacing = td(hours=1)
+
 
     tick_datetime = tick_start
     tick_datetimes = []
@@ -149,6 +160,8 @@ def applyXticks(complexDF, ax):
 
     if figType == 'Long':
         xticklabels = [t.hour for t in tick_datetimes]
+    elif figType == 'Short':
+        xticklabels = ['{:02}'.format(t.minute) for t in tick_datetimes]
     else:
         xticklabels = ['{}:{:02}'.format(t.hour, t.minute) for t in tick_datetimes]
 
@@ -207,6 +220,9 @@ def actigramFigure(dfActigram, complexDF, axis, rhopaliaPositions360 = [], rhopa
     # parses actigram dataframe
     actigramArr = dfActigram[0]
     legend = dfActigram[1]
+
+
+    print('actigram arr shape: {}'.format(actigramArr.shape))
 
     # renames axes object for convenience
     ax1 = axis
@@ -335,7 +351,7 @@ def interpulseInterval(axis, dfComplex, ipi_after = True, show_xLabels = True, s
         ax.get_xaxis().set_visible(False)  # don't bother doing that^ if we're not gonna see it
 
 
-def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_average = True):
+def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_average = True, figType = None):
     """
 
     :param jelly_title: title of Jellyfish to be used in naming of figure
@@ -362,6 +378,19 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
         df = dfComplex[dfComplex.PulseRate.notnull() & (dfComplex.PulseRate < 30)]
         temp_df = df[['PulseRate']]
 
+    window_size = None
+
+    if figType == None:
+        figType = chooseFigType(dfComplex)
+        if figType == 'Long':
+            window_size = 250
+        elif figType == 'Medium':
+            window_size = 100
+        elif figType == 'Short':
+            show_average = False
+        elif figType == 'XLong':
+            window_size = 250
+
     # renames axes object for convenience
     ax = axis
 
@@ -376,8 +405,9 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
 
     # averaging method
     # shown as a blue line
-    if show_average:
-        ax.plot(temp_df.rolling(window=250).mean(), c = 'b', lw = 2, label= 'average')  # adds to ax a plot of the global dataframe vs rolling avg  x
+    if show_average and window_size:
+
+        ax.plot(temp_df.rolling(window=window_size).mean(), c = 'b', lw = 2, label= 'average')  # adds to ax a plot of the global dataframe vs rolling avg  x
 
         ax.set_xlabel(xlabel=r'Zeitgeber Time')  # sets x and y labels
         ax.set_ylabel(ylabel='Pulse Rate (Hz)')
@@ -389,7 +419,7 @@ def pulseRate(axis, dfComplex, pr_after = True, show_xLabels = True, show_averag
     ax.margins(x=0)
 
     #fixed limits. Makes graphs compareable
-    ax.set_ylim(0, 2)
+    ax.set_ylim(0.5, 1.5)
 
     # x tick method.
     if show_xLabels:
@@ -665,6 +695,31 @@ def initiatiorsHistogramFigure(ax, dfComplex, rhopos=[], rholab=[], vertical = T
     if title is not None: ax1.set_title(title)
 
 
+def rgb2hex(rgb):
+    return "#{0:02x}{1:02x}{2:02x}".format(rgb[0], rgb[1], rgb[2])
+
+
+def sleepWakeRhoSpecificUsageFigure(ax, rho_label, wake_series, sleep_series, hist_constraints,
+                                    show_legend=True, show_ylabels=True):
+    legend = {
+        'Sleep': [0, 0, 150],
+        'Wake': [150, 0, 0]
+    }
+    ax.set_facecolor((0.9, 0.9, 0.92))
+    ax.plot(wake_series, c=rgb2hex(legend['Wake']))
+    ax.plot(sleep_series, c=rgb2hex(legend['Sleep']))
+    ax.set_ylim(bottom=hist_constraints[0], top=hist_constraints[1])
+    ax.set_title(rho_label)
+    ax.grid(c='w', lw=1.5)
+
+    for value in ax.spines.values(): value.set_visible(False)
+
+    if show_legend:
+        key_rgb_pairs = [(key, [x / 255 for x in legend[key]]) for key in legend.keys()]
+        patches = [mpatches.Patch(color=c, label=l) for l, c in key_rgb_pairs]
+        ax.legend(handles=patches, loc=1, bbox_to_anchor=(1.5, 1), borderaxespad=0.)
+
+
 def rho_usage(ax, aggSeries, vertical=True, title=None, constraints=[]):
     posSeries= aggSeries > 0
 
@@ -938,7 +993,7 @@ def sleep_areas(ax, dfComplex, aggUsageDF, show_xLabels=True, show_Legend=True,
 
     # sets labels
     ax.set_xlabel(xlabel=r'Zeitgeber Time')
-    ax.set_ylabel(ylabel='fraction of usage')
+    ax.set_ylabel(ylabel='fraction of pulses sleeping')
 
     # sets grid
     ax.grid(axis='y', alpha=0.5, linestyle='--')

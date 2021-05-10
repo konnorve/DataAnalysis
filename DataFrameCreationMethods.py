@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 
 import math
 
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
 ########################################################################################################################
 # **** GLOBAL VARIABLES ****
 
@@ -113,6 +116,97 @@ def convertTo360(a):
     while a >= 360:
         a -= 360
     return a
+
+
+def loadComplexDF(path, columns2keep='all', describe=False):
+    # read in CSV
+    complex_df = pd.read_csv(path)
+
+    # if column list is inputted then use that
+    if columns2keep != 'all':
+        complex_df = complex_df[columns2keep]
+
+    # convert datetime columns into datetime objects
+    complex_df['ZeitgeberTime'] = pd.to_datetime(
+        complex_df['ZeitgeberTime'],
+        format='%Y-%m-%d %H:%M:%S')
+    complex_df['DateTime'] = pd.to_datetime(
+        complex_df['DateTime'],
+        format='%Y-%m-%d %H:%M:%S')
+
+    col_list = list(complex_df.columns)
+
+    # describe dataframe if requested
+    if describe:
+
+        if 'Jellyfish' in col_list:
+            print('all jellyfish: {} \n'.format(complex_df['Jellyfish'].unique()))
+
+        meta_df = []
+
+        for column, dtype in zip(complex_df.columns, complex_df.dtypes):
+            col_slice = complex_df[column].values
+
+            column_row = [column, dtype, min(col_slice), max(col_slice)]
+
+            meta_df.append(column_row)
+
+        print(pd.DataFrame(meta_df, columns=['column', 'dtype', 'min', 'max']))
+
+    return complex_df
+
+
+def df_image(df, legend={"<class 'str'>": [0, 0, 150],  # blue
+                         "<class 'numpy.int64'>": [150, 0, 0],  # red
+                         "<class 'numpy.float64'>": [0, 100, 0],  # green
+                         "<class 'float'>": [0, 100, 0],  # green
+                         "<class 'bool'>": [200, 100, 0],  # orange
+                         "<class 'numpy.bool_'>": [200, 100, 0],  # orange
+                         "<class 'pandas._libs.tslibs.timestamps.Timestamp'>": [0, 100, 100],  # teal
+                         }):
+    dtypes = []
+
+    df_len, df_width = df.shape
+
+    print(df_len, df_width)
+
+    image = np.zeros((df_len, df_width, 3))
+
+    for i in range(df_len):
+        if i % 50000 == 0: print(i)
+        for j in range(df_width):
+            dtype = str(type(df.iloc[i, j]))
+            if dtype not in dtypes:
+                dtypes.append(dtype)
+            image[i, j] = legend[dtype]
+
+    print('dtypes: {}'.format(dtypes))
+
+    return image
+
+
+def plot_df_image(df, df_image):
+    legend = {"String": [0, 0, 150],  # blue
+              "Integer": [150, 0, 0],  # red
+              "Float": [0, 100, 0],  # green
+              "Boolean": [200, 100, 0],  # orange
+              "Datetime": [0, 100, 100],  # teal
+              }
+
+    df_len, df_width = df.shape
+
+    fig, ax = plt.subplots(figsize=(20, 10))
+    ax.imshow(df_image, aspect='auto', interpolation='nearest')
+
+    plt.xticks(range(df_width), df.columns, rotation=45, ha='right')
+
+    key_rgb_pairs = [(key, [x / 255 for x in legend[key]]) for key in legend.keys()]
+    patches = [mpatches.Patch(color=c, label=l) for l, c in key_rgb_pairs]
+    ax.legend(handles=patches, loc=1, bbox_to_anchor=(1.1, 1), borderaxespad=0.)
+
+    plt.show()
+
+
 
 
 #########################################################
@@ -543,13 +637,16 @@ def createComplexDF(angleDataPath, orientationDF, rhopaliaDF, FRAMERATE, STARTDA
 ###################################
 
 
-def createUsageDF(complexDF, metric='closest rhopalia'):
+def createUsageDF(complexDF, metric='closest rhopalia', prefix='rho'):
     """
     creates a dataframe with each pulse representing a row and each rhopalia a column.
     1's are assigned to the presumed initiating rhopalia of each pulse
     pulses are timestamped with Zeigeber Time
     """
-    usage_df = pd.get_dummies(complexDF[metric], prefix='rho')
+    if prefix == None:
+        usage_df = pd.get_dummies(complexDF[metric])
+    else:
+        usage_df = pd.get_dummies(complexDF[metric], prefix=prefix)
 
     usage_df['ZeitgeberTime'] = pd.to_datetime(
         complexDF['ZeitgeberTime'],
@@ -577,7 +674,7 @@ def createAggUsageDF(usageDF, time_bin):
 
     return aggDF
 
-def createSleepWakeAggDFs_Unnormalized(complexDF):
+def createSleepWakeAggDFs_Unnormalized(complexDF, time_bin = 'D', offset = None):
     usage_df_rho = pd.get_dummies(complexDF['closest rhopalia'], prefix='rho')
 
     usage_df_rho['SleepWake_median_ipi_after'] = complexDF['SleepWake_median_ipi_after']
@@ -590,20 +687,18 @@ def createSleepWakeAggDFs_Unnormalized(complexDF):
 
     usage_df_rho = usage_df_rho.set_index('zt_12h_shift')
 
-    time_bin = 'D'
+    aggDF_sleep_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Sleep'].resample(time_bin, offset=offset).sum()
+    aggDF_sleep = aggDF_sleep_counts.div(usage_df_rho.sum(axis=1).resample(time_bin, offset=offset).sum(), axis=0)
 
-    aggDF_sleep_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Sleep'].resample(time_bin).sum()
-    aggDF_sleep = aggDF_sleep_counts.div(usage_df_rho.sum(axis=1).resample(time_bin).sum(), axis=0)
-
-    aggDF_wake_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Wake'].resample(time_bin).sum()
-    aggDF_wake = aggDF_wake_counts.div(usage_df_rho.sum(axis=1).resample(time_bin).sum(), axis=0)
+    aggDF_wake_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Wake'].resample(time_bin, offset=offset).sum()
+    aggDF_wake = aggDF_wake_counts.div(usage_df_rho.sum(axis=1).resample(time_bin, offset=offset).sum(), axis=0)
 
     diffDF = aggDF_sleep - aggDF_wake
 
     return aggDF_wake, aggDF_sleep, diffDF
 
 
-def createSleepWakeAggDFs_Normalized(complexDF):
+def createSleepWakeAggDFs_Normalized(complexDF, time_bin = 'D', offset = None):
     usage_df_rho = pd.get_dummies(complexDF['closest rhopalia'], prefix='rho')
 
     usage_df_rho['SleepWake_median_ipi_after'] = complexDF['SleepWake_median_ipi_after']
@@ -616,13 +711,11 @@ def createSleepWakeAggDFs_Normalized(complexDF):
 
     usage_df_rho = usage_df_rho.set_index('zt_12h_shift')
 
-    time_bin = 'D'
+    aggDF_sleep_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Sleep'].resample(time_bin, offset=offset).sum()
+    aggDF_sleep = aggDF_sleep_counts.div(usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Sleep'].sum(axis=1).resample(time_bin, offset=offset).sum(), axis=0)
 
-    aggDF_sleep_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Sleep'].resample(time_bin).sum()
-    aggDF_sleep = aggDF_sleep_counts.div(usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Sleep'].sum(axis=1).resample(time_bin).sum(), axis=0)
-
-    aggDF_wake_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Wake'].resample(time_bin).sum()
-    aggDF_wake = aggDF_wake_counts.div(usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Wake'].sum(axis=1).resample(time_bin).sum(), axis=0)
+    aggDF_wake_counts = usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Wake'].resample(time_bin, offset=offset).sum()
+    aggDF_wake = aggDF_wake_counts.div(usage_df_rho[usage_df_rho['SleepWake_median_ipi_after'] == 'Wake'].sum(axis=1).resample(time_bin, offset=offset).sum(), axis=0)
 
     diffDF = aggDF_sleep - aggDF_wake
 

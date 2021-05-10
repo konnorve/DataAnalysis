@@ -9,7 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib.cm as cm
-
+import matplotlib as mpl
 
 
 import DataFrameCreationMethods as cdf
@@ -697,6 +697,48 @@ def Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopali
 
 
 
+def Actigram_PR_DM_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen):
+    """
+    Input: ComplexDF
+    Ouput: Actigram figure with corresponding Interpulse Interval and Day/Night Bar
+    """
+    updateparameters()
+
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+
+    plot_title = 'Actigram, Pulse Rate, Distance Moved, Sleep Wake 1 Min With Bar'
+    #gridspec organization
+    heights = [14, 1, 3, 3, 6]
+    gs = fig.add_gridspec(ncols=1, nrows=5, height_ratios = heights)
+
+    #subplot
+    ax1 = fig.add_subplot(gs[0,0])
+    ax2 = fig.add_subplot(gs[1,0])
+    ax3 = fig.add_subplot(gs[2,0])
+    ax4 = fig.add_subplot(gs[3,0])
+    ax5 = fig.add_subplot(gs[4, 0])
+
+    figures.actigramFigure(dfActigram, dfComplex, ax1, rhopaliaPositions360, rhopaliaLabels)
+    figures.bar4MovementDayNight(dfComplex, ax2)
+    figures.pulseRate(ax3, dfComplex, show_xLabels=False)
+
+    usageDF = cdf.createUsageDF(dfComplex, 'SleepWake_median_ipi_after')
+    aggUsageDF = cdf.createAggUsageDF(usageDF, 'T')
+
+    figures.distanceMoved(ax4, dfComplex, show_xLabels=False)
+
+    figures.sleep_areas(ax5, dfComplex, aggUsageDF)
+
+    # save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    fig.savefig(str(outpath),bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
+
+
 def Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, hist_constraints=[]):
     """ input: complex dataframe for a jelly
     Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and vertical
@@ -813,6 +855,72 @@ def Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfC
 
     figures.initiatiorsHistogramFigure(fig_ax6, dfComplex, rhopaliaPositions360, rhopaliaLabels, title='Day', show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Day\'')
     figures.initiatiorsHistogramFigure(fig_ax7, dfComplex, rhopaliaPositions360, rhopaliaLabels, title='Night',  show_degreeLabels=False, constraints=hist_constraints, question='DayOrNight == \'Night\'')
+
+    #save fig
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title.replace(",",""))
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    fig.savefig(str(outpath),bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
+
+def plot_all_timeseries_data(outdir, jelly_title, dfActigram, dfComplex, rhopaliaPositions360, rhopaliaLabels, yfigurelen, xfigurelen, hist_constraints=[]):
+    """
+    input: complex dataframe for a jelly
+    Output: figure displaying all of the plots from graphs of: Actigram, interpulse interval, centersChanged, and
+    pulse initiation day-night Histogram with the day/night bar
+    """
+
+    updateparameters()
+
+    # create empty figure with customized dimensions. "constrained_layout" automatically adjusts subplots to fit window
+    fig = plt.figure(figsize=(xfigurelen, yfigurelen), constrained_layout=True)
+    plot_title = 'All Timeseries Figures'
+    # gridspec organization: 3 columns, 4 rows, with boxes of their respective size ratio
+    heights = [15, 1, 5, 5, 5, 5, 10, 10]
+    widths = [1, 20]
+    gs = fig.add_gridspec(ncols=len(widths), nrows=len(heights), height_ratios = heights, width_ratios = widths)
+
+    figure_labels = ['Actigram',
+                     'Sleep/Wake & Movement Bar',
+                     'Pulse Rate',
+                     'Distance Moved',
+                     'Centralization',
+                     'Sleep Area (min)',
+                     'Stacked Ganglia Usage',
+                     'Ganglia Usage']
+
+    text_ax_list = [fig.add_subplot(gs[i, 0]) for i in range(len(figure_labels))]
+    for i, ax in enumerate(text_ax_list):
+        ax.text(0.5, 0.5, figure_labels[i], ha='center', va='center', size='xx-large')
+        ax.axis('off')
+
+
+    # subplots  - created and assigned to a graph below
+    fig_ax1 = fig.add_subplot(gs[0,1]) # actigram
+    fig_ax2 = fig.add_subplot(gs[1,1]) # bar
+    fig_ax3 = fig.add_subplot(gs[2,1]) # pulse rate
+    fig_ax4 = fig.add_subplot(gs[3,1]) # distance moved
+    fig_ax5 = fig.add_subplot(gs[4,1]) # centralization
+    fig_ax6 = fig.add_subplot(gs[5,1]) # sleep area T
+    fig_ax7 = fig.add_subplot(gs[6,1]) # stacked area 30T
+    fig_ax8 = fig.add_subplot(gs[7, 1])  # rho lines 30T
+
+    figures.actigramFigure(dfActigram, dfComplex, fig_ax1, rhopaliaPositions360, rhopaliaLabels)
+    figures.bar4MovementDayNight(dfComplex, fig_ax2)
+    figures.pulseRate(fig_ax3, dfComplex, show_xLabels=False)
+    figures.distanceMoved(fig_ax4, dfComplex, show_xLabels=False)
+    figures.centralizationFigure(fig_ax5, dfComplex, show_xLabels=False, show_Legend=False)
+
+    usageDF = cdf.createUsageDF(dfComplex, 'SleepWake_median_ipi_after')
+    aggUsageDF = cdf.createAggUsageDF(usageDF, 'T')
+    figures.sleep_areas(fig_ax6, dfComplex, aggUsageDF)
+
+    usageDF = cdf.createUsageDF(dfComplex, 'closest rhopalia')
+    aggUsageDF = cdf.createAggUsageDF(usageDF, '30T')
+    figures.usage_areas(fig_ax7, dfComplex, aggUsageDF)
+    figures.usage_lines(fig_ax8, dfComplex, aggUsageDF)
 
     #save fig
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title.replace(",",""))
@@ -1008,7 +1116,7 @@ def plotSleepVSwakeHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rho
 def plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, hist_constraints=[0, 0.25]):
     plot_title = 'Sleep Wake Histogram, Date Slices'
 
-    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Unnormalized(dfComplex)
+    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Unnormalized(dfComplex, offset='12H')
 
     fig = plt.figure(figsize=(xfigurelen * 3, len(aggDF_wake) * yfigurelen), constrained_layout=True)
 
@@ -1051,7 +1159,7 @@ def plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, yfigurelen,
     else:
         plot_title = 'Sleep Wake and Difference Histogram, Date Slices'
 
-    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Normalized(dfComplex)
+    aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Normalized(dfComplex, offset='12H')
 
     # gridspec organization
     if justDifferences:
@@ -1085,6 +1193,71 @@ def plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, yfigurelen,
             figures.rho_usage(ax2, s, vertical=True, title='{} {}'.format(date, 'Sleep'), constraints=hist_constraints)
 
             figures.rho_usage(ax3, w, vertical=True, title='{} {}'.format(date, 'Wake'), constraints=hist_constraints)
+
+    outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
+
+    fig.suptitle('{} {}'.format(jelly_title, plot_title), fontsize='xx-large')
+
+    fig.savefig(str(outpath), bbox_inches='tight', transparent=False, facecolor='w', edgecolor='w')
+
+    plt.close()
+
+
+def plotGangliaSpecificSWusage(outdir, jelly_title, dfComplex, yfigurelen, xfigurelen, hist_constraints=[0, 0.4],
+                               twelve_hour=True, time_bin = None):
+    """
+    custom example: 'time_bin'
+    """
+
+    if twelve_hour:
+        plot_title = 'Ganglia Specific Sleep Wake Usage Histogram, 12H'
+        time_bin = '12H'
+        aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Normalized(dfComplex, time_bin)
+    elif time_bin:
+        plot_title = 'Ganglia Specific Sleep Wake Usage Histogram, {}'.format(time_bin)
+        aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Normalized(dfComplex, time_bin)
+    else:
+        plot_title = 'Ganglia Specific Sleep Wake Usage Histogram, 24H'
+        time_bin = 'D'
+        aggDF_wake, aggDF_sleep, diffDF = cdf.createSleepWakeAggDFs_Normalized(dfComplex, time_bin, offset='12H')
+
+    aggDF_wake = aggDF_wake.fillna(0)
+    aggDF_sleep = aggDF_sleep.fillna(0)
+
+    # gridspec organization
+    heights = [yfigurelen] * 1
+    widths = [xfigurelen] * len(aggDF_wake.columns)
+
+    fig = plt.figure(figsize=(sum(widths), sum(heights)), constrained_layout=True)
+
+    gs = fig.add_gridspec(ncols=len(widths), nrows=len(heights), height_ratios=heights, width_ratios=widths)
+
+    ax1 = fig.add_subplot(gs[0, 0])
+
+    for i, rho in enumerate(aggDF_wake.columns):
+
+        if i == 0:
+            ax = ax1
+        else:
+            ax = fig.add_subplot(gs[0, i], sharey=ax1)
+
+            plt.setp(ax.get_yticklabels(), visible=False)
+
+        wake_series = aggDF_wake[rho]
+        sleep_series = aggDF_sleep[rho]
+
+        if i == 0:
+            figures.sleepWakeRhoSpecificUsageFigure(ax, rho, wake_series, sleep_series, hist_constraints,
+                                                    show_legend = False, show_ylabels = True)
+        if i == len(aggDF_wake.columns) - 1:
+            figures.sleepWakeRhoSpecificUsageFigure(ax, rho, wake_series, sleep_series, hist_constraints,
+                                                    show_legend = True, show_ylabels = False)
+        else:
+            figures.sleepWakeRhoSpecificUsageFigure(ax, rho, wake_series, sleep_series, hist_constraints,
+                                                    show_legend = False, show_ylabels = False)
+
+        for tick in ax.get_xticklabels():
+            tick.set_rotation(270)
 
     outpath = outdir / '{}_{}.png'.format(jelly_title, plot_title)
 
@@ -1273,30 +1446,6 @@ def plot_sleep_area(outdir, jelly_title, dfComplex, time_bin, yfigurelen, xfigur
 
 ##############################################################
 
-def core_single_dir(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120, histogram_constraints=[]):
-    # standard graph sizes
-    if stdYlen is None: stdYlen = 15 / 2
-    if stdXlen is None: stdXlen = dfComplex['AbsoluteMinute'].max() / 60 * 5 / 3
-
-    dfComplex['ZeitgeberTime'] = pd.to_datetime(
-        dfComplex['ZeitgeberTime'],
-        format='%Y-%m-%d %H:%M:%S')
-
-
-    plotSleepWakeUsageDaySlices(cdf.makeOutDir(outdir, 'SleepWakeUsageDaySlices'), jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
-
-    # actigram
-
-    dfActigram = cdf.createActigramArr(dfComplex, filter='SleepWake_median_ipi_after')
-
-    plotActigram(cdf.makeOutDir(outdir, 'actigram'), jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
-
-    Actigram_PR_SW1M_WithBar(cdf.makeOutDir(outdir, 'Actigram_PR_SW1M_WithBar'), jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen + 5, stdXlen)
-
-    anglesHistogramSleepVSwakePlot(cdf.makeOutDir(outdir, 'anglesHistogramSleepVSwakePlot'), jelly_title, dfComplex, rhopos, rholab, 15, 10)
-
-    plot_sleep_area(cdf.makeOutDir(outdir, 'plot_sleep_area'), jelly_title, dfComplex, 'T', stdYlen, stdXlen)
-
 
 def core(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, Framerate=120, histogram_constraints=[]):
     # standard graph sizes
@@ -1313,19 +1462,27 @@ def core(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
     plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, 5, 3, hist_constraints=[0, 0.25],
                                      justDifferences=False)
 
-    plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
+    plotGangliaSpecificSWusage(outdir, jelly_title, dfComplex, 3.5, 2.5, hist_constraints=[0, 0.4],
+                               twelve_hour=True)
+
+    plotGangliaSpecificSWusage(outdir, jelly_title, dfComplex, 3.5, 2.5, hist_constraints=[0, 0.4],
+                               twelve_hour=False)
+
+    plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.6])
+
+
 
     # actigram
 
-    dfActigram = cdf.createActigramArr(dfComplex, filter='SleepWake_median_ipi_after')
-
-    plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
-
-    Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen + 5, stdXlen)
-
-    anglesHistogramSleepVSwakePlot(outdir, jelly_title, dfComplex, rhopos, rholab, 15, 10)
-
-    plot_sleep_area(outdir, jelly_title, dfComplex, 'T', stdYlen, stdXlen)
+    # dfActigram = cdf.createActigramArr(dfComplex, filter='SleepWake_median_ipi_after')
+    #
+    # plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen, stdXlen)
+    #
+    # Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen + 5, stdXlen)
+    #
+    # anglesHistogramSleepVSwakePlot(outdir, jelly_title, dfComplex, rhopos, rholab, 15, 10)
+    #
+    # plot_sleep_area(outdir, jelly_title, dfComplex, 'T', stdYlen, stdXlen)
 
 
 def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen = None, histogram_constraints=[]):
@@ -1338,15 +1495,20 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
     :return:
     """
 
-
+    # fixes line plots when there are long chunks
+    mpl.rcParams['agg.path.chunksize'] = 10000
 
     #standard graph sizes
     if stdYlen is None: stdYlen = 15/2
     if stdXlen is None: stdXlen = dfComplex['AbsoluteMinute'].max()/60*5/3
 
     dfComplex['ZeitgeberTime'] = pd.to_datetime(
-                                dfComplex['ZeitgeberTime'],
-                                format='%Y-%m-%d %H:%M:%S')
+        dfComplex['ZeitgeberTime'],
+        format='%Y-%m-%d %H:%M:%S')
+
+    fig_type = figures.chooseFigType(dfComplex)
+
+    # Sleep/Wake Difference Bar Charts
 
     plotSleepWakeDifferenceDaySlices(outdir, jelly_title, dfComplex, 5, 3, hist_constraints=[0, 0.25],
                                      justDifferences=True)
@@ -1355,6 +1517,19 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
                                      justDifferences=False)
 
     plotSleepWakeUsageDaySlices(outdir, jelly_title, dfComplex, 15, 10, hist_constraints=[0, 0.4])
+
+    # ganglia specific charts
+
+
+    if fig_type == 'Short':
+        plotGangliaSpecificSWusage(outdir, jelly_title, dfComplex, 3.5, 2.5, hist_constraints=[0, 1],
+                               twelve_hour=True, time_bin='T')
+    else:
+        plotGangliaSpecificSWusage(outdir, jelly_title, dfComplex, 3.5, 2.5, hist_constraints=[0, 0.6],
+                                   twelve_hour=True)
+
+        plotGangliaSpecificSWusage(outdir, jelly_title, dfComplex, 3.5, 2.5, hist_constraints=[0, 0.6],
+                                   twelve_hour=False)
 
     # with bar
 
@@ -1392,7 +1567,12 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     # actigram
 
-    dfActigram = cdf.createActigramArr(dfComplex, filter='SleepWake_median_ipi_after')
+    if fig_type == 'Short':
+        pulse_ext_seconds = 1
+    else:
+        pulse_ext_seconds = 8
+
+    dfActigram = cdf.createActigramArr(dfComplex, filter='SleepWake_median_ipi_after', pulseExtension=pulse_ext_seconds)
 
     plotActigram(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen, stdXlen)
 
@@ -1404,11 +1584,16 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     Actigram_PR_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+5, stdXlen)
 
+    Actigram_PR_DM_SW1M_WithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab, stdYlen+7, stdXlen)
+
     Actigram_PR_CC_AND_CHVertWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen, hist_constraints = histogram_constraints)
 
     Actigram_PR_CC_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+8, stdXlen, hist_constraints = histogram_constraints)
 
     Actigram_PR_CC_DM_AND_CHDayNightWithBar(outdir, jelly_title, dfActigram, dfComplex, rhopos,rholab, stdYlen+11, stdXlen, hist_constraints = histogram_constraints)
+
+    plot_all_timeseries_data(outdir, jelly_title, dfActigram, dfComplex, rhopos, rholab,
+                             stdYlen+25, stdXlen)
 
     # histogram partitions
 
@@ -1416,12 +1601,13 @@ def main(jelly_title, outdir, dfComplex, rhopos, rholab, stdYlen = None, stdXlen
 
     plotHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
 
-    plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
+    # plotHistorgram4DayHourSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 5, 15, hist_constraints = histogram_constraints)
 
     plotSleepVSwakeHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 15, 20,
                                              hist_constraints=histogram_constraints, day_night_separate=True)
     plotSleepVSwakeHistorgram4DayLightSlices(outdir, jelly_title, dfComplex, rhopos, rholab, 15, 20,
                                              hist_constraints=histogram_constraints, day_night_separate=False)
+
 
     # trajectory plotting
 
